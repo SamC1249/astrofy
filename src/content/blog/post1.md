@@ -1,56 +1,19 @@
 ---
-title: "Demo Post 1"
-description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-pubDate: "Sep 10 2022"
-heroImage: "/post_img.webp"
-tags: ["tokio"]
+title: "People as Vectors of Direction"
+description: "High achievers struggle with a gap between what they want and where they are. I suggest looking around you first."
+pubDate: "Dec 30 2025"
+heroImage: "/interesting-image-perplexity.png"
+tags: ["From my Journal"]
 ---
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-incididunt ut labore et dolore magna aliqua. Vitae ultricies leo integer
-malesuada nunc vel risus commodo viverra. Adipiscing enim eu turpis egestas
-pretium. Euismod elementum nisi quis eleifend quam adipiscing. In hac habitasse
-platea dictumst vestibulum. Sagittis purus sit amet volutpat. Netus et malesuada
-fames ac turpis egestas. Eget magna fermentum iaculis eu non diam phasellus
-vestibulum lorem. Varius sit amet mattis vulputate enim. Habitasse platea
-dictumst quisque sagittis. Integer quis auctor elit sed vulputate mi. Dictumst
-quisque sagittis purus sit amet.
+One of the undeniably hardest parts about being ambitious is knowing if what you are doing is leading you in the right direction. People are one of the best indicators of your direction, and where you are headed. In no order, here are some thoughts abouts how who you surround yourself with is vital to knowing yourself.
 
-Morbi tristique senectus et netus. Id semper risus in hendrerit gravida rutrum
-quisque non tellus. Habitasse platea dictumst quisque sagittis purus sit amet.
-Tellus molestie nunc non blandit massa. Cursus vitae congue mauris rhoncus.
-Accumsan tortor posuere ac ut. Fringilla urna porttitor rhoncus dolor. Elit
-ullamcorper dignissim cras tincidunt lobortis. In cursus turpis massa tincidunt
-dui ut ornare lectus. Integer feugiat scelerisque varius morbi enim nunc.
-Bibendum neque egestas congue quisque egestas diam. Cras ornare arcu dui vivamus
-arcu felis bibendum. Dignissim suspendisse in est ante in nibh mauris. Sed
-tempus urna et pharetra pharetra massa massa ultricies mi.
+*You are your environment :*  Science has shown that the best indicator of your income is your parent’s income, and the zip code you grew up in is one of the best predictor’s of financial mobility. Who you surround yourself with is who you become so think about who you surround yourself with. In the words of Kurt Vonnegut, “We are what we pretend to be, so we must be careful about what we pretend to be.”  Be careful of who you surround yourself with.
 
-Mollis nunc sed id semper risus in. Convallis a cras semper auctor neque. Diam
-sit amet nisl suscipit. Lacus viverra vitae congue eu consequat ac felis donec.
-Egestas integer eget aliquet nibh praesent tristique magna sit amet. Eget magna
-fermentum iaculis eu non diam. In vitae turpis massa sed elementum. Tristique et
-egestas quis ipsum suspendisse ultrices. Eget lorem dolor sed viverra ipsum. Vel
-turpis nunc eget lorem dolor sed viverra. Posuere ac ut consequat semper viverra
-nam. Laoreet suspendisse interdum consectetur libero id faucibus. Diam phasellus
-vestibulum lorem sed risus ultricies tristique. Rhoncus dolor purus non enim
-praesent elementum facilisis. Ultrices tincidunt arcu non sodales neque. Tempus
-egestas sed sed risus pretium quam vulputate. Viverra suspendisse potenti nullam
-ac tortor vitae purus faucibus ornare. Fringilla urna porttitor rhoncus dolor
-purus non. Amet dictum sit amet justo donec enim.
+*You are not a prisoner to your environment :*  In the African Queen, Katherine tells Humphrey that  “Nature, Mr. Allnut, is what we were put in the world to rise above.”  It is natural for you to gamble  if you are surrounded by gambling just as it is natural to go to prison if you are surrounded by criminals. You can leave, move, shield yourself. MJ Demarco — author of the fastlane millionaire — talks about leaving his Chicago home and driving to Arizona with nothing. A few years later, he became a millionaire through hard work and consistency. You, too, can leave your Chicago. 
 
-Mattis ullamcorper velit sed ullamcorper morbi tincidunt. Tortor posuere ac ut
-consequat semper viverra. Tellus mauris a diam maecenas sed enim ut sem viverra.
-Venenatis urna cursus eget nunc scelerisque viverra mauris in. Arcu ac tortor
-dignissim convallis aenean et tortor at. Curabitur gravida arcu ac tortor
-dignissim convallis aenean et tortor. Egestas tellus rutrum tellus pellentesque
-eu. Fusce ut placerat orci nulla pellentesque dignissim enim sit amet. Ut enim
-blandit volutpat maecenas volutpat blandit aliquam etiam. Id donec ultrices
-tincidunt arcu. Id cursus metus aliquam eleifend mi.
+*You are overwhelmed and impressed by the average person around you — It becomes a shock what you can accomplish.* This is one of the most powerful moments you can experience. At this stage of life, you think of ways to do things you never though of before. You might even believe that as long as you can dream it, you can do it. For me, this happened when I went to a summer program in sophomore year of high school, and started learning what my peers were doing: they were doing research, founders of non-profits, and competitive coding medalists. For the first time, I felt inspired by my peers.
 
-Tempus quam pellentesque nec nam aliquam sem. Risus at ultrices mi tempus
-imperdiet. Id porta nibh venenatis cras sed felis eget velit. Ipsum a arcu
-cursus vitae. Facilisis magna etiam tempor orci eu lobortis elementum. Tincidunt
-dui ut ornare lectus sit. Quisque non tellus orci ac. Blandit libero volutpat
-sed cras. Nec tincidunt praesent semper feugiat nibh sed pulvinar proin gravida.
-Egestas integer eget aliquet nibh praesent tristique magna.
+*The average of your relationships is doing impressive things.* I had already met many impressive people in high school. In college, this continued but I gradually became less impressed at what I had already seen. At one point, I realized that this average was quite high. I knew several friends that got into YCombinator, raised a couple million for a startup, or published in places like NeurIPS. It felt like each year, one of my friends would win Forbes 30 Under 30 one morning. In a super high-growth environment, when you forget about looking at accomplishments relatively and instead absolutely, you realize the average is in the top 1%.  You are probably there, too.
+
+If you haven't experienced the last two emotions: the overwhelming inspiration or the aclimatization to excellence, don't worry! Find great people, talk with them, go to environments where they exist and, soon enough, you will be among them too.
