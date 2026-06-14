@@ -1,0 +1,202 @@
+---
+---
+
+<div class="lx-palette-overlay" id="lx-palette-overlay" hidden>
+  <div class="lx-palette" role="dialog" aria-label="Command palette">
+    <input id="lx-palette-input" placeholder="Type a command or search…" autocomplete="off" />
+    <ul id="lx-palette-list">
+      <li data-action="goto" data-href="/"><span>Go to Home</span><span class="group">Navigation</span></li>
+      <li data-action="goto" data-href="/projects"><span>Go to Projects</span><span class="group">Navigation</span></li>
+      <li data-action="goto" data-href="/blog/"><span>Go to Blog</span><span class="group">Navigation</span></li>
+      <li data-action="goto" data-href="/cv"><span>Read the CV</span><span class="group">Navigation</span></li>
+      <li data-action="copy-email"><span>Copy email address</span><span class="group">Actions</span></li>
+      <li data-action="open" data-href="https://github.com/SamC1249"><span>Open GitHub</span><span class="group">Links</span></li>
+      <li data-action="open" data-href="https://linkedin.com/in/sam-chen-massachusetts"><span>Open LinkedIn</span><span class="group">Links</span></li>
+    </ul>
+  </div>
+</div>
+
+<div class="lx-toast" id="lx-toast"><span class="lx-dot"></span>Email copied to clipboard</div>
+
+<style>
+  .lx-palette-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 18vh;
+    background: rgba(40, 42, 48, 0.15);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  .lx-palette-overlay[hidden] {
+    display: none;
+  }
+  .lx-palette {
+    width: 90%;
+    max-width: 540px;
+    background: var(--bg);
+    border-radius: 12px;
+    border: 1px solid var(--hairline);
+    box-shadow: var(--shadow-high), var(--shadow-med);
+    overflow: hidden;
+    animation: lx-pal-in 0.18s var(--ease);
+  }
+  @keyframes lx-pal-in {
+    from { opacity: 0; transform: scale(0.98) translateY(-4px); }
+  }
+  .lx-palette input {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    font: inherit;
+    font-size: 0.9375rem;
+    padding: 16px 18px;
+    color: var(--text-1);
+    border-bottom: 1px solid var(--hairline-soft);
+    background: transparent;
+  }
+  .lx-palette input::placeholder {
+    color: var(--text-4);
+  }
+  .lx-palette ul {
+    list-style: none;
+    margin: 0;
+    padding: 6px;
+    max-height: 280px;
+    overflow-y: auto;
+  }
+  .lx-palette li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 12px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: var(--text-2);
+    cursor: pointer;
+    transition: background 0.1s var(--ease);
+  }
+  .lx-palette li:hover {
+    background: var(--surface);
+    color: var(--text-1);
+  }
+  .lx-palette li .group {
+    font-size: 0.75rem;
+    color: var(--text-4);
+  }
+  .lx-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.8125rem;
+    color: var(--text-1);
+    font-weight: 500;
+    box-shadow: var(--shadow-med);
+    transform: translateY(12px);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.2s var(--ease), opacity 0.2s var(--ease);
+  }
+  .lx-toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .lx-toast :global(.lx-dot)::after {
+    animation: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lx-palette { animation: none; }
+  }
+</style>
+
+<script>
+  const EMAIL = "sam_chen@college.harvard.edu";
+  let toastTimer: ReturnType<typeof setTimeout> | undefined;
+
+  function showToast() {
+    const toast = document.getElementById("lx-toast");
+    if (!toast) return;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove("show"), 2400);
+  }
+
+  function openPal() {
+    const overlay = document.getElementById("lx-palette-overlay");
+    const input = document.getElementById("lx-palette-input") as HTMLInputElement | null;
+    if (!overlay || !input) return;
+    overlay.hidden = false;
+    input.value = "";
+    filterPal("");
+    input.focus();
+  }
+
+  function closePal() {
+    const overlay = document.getElementById("lx-palette-overlay");
+    if (overlay) overlay.hidden = true;
+  }
+
+  function filterPal(q: string) {
+    document.querySelectorAll<HTMLElement>("#lx-palette-list li").forEach((li) => {
+      const label = li.textContent || "";
+      li.style.display = label.toLowerCase().includes(q.toLowerCase()) ? "" : "none";
+    });
+  }
+
+  function runItem(li: HTMLElement) {
+    const action = li.dataset.action;
+    const href = li.dataset.href;
+    closePal();
+    if (action === "goto" && href) window.location.href = href;
+    else if (action === "open" && href) window.open(href, "_blank");
+    else if (action === "copy-email") {
+      try {
+        navigator.clipboard.writeText(EMAIL);
+      } catch (_) {}
+      showToast();
+    }
+  }
+
+  function initPalette() {
+    const overlay = document.getElementById("lx-palette-overlay");
+    const input = document.getElementById("lx-palette-input") as HTMLInputElement | null;
+    const list = document.getElementById("lx-palette-list");
+    if (!overlay || !input || !list) return;
+
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) closePal();
+    });
+    input.addEventListener("input", () => filterPal(input.value));
+    list.addEventListener("click", (e) => {
+      const li = (e.target as HTMLElement).closest("li");
+      if (li) runItem(li as HTMLElement);
+    });
+    document.querySelectorAll("[data-palette-open]").forEach((btn) => {
+      btn.addEventListener("click", openPal);
+    });
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      e.preventDefault();
+      const overlay = document.getElementById("lx-palette-overlay");
+      overlay && overlay.hidden ? openPal() : closePal();
+    }
+    if (e.key === "Escape") closePal();
+  });
+
+  initPalette();
+  document.addEventListener("astro:page-load", initPalette);
+</script>

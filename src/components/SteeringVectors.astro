@@ -1,0 +1,191 @@
+---
+---
+
+<figure class="lx-steer">
+  <canvas id="lx-steer-canvas" aria-label="A field of vectors that steer toward your cursor" role="img"></canvas>
+  <figcaption class="lx-steer-spec">
+    <span class="lx-steer-name">Steering vectors</span>
+    <span class="lx-steer-meta">what I study — hover to steer</span>
+  </figcaption>
+</figure>
+
+<style>
+  .lx-steer {
+    margin: 0;
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    background: var(--bg);
+    overflow: hidden;
+    box-shadow: var(--shadow-tiny);
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 260px;
+  }
+  .lx-steer-spec {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-top: 1px solid var(--hairline-soft);
+    background: var(--surface);
+  }
+  .lx-steer-name {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-2);
+    white-space: nowrap;
+  }
+  .lx-steer-meta {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    color: var(--text-4);
+    text-align: right;
+  }
+</style>
+
+<script>
+  // A field of vectors: idle, they follow a slow noise flow; near the cursor
+  // they rotate to point at it — a small nod to steering-vector research.
+  function initSteer() {
+    const canvas = document.getElementById("lx-steer-canvas") as HTMLCanvasElement | null;
+    if (!canvas || canvas.dataset.lxInit) return;
+    canvas.dataset.lxInit = "1";
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const GAP = 26;
+
+    let W = 0, H = 0, cols = 0, rows = 0;
+    let angles: Float32Array = new Float32Array(0);
+    let mx = -1e4, my = -1e4, mActive = false;
+    let visible = false;
+    let raf = 0;
+
+    function resize() {
+      W = canvas!.clientWidth;
+      H = canvas!.clientHeight;
+      if (!W || !H) return;
+      canvas!.width = Math.floor(W * dpr);
+      canvas!.height = Math.floor(H * dpr);
+      ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cols = Math.ceil(W / GAP) + 1;
+      rows = Math.ceil(H / GAP) + 1;
+      angles = new Float32Array(cols * rows);
+    }
+
+    function flowAngle(x: number, y: number, t: number) {
+      return (
+        Math.sin(x * 0.011 + t * 0.45) +
+        Math.cos(y * 0.013 - t * 0.3) +
+        Math.sin((x + y) * 0.006 + t * 0.2)
+      );
+    }
+
+    function step(t: number) {
+      const R = Math.max(90, W * 0.28);
+      for (let j = 0; j < rows; j++) {
+        for (let i = 0; i < cols; i++) {
+          const x = i * GAP + GAP / 2;
+          const y = j * GAP + GAP / 2;
+          let target = flowAngle(x, y, t);
+          let w = 0;
+          if (mActive) {
+            const dx = mx - x, dy = my - y;
+            const d = Math.hypot(dx, dy);
+            if (d < R) {
+              w = 1 - d / R;
+              w *= w;
+              const toward = Math.atan2(dy, dx);
+              // blend angles along the shortest arc
+              let diff = toward - target;
+              diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+              target += diff * w;
+            }
+          }
+          const k = j * cols + i;
+          let d2 = target - angles[k];
+          d2 = Math.atan2(Math.sin(d2), Math.cos(d2));
+          angles[k] += d2 * 0.12;
+        }
+      }
+    }
+
+    function draw() {
+      ctx!.clearRect(0, 0, W, H);
+      const R = Math.max(90, W * 0.28);
+      const L = 9;
+      for (let j = 0; j < rows; j++) {
+        for (let i = 0; i < cols; i++) {
+          const x = i * GAP + GAP / 2;
+          const y = j * GAP + GAP / 2;
+          const a = angles[j * cols + i];
+          let prox = 0;
+          if (mActive) {
+            const d = Math.hypot(mx - x, my - y);
+            if (d < R) {
+              prox = 1 - d / R;
+              prox *= prox;
+            }
+          }
+          const ca = Math.cos(a), sa = Math.sin(a);
+          ctx!.strokeStyle = prox > 0.04 ? `rgba(112,112,255,${0.35 + prox * 0.65})` : "rgba(111,110,119,0.5)";
+          ctx!.lineWidth = 1.2;
+          ctx!.beginPath();
+          ctx!.moveTo(x - ca * L, y - sa * L);
+          ctx!.lineTo(x + ca * L, y + sa * L);
+          ctx!.stroke();
+          // arrowhead dot
+          ctx!.fillStyle = prox > 0.04 ? `rgba(112,112,255,${0.5 + prox * 0.5})` : "rgba(111,110,119,0.65)";
+          ctx!.fillRect(x + ca * L - 1, y + sa * L - 1, 2, 2);
+        }
+      }
+    }
+
+    function frame(now: number) {
+      raf = requestAnimationFrame(frame);
+      if (!visible) return;
+      step(now / 1000);
+      draw();
+    }
+
+    resize();
+
+    if (reduced) {
+      step(17.0);
+      // settle the lerp for a static frame
+      for (let i = 0; i < 20; i++) step(17.0);
+      draw();
+      return;
+    }
+
+    new IntersectionObserver((entries) => {
+      visible = entries[0].isIntersecting;
+    }).observe(canvas);
+
+    canvas.addEventListener("pointermove", (e) => {
+      const r = canvas!.getBoundingClientRect();
+      mx = e.clientX - r.left;
+      my = e.clientY - r.top;
+      mActive = true;
+    });
+    canvas.addEventListener("pointerleave", () => (mActive = false));
+
+    let rt: ReturnType<typeof setTimeout>;
+    addEventListener("resize", () => {
+      clearTimeout(rt);
+      rt = setTimeout(resize, 200);
+    });
+
+    raf = requestAnimationFrame(frame);
+    document.addEventListener("astro:before-swap", () => cancelAnimationFrame(raf), { once: true });
+  }
+
+  initSteer();
+  document.addEventListener("astro:page-load", initSteer);
+</script>

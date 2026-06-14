@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sam Chen — Researcher, Builder, Founder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     KINETIC SWISS — Sam Chen
+     Type: Space Grotesk (display) / Space Mono (annotation)
+     Accent: International Klein Blue #002FA7
+     ============================================================ */
+
+  :root {
+    --bg: #fbfaf7;
+    --ink: #101013;
+    --ink-soft: #55555c;
+    --hairline: rgba(16, 16, 19, 0.16);
+    --hairline-strong: rgba(16, 16, 19, 0.85);
+    --ikb: #002FA7;
+    --ikb-bright: #1a49d6;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-snap: cubic-bezier(0.7, 0, 0.15, 1);
+    --rail: 72px;          /* sticky side index width */
+    --gutter: clamp(20px, 4vw, 56px);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection { background: var(--ikb); color: #fff; }
+
+  a { color: inherit; text-decoration: none; }
+
+  .mono {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  /* ---------- scroll progress ---------- */
+  #progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    width: 100%;
+    transform-origin: 0 50%;
+    transform: scaleX(0);
+    background: var(--ikb);
+    z-index: 120;
+  }
+
+  /* ---------- nav ---------- */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    height: 58px;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--hairline);
+  }
+  nav .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 var(--gutter);
+    border-right: 1px solid var(--hairline);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  nav .brand .dot {
+    width: 9px; height: 9px;
+    background: var(--ikb);
+    display: inline-block;
+  }
+  nav .links { display: flex; align-items: stretch; }
+  nav .links a {
+    display: flex;
+    align-items: center;
+    padding: 0 clamp(14px, 2.4vw, 28px);
+    border-left: 1px solid var(--hairline);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+    transition: color 0.3s var(--ease-out);
+  }
+  nav .links a::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 100%;
+    background: var(--ikb);
+    transform: translateY(101%);
+    transition: transform 0.35s var(--ease-snap);
+    z-index: -1;
+  }
+  nav .links a:hover { color: #fff; }
+  nav .links a:hover::after { transform: translateY(0); }
+  nav .links a sup {
+    font-size: 8px;
+    margin-left: 5px;
+    color: var(--ikb);
+    transition: color 0.3s var(--ease-out);
+  }
+  nav .links a:hover sup { color: #fff; }
+
+  /* ---------- sticky side index ---------- */
+  #rail {
+    position: fixed;
+    top: 58px; bottom: 0; left: 0;
+    width: var(--rail);
+    border-right: 1px solid var(--hairline);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 28px 0;
+    z-index: 90;
+    background: var(--bg);
+  }
+  #rail .idx {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+  #rail .idx a {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-soft);
+    position: relative;
+    padding: 2px 6px;
+    transition: color 0.3s var(--ease-out);
+  }
+  #rail .idx a::before {
+    content: "";
+    position: absolute;
+    left: -1px; top: 0; bottom: 0;
+    width: 2px;
+    background: var(--ikb);
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.35s var(--ease-snap);
+  }
+  #rail .idx a.active { color: var(--ikb); font-weight: 700; }
+  #rail .idx a.active::before { transform: scaleY(1); }
+  #rail .coord {
+    writing-mode: vertical-rl;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+  }
+
+  /* ---------- page shell ---------- */
+  main {
+    margin-left: var(--rail);
+    padding-top: 58px;
+  }
+  section {
+    border-bottom: 1px solid var(--hairline);
+    position: relative;
+  }
+
+  /* big section numeral, gallery-placard style */
+  .sec-head {
+    display: grid;
+    grid-template-columns: minmax(140px, 1fr) 4fr;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .sec-head .num {
+    font-size: clamp(60px, 9vw, 132px);
+    font-weight: 700;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    padding: 28px var(--gutter) 20px;
+    border-right: 1px solid var(--hairline);
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--ink);
+    transition: color 0.5s var(--ease-out);
+  }
+  section:hover .sec-head .num { color: var(--ikb); -webkit-text-stroke: 1.5px var(--ikb); }
+  .sec-head .label {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 28px var(--gutter) 20px;
+    gap: 8px;
+  }
+  .sec-head .label h2 {
+    font-size: clamp(26px, 3.4vw, 44px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .sec-head .label .mono { color: var(--ink-soft); }
+
+  /* ---------- hero ---------- */
+  #hero {
+    min-height: calc(100svh - 58px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+  /* exposed column rules across hero */
+  #hero .grid-rules {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+  }
+  #hero .grid-rules span { border-right: 1px solid rgba(16,16,19,0.07); }
+  #hero .grid-rules span:last-child { border-right: none; }
+
+  #hero .hero-top {
+    display: flex;
+    justify-content: space-between;
+    padding: 26px var(--gutter) 0;
+    position: relative;
+  }
+  #hero .hero-top .mono { color: var(--ink-soft); }
+
+  #hero h1 {
+    padding: 0 var(--gutter);
+    font-size: clamp(58px, 11.5vw, 176px);
+    line-height: 0.94;
+    font-weight: 700;
+    letter-spacing: -0.045em;
+    text-transform: uppercase;
+    position: relative;
+  }
+  #hero h1 .line {
+    display: block;
+    overflow: hidden;
+  }
+  #hero h1 .line > span {
+    display: inline-block;
+    transform: translateY(110%);
+    animation: rise 1s var(--ease-snap) forwards;
+  }
+  #hero h1 .line:nth-child(1) > span { animation-delay: 0.10s; }
+  #hero h1 .line:nth-child(2) > span { animation-delay: 0.22s; }
+  #hero h1 .line:nth-child(3) > span { animation-delay: 0.34s; }
+  #hero h1 .accent { color: var(--ikb); }
+  #hero h1 .outline {
+    color: transparent;
+    -webkit-text-stroke: 2px var(--ink);
+  }
+  @keyframes rise {
+    to { transform: translateY(0); }
+  }
+
+  #hero .hero-sub {
+    display: grid;
+    grid-template-columns: minmax(140px, 1fr) 2fr 1fr;
+    border-top: 1px solid var(--hairline);
+    position: relative;
+  }
+  #hero .hero-sub > div {
+    padding: 22px var(--gutter);
+    border-right: 1px solid var(--hairline);
+  }
+  #hero .hero-sub > div:last-child { border-right: none; }
+  #hero .hero-sub .status { display: flex; align-items: center; gap: 10px; }
+  #hero .hero-sub .status .pulse {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--ikb);
+    animation: pulse 2.2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0,47,167,0.45); }
+    50% { box-shadow: 0 0 0 7px rgba(0,47,167,0); }
+  }
+  #hero .hero-sub p { font-size: 15px; color: var(--ink-soft); max-width: 42ch; }
+  #hero .hero-sub .down {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+  #hero .hero-sub .down .arrow { animation: nudge 1.8s var(--ease-out) infinite; display: inline-block; }
+  @keyframes nudge {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(5px); }
+  }
+
+  /* rotated micro-label, engineering-drawing style */
+  .micro-rotated {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: rotate(90deg) translateX(-50%);
+    transform-origin: right top;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: rgba(16,16,19,0.35);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  /* ---------- ticker ---------- */
+  #ticker {
+    background: var(--ikb);
+    color: #fff;
+    overflow: hidden;
+    border-bottom: 1px solid var(--hairline-strong);
+    padding: 13px 0;
+    user-select: none;
+  }
+  #ticker .track {
+    display: flex;
+    width: max-content;
+    animation: marquee 28s linear infinite;
+  }
+  #ticker:hover .track { animation-play-state: paused; }
+  #ticker .set {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  #ticker .set span {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 0 26px;
+    white-space: nowrap;
+  }
+  #ticker .set i {
+    font-style: normal;
+    font-size: 9px;
+    opacity: 0.7;
+  }
+  @keyframes marquee {
+    to { transform: translateX(-50%); }
+  }
+
+  /* ---------- reveal-on-scroll primitives ---------- */
+  .reveal {
+    opacity: 0;
+    transform: translateY(26px);
+    transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+    transition-delay: var(--d, 0s);
+  }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+
+  /* ---------- about ---------- */
+  #about .body {
+    display: grid;
+    grid-template-columns: minmax(140px, 1fr) 2.4fr 1.6fr;
+  }
+  #about .body > div { padding: 44px var(--gutter) 56px; }
+  #about .body .placard {
+    border-right: 1px solid var(--hairline);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  #about .body .placard .mono { color: var(--ink-soft); line-height: 2.1; }
+  #about .body .bio { border-right: 1px solid var(--hairline); }
+  #about .body .bio p {
+    font-size: clamp(19px, 2.1vw, 26px);
+    line-height: 1.45;
+    letter-spacing: -0.01em;
+    font-weight: 500;
+    max-width: 30em;
+  }
+  #about .body .bio p + p { margin-top: 1.1em; }
+  #about .body .bio em {
+    font-style: normal;
+    color: var(--ikb);
+  }
+  #about .prev h3 {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  #about .prev h3::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--hairline);
+  }
+  #about .prev ul { list-style: none; }
+  #about .prev li {
+    padding: 15px 0;
+    border-bottom: 1px solid var(--hairline);
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    display: grid;
+    grid-template-columns: 30px 1fr;
+    gap: 10px;
+  }
+  #about .prev li b { color: var(--ink); font-weight: 600; }
+  #about .prev li .tick {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--ikb);
+    padding-top: 5px;
+  }
+
+  /* ---------- projects ---------- */
+  #projects .rows { list-style: none; }
+  .proj {
+    border-bottom: 1px solid var(--hairline);
+    position: relative;
+    cursor: pointer;
+  }
+  .proj:last-child { border-bottom: none; }
+  .proj .row {
+    display: grid;
+    grid-template-columns: minmax(140px, 1fr) 2.4fr 1.6fr 56px;
+    align-items: center;
+    padding: 0;
+    transition: background 0.4s var(--ease-out);
+  }
+  .proj .row > * { padding: 30px var(--gutter); }
+  .proj .pnum {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    color: var(--ink-soft);
+    border-right: 1px solid var(--hairline);
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    transition: color 0.3s var(--ease-out);
+  }
+  .proj h3 {
+    font-size: clamp(24px, 3vw, 40px);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+    transition: transform 0.45s var(--ease-snap), color 0.3s var(--ease-out);
+  }
+  .proj .meta {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .proj .arr {
+    font-size: 22px;
+    color: var(--ink-soft);
+    transition: transform 0.45s var(--ease-snap), color 0.3s var(--ease-out);
+    padding: 30px 20px;
+  }
+  .proj:hover .row, .proj:focus-within .row { background: rgba(0,47,167,0.04); }
+  .proj:hover h3 { transform: translateX(12px); color: var(--ikb); }
+  .proj:hover .pnum { color: var(--ikb); }
+  .proj:hover .arr { transform: translateX(6px) rotate(-45deg); color: var(--ikb); }
+
+  /* expanding preview drawer */
+  .proj .drawer {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.55s var(--ease-snap);
+  }
+  .proj:hover .drawer, .proj:focus-within .drawer { grid-template-rows: 1fr; }
+  .proj .drawer-inner {
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: minmax(140px, 1fr) 2.4fr 1.6fr 56px;
+  }
+  .proj .drawer-inner > * { min-height: 0; }
+  .proj .drawer .spacer { border-right: 1px solid var(--hairline); }
+  .proj .drawer .desc {
+    padding: 0 var(--gutter) 34px;
+    font-size: 15.5px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    max-width: 52ch;
+  }
+  .proj .drawer .desc .stats {
+    display: flex;
+    gap: 22px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .proj .drawer .desc .stats span {
+    font-family: 'Space Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ikb);
+    border: 1px solid rgba(0,47,167,0.35);
+    padding: 5px 10px;
+  }
+  /* CSS-only preview blocks */
+  .proj .drawer .preview {
+    margin: 0 var(--gutter) 34px;
+    height: 110px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--hairline-strong);
+  }
+  .pv-1 {
+    background:
+      linear-gradient(90deg, var(--ikb) 0 26%, transparent 26%),
+      repeating-linear-gradient(90deg, rgba(16,16,19,0.12) 0 1px, transparent 1px 22px),
+      linear-gradient(180deg, #fff, #f0efe9);
+  }
+  .pv-1::after {
+    content: "⌕ semantic match: 0.94";
+    position: absolute;
+    right: 12px; bottom: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+  }
+  .pv-2 {
+    background:
+      repeating-linear-gradient(0deg, rgba(0,47,167,0.16) 0 2px, transparent 2px 14px),
+      repeating-linear-gradient(90deg, rgba(0,47,167,0.16) 0 2px, transparent 2px 14px),
+      linear-gradient(135deg, #fff 60%, rgba(0,47,167,0.12));
+  }
+  .pv-2::after {
+    content: "fn attention(q, k, v) -> Tensor";
+    position: absolute;
+    left: 12px; bottom: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    color: var(--ikb);
+  }
+  .pv-3 {
+    background:
+      conic-gradient(from 200deg at 78% 30%, var(--ikb), transparent 110deg),
+      linear-gradient(180deg, #fff, #f0efe9);
+  }
+  .pv-3::after {
+    content: "▲ trajectory: ascending";
+    position: absolute;
+    left: 12px; bottom: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+  }
+
+  /* ---------- writing ---------- */
+  #writing ol { list-style: none; counter-reset: post; }
+  #writing li {
+    counter-increment: post;
+    border-bottom: 1px solid var(--hairline);
+  }
+  #writing li:last-child { border-bottom: none; }
+  #writing li a {
+    display: grid;
+    grid-template-columns: minmax(140px, 1fr) 3fr 1fr;
+    align-items: baseline;
+    padding: 26px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  #writing li a::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--ink);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.4s var(--ease-snap);
+  }
+  #writing li a:hover::before { transform: scaleY(1); }
+  #writing li a > * { position: relative; transition: color 0.3s var(--ease-out); }
+  #writing li a:hover > * { color: #fff; }
+  #writing .pno {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    padding: 0 var(--gutter);
+  }
+  #writing .pno::before { content: "W·0" counter(post); }
+  #writing .ptitle {
+    font-size: clamp(19px, 2.2vw, 28px);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    padding-right: var(--gutter);
+  }
+  #writing li a:hover .ptitle { color: #fff; }
+  #writing li a:hover .ptitle u {
+    text-decoration-color: var(--ikb-bright);
+  }
+  #writing .pdate {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--ink-soft);
+    text-align: right;
+    padding-right: var(--gutter);
+    text-transform: uppercase;
+  }
+
+  /* ---------- contact / footer ---------- */
+  #contact .big-mail {
+    display: block;
+    padding: clamp(50px, 8vw, 110px) var(--gutter);
+    text-align: left;
+  }
+  #contact .big-mail .mono { color: var(--ink-soft); display: block; margin-bottom: 18px; }
+  #contact .big-mail .addr {
+    font-size: clamp(26px, 4.6vw, 72px);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+    word-break: break-all;
+    position: relative;
+    display: inline-block;
+  }
+  #contact .big-mail .addr::after {
+    content: "";
+    position: absolute;
+    left: 0; bottom: -6px;
+    width: 100%;
+    height: 4px;
+    background: var(--ikb);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.5s var(--ease-snap);
+  }
+  #contact .big-mail:hover .addr::after { transform: scaleX(1); }
+  #contact .big-mail:hover .addr { color: var(--ikb); transition: color 0.3s var(--ease-out); }
+
+  footer {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    border-top: 1px solid var(--hairline);
+  }
+  footer > * {
+    padding: 20px var(--gutter);
+    border-right: 1px solid var(--hairline);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  footer > *:last-child { border-right: none; text-align: right; }
+  footer a {
+    position: relative;
+    transition: color 0.3s var(--ease-out);
+  }
+  footer a:hover { color: var(--ikb); }
+  footer a::after { content: " ↗"; font-size: 9px; }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 900px) {
+    :root { --rail: 0px; }
+    #rail { display: none; }
+    nav .links a sup { display: none; }
+    .sec-head { grid-template-columns: 1fr; }
+    .sec-head .num { border-right: none; border-bottom: 1px solid var(--hairline); }
+    #about .body { grid-template-columns: 1fr; }
+    #about .body .placard, #about .body .bio { border-right: none; border-bottom: 1px solid var(--hairline); }
+    .proj .row { grid-template-columns: 64px 1fr 40px; }
+    .proj .meta { display: none; }
+    .proj .drawer-inner { grid-template-columns: 1fr; }
+    .proj .drawer .spacer { display: none; }
+    .proj .drawer .preview { margin-top: 0; }
+    #hero .hero-sub { grid-template-columns: 1fr; }
+    #hero .hero-sub > div { border-right: none; border-bottom: 1px solid var(--hairline); }
+    #hero .hero-sub > div:last-child { border-bottom: none; }
+    #writing li a { grid-template-columns: 64px 1fr; }
+    #writing .pdate { display: none; }
+    footer { grid-template-columns: 1fr 1fr; }
+    footer > * { border-bottom: 1px solid var(--hairline); }
+    .micro-rotated { display: none; }
+  }
+
+  /* ---------- reduced motion ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    #hero h1 .line > span { transform: none; animation: none; }
+    .reveal { opacity: 1; transform: none; }
+    #ticker .track { animation: none; flex-wrap: wrap; width: auto; }
+    #ticker .set:nth-child(2) { display: none; }
+    .proj .drawer { grid-template-rows: 1fr; } /* always expanded */
+  }
+</style>
+</head>
+<body>
+
+<div id="progress" aria-hidden="true"></div>
+
+<nav>
+  <a class="brand" href="#hero"><span class="dot"></span>Sam Chen</a>
+  <div class="links">
+    <a href="#about">About<sup>01</sup></a>
+    <a href="#projects">Projects<sup>02</sup></a>
+    <a href="#writing">Writing<sup>03</sup></a>
+    <a href="#contact">Contact<sup>04</sup></a>
+  </div>
+</nav>
+
+<aside id="rail" aria-label="Section index">
+  <div class="idx">
+    <a href="#about" data-sec="about">01</a>
+    <a href="#projects" data-sec="projects">02</a>
+    <a href="#writing" data-sec="writing">03</a>
+    <a href="#contact" data-sec="contact">04</a>
+  </div>
+  <div class="coord">42.3736° N — Cambridge, MA</div>
+</aside>
+
+<main>
+
+  <!-- ============ HERO ============ -->
+  <section id="hero">
+    <div class="grid-rules" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+    <div class="micro-rotated">Fig. 01 — Index / Homepage Rev. 3</div>
+
+    <div class="hero-top">
+      <span class="mono">Harvard · CS / Math / Psych</span>
+      <span class="mono">Portfolio — 2026</span>
+    </div>
+
+    <h1 aria-label="Researcher, Builder, Founder">
+      <span class="line"><span>Researcher,</span></span>
+      <span class="line"><span class="outline">Builder,</span></span>
+      <span class="line"><span>&amp;&nbsp;<span class="accent">Founder</span></span></span>
+    </h1>
+
+    <div class="hero-sub">
+      <div class="status">
+        <span class="pulse" aria-hidden="true"></span>
+        <span class="mono">SF · Summer ’26</span>
+      </div>
+      <div>
+        <p>Sam Chen — sophomore at Harvard working on mechanistic interpretability and hierarchical reinforcement learning. Formerly 6th in the nation in Public Forum debate.</p>
+      </div>
+      <div class="down"><span>Scroll</span><span class="arrow">↓</span></div>
+    </div>
+  </section>
+
+  <!-- ============ TICKER ============ -->
+  <div id="ticker" aria-hidden="true">
+    <div class="track">
+      <div class="set">
+        <span>Interpretability</span><i>●</i>
+        <span>Reinforcement Learning</span><i>●</i>
+        <span>Mathematics</span><i>●</i>
+        <span>Debate</span><i>●</i>
+        <span>Cognition</span><i>●</i>
+        <span>Founding</span><i>●</i>
+        <span>Rust</span><i>●</i>
+        <span>Education</span><i>●</i>
+      </div>
+      <div class="set">
+        <span>Interpretability</span><i>●</i>
+        <span>Reinforcement Learning</span><i>●</i>
+        <span>Mathematics</span><i>●</i>
+        <span>Debate</span><i>●</i>
+        <span>Cognition</span><i>●</i>
+        <span>Founding</span><i>●</i>
+        <span>Rust</span><i>●</i>
+        <span>Education</span><i>●</i>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ABOUT ============ -->
+  <section id="about">
+    <div class="sec-head">
+      <div class="num reveal">01</div>
+      <div class="label reveal" style="--d:.08s">
+        <span class="mono">Placard — Biography</span>
+        <h2>About</h2>
+      </div>
+    </div>
+    <div class="body">
+      <div class="placard reveal" style="--d:.05s">
+        <span class="mono">
+          Name — Sam Chen<br>
+          Origin — Boston, MA<br>
+          Year — Sophomore<br>
+          Medium — Code, proofs,<br>&amp; arguments
+        </span>
+      </div>
+      <div class="bio reveal" style="--d:.12s">
+        <p>I study Computer Science, Mathematics, and Psychology at Harvard. I work on <em>mechanistic interpretability</em> in the Computation, Cognition, and Development Lab, and on <em>hierarchical reinforcement learning</em> under Kempner and the Brantley Lab.</p>
+        <p>This summer, I’m in San Francisco.</p>
+      </div>
+      <div class="prev reveal" style="--d:.2s">
+        <h3>Previously</h3>
+        <ul>
+          <li><span class="tick">a.</span><span><b>AGI House</b> — engineering on people-search infrastructure.</span></li>
+          <li><span class="tick">b.</span><span><b>Public Forum debate</b> — peaked 6th nationally.</span></li>
+          <li><span class="tick">c.</span><span><b>Outreach Debate</b> — founded; 1,800+ members, 300+ volunteers.</span></li>
+          <li><span class="tick">d.</span><span><b>2 education businesses</b> — founded; 5–6 figures in revenue.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PROJECTS ============ -->
+  <section id="projects">
+    <div class="sec-head">
+      <div class="num reveal">02</div>
+      <div class="label reveal" style="--d:.08s">
+        <span class="mono">Selected Work — Hover to inspect</span>
+        <h2>Projects</h2>
+      </div>
+    </div>
+    <ul class="rows">
+      <li class="proj reveal">
+        <a class="row" href="#" tabindex="0">
+          <span class="pnum">P·01</span>
+          <h3>IvyLine Search</h3>
+          <span class="meta">Semantic search · Education</span>
+          <span class="arr" aria-hidden="true">→</span>
+        </a>
+        <div class="drawer">
+          <div class="drawer-inner">
+            <div class="spacer"></div>
+            <div class="desc">
+              Semantic search democratizing college advice — indexing 200+ opportunities so students without counselors can find them.
+              <div class="stats">
+                <span>500 users / 5 days</span>
+                <span>100K LinkedIn impressions</span>
+                <span>200+ opportunities</span>
+              </div>
+            </div>
+            <div class="preview pv-1" aria-hidden="true"></div>
+            <div></div>
+          </div>
+        </div>
+      </li>
+      <li class="proj reveal" style="--d:.08s">
+        <a class="row" href="#" tabindex="0">
+          <span class="pnum">P·02</span>
+          <h3>Transformer in Rust</h3>
+          <span class="meta">From scratch · Candle</span>
+          <span class="arr" aria-hidden="true">→</span>
+        </a>
+        <div class="drawer">
+          <div class="drawer-inner">
+            <div class="spacer"></div>
+            <div class="desc">
+              A transformer built from scratch in Rust with candle — attention, layernorm, and the training loop, no framework magic. The best way to understand a model is to make the compiler agree with you about it.
+              <div class="stats">
+                <span>Rust</span>
+                <span>Candle</span>
+                <span>Zero deps on Python</span>
+              </div>
+            </div>
+            <div class="preview pv-2" aria-hidden="true"></div>
+            <div></div>
+          </div>
+        </div>
+      </li>
+      <li class="proj reveal" style="--d:.16s">
+        <a class="row" href="#" tabindex="0">
+          <span class="pnum">P·03</span>
+          <h3>Ignite Fund</h3>
+          <span class="meta">Community · Web</span>
+          <span class="arr" aria-hidden="true">→</span>
+        </a>
+        <div class="drawer">
+          <div class="drawer-inner">
+            <div class="spacer"></div>
+            <div class="desc">
+              A site for high achievers — surfacing ambitious people and the resources to match their trajectories.
+              <div class="stats">
+                <span>Design + Build</span>
+                <span>Live</span>
+              </div>
+            </div>
+            <div class="preview pv-3" aria-hidden="true"></div>
+            <div></div>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ============ WRITING ============ -->
+  <section id="writing">
+    <div class="sec-head">
+      <div class="num reveal">03</div>
+      <div class="label reveal" style="--d:.08s">
+        <span class="mono">Notes — Occasional, opinionated</span>
+        <h2>Writing</h2>
+      </div>
+    </div>
+    <ol>
+      <li class="reveal">
+        <a href="#">
+          <span class="pno" aria-hidden="true"></span>
+          <span class="ptitle">What sparse autoencoders still can’t tell us about features</span>
+          <span class="pdate">Apr 2026</span>
+        </a>
+      </li>
+      <li class="reveal" style="--d:.07s">
+        <a href="#">
+          <span class="pno" aria-hidden="true"></span>
+          <span class="ptitle">Options, subgoals, and why hierarchy is hard in RL</span>
+          <span class="pdate">Feb 2026</span>
+        </a>
+      </li>
+      <li class="reveal" style="--d:.14s">
+        <a href="#">
+          <span class="pno" aria-hidden="true"></span>
+          <span class="ptitle">Everything I know about thinking fast, I learned in a debate round</span>
+          <span class="pdate">Dec 2025</span>
+        </a>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ============ CONTACT ============ -->
+  <section id="contact" style="border-bottom:none">
+    <div class="sec-head">
+      <div class="num reveal">04</div>
+      <div class="label reveal" style="--d:.08s">
+        <span class="mono">Open to research collabs &amp; interesting problems</span>
+        <h2>Contact</h2>
+      </div>
+    </div>
+    <a class="big-mail reveal" href="mailto:sam_chen@college.harvard.edu">
+      <span class="mono">Write to me —</span>
+      <span class="addr">sam_chen@college.harvard.edu</span>
+    </a>
+    <footer>
+      <a href="https://linkedin.com/in/sam-chen-massachusetts" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="https://github.com/SamC1249" target="_blank" rel="noopener">GitHub</a>
+      <span>© 2026 Sam Chen</span>
+      <span>Set in Space Grotesk</span>
+    </footer>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ----- scroll progress ----- */
+  var bar = document.getElementById('progress');
+  function onScroll() {
+    var doc = document.documentElement;
+    var max = doc.scrollHeight - window.innerHeight;
+    var p = max > 0 ? window.scrollY / max : 0;
+    bar.style.transform = 'scaleX(' + p + ')';
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* ----- staggered reveals ----- */
+  var reveals = document.querySelectorAll('.reveal');
+  if (reduced || !('IntersectionObserver' in window)) {
+    reveals.forEach(function (el) { el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          e.target.classList.add('in');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+    reveals.forEach(function (el) { io.observe(el); });
+  }
+
+  /* ----- side-rail active section ----- */
+  var railLinks = document.querySelectorAll('#rail .idx a');
+  var secs = ['about', 'projects', 'writing', 'contact']
+    .map(function (id) { return document.getElementById(id); });
+  if ('IntersectionObserver' in window) {
+    var spy = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          railLinks.forEach(function (l) {
+            l.classList.toggle('active', l.dataset.sec === e.target.id);
+          });
+        }
+      });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+    secs.forEach(function (s) { if (s) spy.observe(s); });
+  }
+
+  /* ----- project drawers: keyboard + touch parity with hover ----- */
+  document.querySelectorAll('.proj > a.row').forEach(function (rowLink) {
+    rowLink.addEventListener('click', function (ev) {
+      if (rowLink.getAttribute('href') === '#') ev.preventDefault();
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

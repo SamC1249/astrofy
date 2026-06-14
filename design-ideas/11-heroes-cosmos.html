@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sam Chen — Hero Concepts 26–30 / Cosmic Structure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --ink: #282a30;
+    --ink-2: #3c4149;
+    --ink-3: #6f6e77;
+    --ink-4: #86848d;
+    --accent: #7070ff;
+    --accent-tint: #f1f1ff;
+    --hairline: rgba(0, 0, 0, 0.08);
+    --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html {
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-optical-sizing: auto;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overscroll-behavior: none;
+  }
+
+  ::selection { background: var(--accent-tint); color: var(--ink); }
+
+  .visually-hidden {
+    position: absolute; width: 1px; height: 1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  /* ---------- sections ---------- */
+  section.hero {
+    position: relative;
+    height: 100vh;
+    height: 100dvh;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    overflow: hidden;
+    background: var(--bg);
+  }
+  section.hero canvas.stage {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+  }
+
+  /* ---------- mono labels ---------- */
+  .mono-label {
+    position: absolute;
+    left: 28px;
+    bottom: 24px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-4);
+    pointer-events: none;
+    z-index: 4;
+    white-space: nowrap;
+  }
+  .mono-label b { font-weight: 400; color: var(--ink-2); }
+  .mono-label .tick {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-right: 10px;
+    vertical-align: 1px;
+  }
+
+  /* fixed gallery chrome */
+  .chrome {
+    position: fixed;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-4);
+    z-index: 20;
+    pointer-events: none;
+  }
+  .chrome.tl { top: 24px; left: 28px; }
+  .chrome.tr { top: 24px; right: 28px; }
+  .chrome.tl b { color: var(--ink); font-weight: 400; }
+
+  /* ---------- dot nav ---------- */
+  nav.dots {
+    position: fixed;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    z-index: 30;
+  }
+  nav.dots a {
+    display: block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.14);
+    transition: background 0.3s var(--ease), transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+  }
+  nav.dots a:hover { background: var(--ink-4); transform: scale(1.25); }
+  nav.dots a.active {
+    background: var(--accent);
+    transform: scale(1.25);
+    box-shadow: 0 0 0 4px var(--accent-tint);
+  }
+
+  /* ---------- hero copy ---------- */
+  .copy {
+    position: absolute;
+    z-index: 3;
+    pointer-events: none;
+  }
+  .copy .kicker {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 22px;
+  }
+  .copy h1, .copy .h1 {
+    font-size: clamp(48px, 6.4vw, 72px);
+    font-weight: 590;
+    letter-spacing: -0.022em;
+    line-height: 1.02;
+    color: var(--ink);
+    margin-bottom: 18px;
+  }
+  .copy .tagline {
+    font-size: 19px;
+    font-weight: 510;
+    letter-spacing: -0.012em;
+    color: var(--ink-2);
+    margin-bottom: 10px;
+  }
+  .copy .bio {
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.55;
+    color: var(--ink-3);
+    max-width: 46ch;
+    margin-bottom: 30px;
+  }
+  .copy .actions { display: flex; gap: 10px; }
+  .copy.center .actions { justify-content: center; }
+
+  .btn {
+    pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 18px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 510;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: transform 0.25s var(--ease), background 0.25s var(--ease),
+                border-color 0.25s var(--ease), box-shadow 0.25s var(--ease);
+  }
+  .btn.primary {
+    background: var(--ink);
+    color: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.09);
+  }
+  .btn.primary:hover { background: #16171b; transform: translateY(-1px); }
+  .btn.secondary {
+    background: #fff;
+    color: var(--ink-2);
+    border-color: var(--hairline);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+  .btn.secondary:hover {
+    background: #f9f9fb;
+    border-color: rgba(0, 0, 0, 0.14);
+    transform: translateY(-1px);
+  }
+  .btn .arrow { font-size: 13px; transition: transform 0.25s var(--ease); }
+  .btn:hover .arrow { transform: translateX(2px); }
+
+  /* placement variants */
+  .copy.center {
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .copy.center::before {
+    content: "";
+    position: absolute;
+    width: min(880px, 90vw);
+    height: 480px;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(255,255,255,0.93) 38%, rgba(255,255,255,0) 100%);
+    z-index: -1;
+  }
+
+  .copy.left {
+    left: 8vw;
+    top: 50%;
+    transform: translateY(-50%);
+    max-width: 600px;
+  }
+  .copy.left.scrim::before {
+    content: "";
+    position: absolute;
+    inset: -70px -90px;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(255,255,255,0.9) 42%, rgba(255,255,255,0) 100%);
+    z-index: -1;
+  }
+
+  .copy.right {
+    left: 56vw;
+    right: 7vw;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .copy.bottom-left {
+    left: 8vw;
+    bottom: 13vh;
+    max-width: 600px;
+  }
+  .copy.bottom-left.scrim::before {
+    content: "";
+    position: absolute;
+    inset: -60px -90px;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(255,255,255,0.88) 40%, rgba(255,255,255,0) 100%);
+    z-index: -1;
+  }
+
+  .hint {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-4);
+    margin-top: 26px;
+  }
+  .hint::before {
+    content: "";
+    display: inline-block;
+    width: 18px; height: 1px;
+    background: var(--accent);
+    margin-right: 10px;
+    vertical-align: 4px;
+  }
+  .hint.live {
+    pointer-events: auto;
+    cursor: pointer;
+    transition: color 0.25s var(--ease);
+  }
+  .hint.live:hover { color: var(--accent); }
+
+  /* scene-specific captions */
+  .field-caption {
+    position: absolute;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-4);
+    pointer-events: none;
+    z-index: 3;
+  }
+  .field-caption b { font-weight: 400; color: var(--ink-2); }
+  #s27 .field-caption { left: 10vw; top: 11vh; }
+  #s28 .field-caption { right: 7vw; top: 11vh; text-align: right; }
+
+  @media (max-width: 860px) {
+    .copy.right { left: 24px; right: 24px; top: auto; bottom: 12vh; transform: none; }
+    #s27 .field-caption { display: none; }
+  }
+  @media (max-width: 720px) {
+    .mono-label { font-size: 10px; left: 18px; bottom: 18px; }
+    .chrome.tr { display: none; }
+    .chrome.tl { left: 18px; }
+    nav.dots { right: 12px; }
+    .copy.left, .copy.bottom-left { left: 24px; right: 24px; }
+    #s28 .field-caption { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="chrome tl"><b>Sam Chen</b>&nbsp;&nbsp;—&nbsp;&nbsp;Hero Concepts</div>
+<div class="chrome tr">11 / Cosmic Structure</div>
+
+<nav class="dots" aria-label="Section navigation">
+  <a href="#s26" data-dot="s26" aria-label="Hero 26 — Starfield warp"></a>
+  <a href="#s27" data-dot="s27" aria-label="Hero 27 — Pulsar ridgelines"></a>
+  <a href="#s28" data-dot="s28" aria-label="Hero 28 — Minimal orrery"></a>
+  <a href="#s29" data-dot="s29" aria-label="Hero 29 — Cosmic web"></a>
+  <a href="#s30" data-dot="s30" aria-label="Hero 30 — ASCII supernova"></a>
+</nav>
+
+<!-- ============ 26 · STARFIELD WARP ============ -->
+<section class="hero" id="s26">
+  <canvas class="stage" data-kind="gl" aria-hidden="true"></canvas>
+  <div class="copy center">
+    <div class="kicker">Portfolio — 2026</div>
+    <h1>Sam Chen</h1>
+    <div class="tagline">Researcher, Builder &amp; Founder</div>
+    <p class="bio">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+    <div class="actions">
+      <a class="btn primary" href="#">View work <span class="arrow">→</span></a>
+      <a class="btn secondary" href="#">Get in touch</a>
+    </div>
+    <div class="hint live" id="warpHint">Hold anywhere to engage warp</div>
+  </div>
+  <div class="mono-label"><span class="tick"></span>Hero 26 / 30 — <b>Starfield Warp</b> — 2,400 stars · z-parallax · hold to jump</div>
+</section>
+
+<!-- ============ 27 · PULSAR RIDGELINES ============ -->
+<section class="hero" id="s27">
+  <canvas class="stage" data-kind="2d" aria-hidden="true"></canvas>
+  <div class="field-caption">PSR B1919+21 — <b>period 1.337 s</b></div>
+  <div class="copy right">
+    <div class="kicker">Cambridge, MA</div>
+    <h1>Sam Chen</h1>
+    <div class="tagline">Researcher, Builder &amp; Founder</div>
+    <p class="bio">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+    <div class="actions">
+      <a class="btn primary" href="#">View work <span class="arrow">→</span></a>
+      <a class="btn secondary" href="#">Read research</a>
+    </div>
+    <div class="hint">Sweep the stack — your cursor drives the pulse</div>
+  </div>
+  <div class="mono-label"><span class="tick"></span>Hero 27 / 30 — <b>Pulsar Ridgelines</b> — CP 1919 · 42 profiles · detection sweep</div>
+</section>
+
+<!-- ============ 28 · MINIMAL ORRERY ============ -->
+<section class="hero" id="s28">
+  <canvas class="stage" data-kind="2d" aria-hidden="true"></canvas>
+  <div class="field-caption">Orrery — <b>ω ∝ a^−3/2</b></div>
+  <div class="copy left scrim">
+    <div class="kicker">sam_chen@neosigma.ai</div>
+    <h1>Sam Chen</h1>
+    <div class="tagline">Researcher, Builder &amp; Founder</div>
+    <p class="bio">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+    <div class="actions">
+      <a class="btn primary" href="#">View work <span class="arrow">→</span></a>
+      <a class="btn secondary" href="#">About me</a>
+    </div>
+  </div>
+  <div class="mono-label"><span class="tick"></span>Hero 28 / 30 — <b>Minimal Orrery</b> — 8 orbits · keplerian a^−3/2 · parallax</div>
+</section>
+
+<!-- ============ 29 · COSMIC WEB ============ -->
+<section class="hero" id="s29">
+  <canvas class="stage" data-kind="gl" aria-hidden="true"></canvas>
+  <div class="copy bottom-left scrim">
+    <div class="kicker">Selected work · 2022 — 2026</div>
+    <h1>Sam Chen</h1>
+    <div class="tagline">Researcher, Builder &amp; Founder</div>
+    <p class="bio">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+    <div class="actions">
+      <a class="btn primary" href="#">View work <span class="arrow">→</span></a>
+      <a class="btn secondary" href="#">Get in touch</a>
+    </div>
+    <div class="hint">Move the pointer to run the survey</div>
+  </div>
+  <div class="mono-label"><span class="tick"></span>Hero 29 / 30 — <b>Cosmic Web</b> — 1,500 pts · filament graph · cursor survey</div>
+</section>
+
+<!-- ============ 30 · ASCII SUPERNOVA ============ -->
+<section class="hero" id="s30">
+  <canvas class="stage" data-kind="2d" aria-hidden="true"></canvas>
+  <div class="copy center">
+    <div class="kicker">Portfolio — 2026</div>
+    <h1>Sam Chen</h1>
+    <div class="tagline">Researcher, Builder &amp; Founder</div>
+    <p class="bio">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+    <div class="actions">
+      <a class="btn primary" href="#">View work <span class="arrow">→</span></a>
+      <a class="btn secondary" href="#">Get in touch</a>
+    </div>
+    <div class="hint">Click to detonate</div>
+  </div>
+  <div class="mono-label"><span class="tick"></span>Hero 30 / 30 — <b>ASCII Supernova</b> — char grid · shockwave shells · click to detonate</div>
+</section>
+
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+/* ================================================================
+   Shared
+================================================================ */
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const DPR = Math.min(window.devicePixelRatio || 1, 2);
+
+const INK  = '#282a30';
+const INK2 = '#3c4149';
+const INK3 = '#6f6e77';
+const INK4 = '#86848d';
+const INDIGO = '#7070ff';
+
+function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+function lerp(a, b, t) { return a + (b - a) * t; }
+function gaussRand() {
+  return (Math.random() + Math.random() + Math.random() - 1.5) * 0.8165;
+}
+
+/* ---------------- classic Perlin gradient noise (3D) ---------------- */
+const PERM = new Uint8Array(512);
+(() => {
+  const p = new Uint8Array(256);
+  for (let i = 0; i < 256; i++) p[i] = i;
+  let seed = 1337;
+  const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 255; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    const t = p[i]; p[i] = p[j]; p[j] = t;
+  }
+  for (let i = 0; i < 512; i++) PERM[i] = p[i & 255];
+})();
+function fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+function grad3(h, x, y, z) {
+  const g = h & 15;
+  const u = g < 8 ? x : y;
+  const v = g < 4 ? y : (g === 12 || g === 14 ? x : z);
+  return ((g & 1) ? -u : u) + ((g & 2) ? -v : v);
+}
+function noise3(x, y, z) {
+  const X = Math.floor(x) & 255, Y = Math.floor(y) & 255, Z = Math.floor(z) & 255;
+  x -= Math.floor(x); y -= Math.floor(y); z -= Math.floor(z);
+  const u = fade(x), v = fade(y), w = fade(z);
+  const A = PERM[X] + Y, AA = PERM[A] + Z, AB = PERM[A + 1] + Z;
+  const B = PERM[X + 1] + Y, BA = PERM[B] + Z, BB = PERM[B + 1] + Z;
+  return lerp(
+    lerp(
+      lerp(grad3(PERM[AA], x, y, z),     grad3(PERM[BA], x - 1, y, z), u),
+      lerp(grad3(PERM[AB], x, y - 1, z), grad3(PERM[BB], x - 1, y - 1, z), u), v),
+    lerp(
+      lerp(grad3(PERM[AA + 1], x, y, z - 1),     grad3(PERM[BA + 1], x - 1, y, z - 1), u),
+      lerp(grad3(PERM[AB + 1], x, y - 1, z - 1), grad3(PERM[BB + 1], x - 1, y - 1, z - 1), u), v),
+    w);
+}
+
+/* round-sprite texture for soft points */
+const dotTexture = (() => {
+  const c = document.createElement('canvas');
+  c.width = c.height = 64;
+  const g = c.getContext('2d');
+  const grd = g.createRadialGradient(32, 32, 0, 32, 32, 30);
+  grd.addColorStop(0, 'rgba(255,255,255,1)');
+  grd.addColorStop(0.72, 'rgba(255,255,255,1)');
+  grd.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = grd;
+  g.beginPath(); g.arc(32, 32, 30, 0, Math.PI * 2); g.fill();
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+})();
+
+/* ================================================================
+   Controller framework
+   build(ctl) -> api: { update(t, dt), prime(), layout?() }
+   GL scenes render via ctl.renderer; 2D scenes draw inside update.
+================================================================ */
+const controllers = [];
+
+function startLoop(ctl) {
+  if (ctl.running || REDUCED) return;
+  ctl.running = true;
+  ctl.last = performance.now();
+  const tick = (now) => {
+    if (!ctl.running) return;
+    const dt = Math.min((now - ctl.last) / 1000, 0.05);
+    ctl.last = now;
+    ctl.time += dt;
+    ctl.api.update(ctl.time, dt);
+    if (ctl.render) ctl.render();
+    ctl.raf = requestAnimationFrame(tick);
+  };
+  ctl.raf = requestAnimationFrame(tick);
+}
+function stopLoop(ctl) {
+  ctl.running = false;
+  if (ctl.raf) cancelAnimationFrame(ctl.raf);
+}
+
+function makeGL(id, camZ, fov, build) {
+  const section = document.getElementById(id);
+  const canvas = section.querySelector('canvas.stage');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+  renderer.setClearColor(0xffffff, 1);
+  renderer.setPixelRatio(DPR);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(fov, 1, 0.1, 300);
+  camera.position.set(0, 0, camZ);
+
+  const ctl = {
+    id, section, canvas, renderer, scene, camera,
+    running: false, time: 0, raf: 0, api: null,
+    render: () => renderer.render(scene, camera),
+  };
+  ctl.api = build(ctl);
+
+  ctl.resize = () => {
+    const w = section.clientWidth, h = section.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    if (ctl.api.layout) ctl.api.layout(w, h);
+    if (REDUCED) { ctl.api.prime(); ctl.render(); }
+  };
+  controllers.push(ctl);
+  return ctl;
+}
+
+function make2D(id, build) {
+  const section = document.getElementById(id);
+  const canvas = section.querySelector('canvas.stage');
+  const ctx = canvas.getContext('2d');
+
+  const ctl = {
+    id, section, canvas, ctx, w: 0, h: 0,
+    running: false, time: 0, raf: 0, api: null, render: null,
+  };
+  ctl.api = build(ctl);
+
+  ctl.resize = () => {
+    const w = section.clientWidth, h = section.clientHeight;
+    if (!w || !h) return;
+    ctl.w = w; ctl.h = h;
+    canvas.width = Math.round(w * DPR);
+    canvas.height = Math.round(h * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    if (ctl.api.layout) ctl.api.layout(w, h);
+    if (REDUCED) ctl.api.prime();
+  };
+  controllers.push(ctl);
+  return ctl;
+}
+
+/* pointer helper: normalized coords inside the section */
+function trackPointer(section, cb) {
+  if (REDUCED) return;
+  section.addEventListener('pointermove', (e) => {
+    const r = section.getBoundingClientRect();
+    cb((e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height, true);
+  });
+  section.addEventListener('pointerleave', () => cb(0.5, 0.5, false));
+}
+
+/* ================================================================
+   HERO 26 — STARFIELD WARP
+   Dark stars on white, real z-depth. Hold to stretch points into
+   velocity streaks (prev -> current world positions as segments).
+================================================================ */
+makeGL('s26', 0, 62, (ctl) => {
+  const N = 2400;
+  const NEAR = 3, FAR = 70, SPAN = FAR - NEAR;
+  const BASE = 2.2, WARP = 72;
+
+  const starX = new Float32Array(N);
+  const starY = new Float32Array(N);
+  const starZ = new Float32Array(N);
+
+  const ptPos = new Float32Array(N * 3);
+  const ptCol = new Float32Array(N * 3);
+  const lnPos = new Float32Array(N * 6);
+  const lnCol = new Float32Array(N * 6);
+
+  const cInk2 = new THREE.Color(INK2), cInk3 = new THREE.Color(INK3),
+        cInk4 = new THREE.Color(INK4), cIndigo = new THREE.Color(INDIGO);
+
+  for (let i = 0; i < N; i++) {
+    starX[i] = (Math.random() * 2 - 1) * 56;
+    starY[i] = (Math.random() * 2 - 1) * 38;
+    starZ[i] = -(NEAR + Math.random() * SPAN);
+    const r = Math.random();
+    const c = r < 0.06 ? cIndigo : r < 0.30 ? cInk2 : r < 0.66 ? cInk3 : cInk4;
+    ptCol[i * 3] = c.r; ptCol[i * 3 + 1] = c.g; ptCol[i * 3 + 2] = c.b;
+    lnCol[i * 6] = c.r; lnCol[i * 6 + 1] = c.g; lnCol[i * 6 + 2] = c.b;
+    lnCol[i * 6 + 3] = c.r; lnCol[i * 6 + 4] = c.g; lnCol[i * 6 + 5] = c.b;
+  }
+
+  const ptGeo = new THREE.BufferGeometry();
+  ptGeo.setAttribute('position', new THREE.BufferAttribute(ptPos, 3));
+  ptGeo.setAttribute('color', new THREE.BufferAttribute(ptCol, 3));
+  const ptMat = new THREE.PointsMaterial({
+    size: 0.07, map: dotTexture, transparent: true, opacity: 0.92,
+    vertexColors: true, sizeAttenuation: true, depthWrite: false, alphaTest: 0.05,
+  });
+  const points = new THREE.Points(ptGeo, ptMat);
+  points.frustumCulled = false;
+  ctl.scene.add(points);
+
+  const lnGeo = new THREE.BufferGeometry();
+  lnGeo.setAttribute('position', new THREE.BufferAttribute(lnPos, 3));
+  lnGeo.setAttribute('color', new THREE.BufferAttribute(lnCol, 3));
+  const lnMat = new THREE.LineBasicMaterial({
+    vertexColors: true, transparent: true, opacity: 0, depthWrite: false,
+  });
+  const lines = new THREE.LineSegments(lnGeo, lnMat);
+  lines.frustumCulled = false;
+  ctl.scene.add(lines);
+
+  const st = { speed: BASE, warp: false, px: 0.5, py: 0.5 };
+
+  function step(dt) {
+    const target = st.warp ? WARP : BASE;
+    const k = st.warp ? 2.4 : 1.5;
+    st.speed += (target - st.speed) * (1 - Math.exp(-dt * k));
+    const warpT = clamp((st.speed - BASE) / (WARP - BASE), 0, 1);
+    const stretch = 0.016 + warpT * 0.052; /* seconds of tail */
+
+    for (let i = 0; i < N; i++) {
+      let z = starZ[i] + st.speed * dt;
+      if (z > -NEAR) {
+        z -= SPAN;
+        starX[i] = (Math.random() * 2 - 1) * 56;
+        starY[i] = (Math.random() * 2 - 1) * 38;
+      }
+      starZ[i] = z;
+      const x = starX[i], y = starY[i];
+      ptPos[i * 3] = x; ptPos[i * 3 + 1] = y; ptPos[i * 3 + 2] = z;
+      const tail = Math.max(z - st.speed * stretch, -FAR - 4);
+      lnPos[i * 6] = x;     lnPos[i * 6 + 1] = y;     lnPos[i * 6 + 2] = tail;
+      lnPos[i * 6 + 3] = x; lnPos[i * 6 + 4] = y;     lnPos[i * 6 + 5] = z;
+    }
+    ptGeo.attributes.position.needsUpdate = true;
+    lnGeo.attributes.position.needsUpdate = true;
+
+    lnMat.opacity = 0.10 + warpT * 0.58;
+    ptMat.opacity = 0.92 - warpT * 0.68;
+
+    /* gentle parallax */
+    const tx = (st.px - 0.5) * 2.4, ty = -(st.py - 0.5) * 1.6;
+    ctl.camera.position.x += (tx - ctl.camera.position.x) * Math.min(1, dt * 3);
+    ctl.camera.position.y += (ty - ctl.camera.position.y) * Math.min(1, dt * 3);
+  }
+
+  if (!REDUCED) {
+    const setWarp = (on) => { st.warp = on; };
+    ctl.canvas.addEventListener('pointerdown', (e) => { e.preventDefault(); setWarp(true); });
+    window.addEventListener('pointerup', () => setWarp(false));
+    window.addEventListener('pointercancel', () => setWarp(false));
+    ctl.canvas.addEventListener('pointerleave', () => setWarp(false));
+    const hint = document.getElementById('warpHint');
+    hint.addEventListener('pointerenter', () => setWarp(true));
+    hint.addEventListener('pointerleave', () => setWarp(false));
+    trackPointer(ctl.section, (nx, ny) => { st.px = nx; st.py = ny; });
+  }
+
+  return {
+    update(t, dt) { step(dt); },
+    prime() {
+      /* mid-warp static frame: streaks visible */
+      st.speed = 42; st.warp = false;
+      step(1 / 60);
+      st.speed = 42; /* step decays speed; restore for streak math next frame */
+    },
+  };
+});
+
+/* ================================================================
+   HERO 27 — PULSAR RIDGELINES (CP 1919)
+   42 stacked pulse profiles, white-fill occlusion, indigo
+   detection sweep, cursor-row amplitude boost.
+================================================================ */
+make2D('s27', (ctl) => {
+  const R = 42, P = 170;
+  const rows = [];
+  (() => {
+    let seed = 4242;
+    const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    for (let i = 0; i < R; i++) {
+      const pulses = [];
+      const n = 2 + Math.floor(rnd() * 2.6); /* 2-4 pulses */
+      for (let p = 0; p < n; p++) {
+        pulses.push({
+          c: 0.5 + (rnd() - 0.5) * 0.36,            /* center, middle-weighted */
+          w: 0.014 + rnd() * 0.045,                  /* width */
+          a: 9 + Math.pow(rnd(), 1.6) * 40,          /* amplitude px */
+          ph: rnd() * 8,
+        });
+      }
+      rows.push({ pulses, seed: rnd() * 100 });
+    }
+  })();
+
+  const st = { my: -1, inside: false };
+  let band = { left: 0, width: 0, top: 0, gap: 0 };
+
+  function layout(w, h) {
+    const narrow = w < 860;
+    const bw = narrow ? Math.min(w - 96, 560) : Math.min(w * 0.40, 600);
+    band = {
+      left: narrow ? (w - bw) / 2 : Math.max(w * 0.10, 64),
+      width: bw,
+      top: h * 0.165,
+      gap: (h * 0.64) / (R - 1),
+    };
+  }
+
+  function draw(t) {
+    const { ctx } = ctl;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, ctl.w, ctl.h);
+
+    const detPos = ((t * 3.1) % (R + 12)) - 6; /* detection sweep row index */
+    ctx.lineJoin = 'round';
+
+    for (let i = 0; i < R; i++) {
+      const row = rows[i];
+      const y0 = band.top + i * band.gap;
+      const dDet = i - detPos;
+      const det = Math.exp(-(dDet * dDet) / (2 * 1.15 * 1.15));
+      let boost = 1 + det * 0.75;
+      if (st.inside) {
+        const dm = (y0 - st.my) / (band.gap * 2.6);
+        boost *= 1 + 1.05 * Math.exp(-dm * dm);
+      }
+      /* per-row, per-pulse breathing (cheap: not per point) */
+      const amps = [];
+      for (let p = 0; p < row.pulses.length; p++) {
+        const pu = row.pulses[p];
+        amps.push(pu.a * (0.78 + 0.26 * noise3(row.seed + p * 3.7, t * 0.45 + pu.ph, 5.5)) * boost);
+      }
+
+      ctx.beginPath();
+      for (let q = 0; q < P; q++) {
+        const x01 = q / (P - 1);
+        let hgt = 0;
+        for (let p = 0; p < row.pulses.length; p++) {
+          const pu = row.pulses[p];
+          const dx = x01 - pu.c;
+          hgt += amps[p] * Math.exp(-(dx * dx) / (2 * pu.w * pu.w));
+        }
+        /* fine jitter, stronger inside the pulse envelope */
+        const jit = noise3(x01 * 26, i * 1.31, t * 0.85) * (0.7 + hgt * 0.055);
+        const x = band.left + x01 * band.width;
+        const y = y0 - Math.max(0, hgt + jit * 2.0);
+        if (q === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      /* white fill down to baseline occludes rows behind */
+      ctx.lineTo(band.left + band.width, y0 + 0.5);
+      ctx.lineTo(band.left, y0 + 0.5);
+      ctx.closePath();
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+
+      if (det > 0.42) {
+        ctx.strokeStyle = INDIGO;
+        ctx.lineWidth = 1.5;
+      } else if (det > 0.16) {
+        ctx.strokeStyle = 'rgba(112,112,255,0.75)';
+        ctx.lineWidth = 1.2;
+      } else {
+        ctx.strokeStyle = 'rgba(40,42,48,0.72)';
+        ctx.lineWidth = 1;
+      }
+      ctx.stroke();
+
+      /* detection tick at right edge of the hot row */
+      if (det > 0.6) {
+        ctx.fillStyle = INDIGO;
+        ctx.fillRect(band.left + band.width + 12, y0 - 1, 14, 2);
+      }
+    }
+  }
+
+  trackPointer(ctl.section, (nx, ny, inside) => {
+    st.my = ny * ctl.h; st.inside = inside;
+  });
+
+  return {
+    layout,
+    update(t) { draw(t); },
+    prime() { draw(7.9); }, /* sweep mid-stack */
+  };
+});
+
+/* ================================================================
+   HERO 28 — MINIMAL ORRERY
+   Engineering-diagram solar system: hairline elliptical orbits,
+   keplerian speeds, one indigo planet with live radius readout.
+================================================================ */
+make2D('s28', (ctl) => {
+  const AF  = [0.16, 0.24, 0.33, 0.44, 0.56, 0.68, 0.82, 0.97]; /* a / maxR */
+  const SZ  = [2.2, 3.2, 3.8, 3.6, 5.2, 4.6, 3.2, 2.6];
+  const RYF = [0.975, 0.945, 0.96, 0.93, 0.965, 0.94, 0.955, 0.925];
+  const ROT = [0.12, -0.3, 0.5, -0.15, 0.34, -0.5, 0.2, -0.38];   /* ellipse tilt */
+  const TH0 = [0.6, 2.9, 4.4, 1.2, 5.5, 3.6, 0.2, 2.1];
+  const IDX_INDIGO = 3;
+  const K = 0.95 * Math.pow(AF[0], 1.5); /* innermost period ≈ 6.6 s */
+
+  const st = { px: 0.5, py: 0.5, inside: false, ox: 0, oy: 0, zoom: 1 };
+
+  function planetPos(i, th, maxR) {
+    const rx = AF[i] * maxR, ry = rx * RYF[i], ro = ROT[i];
+    const ex = Math.cos(th) * rx, ey = Math.sin(th) * ry;
+    return [
+      ex * Math.cos(ro) - ey * Math.sin(ro),
+      ex * Math.sin(ro) + ey * Math.cos(ro),
+    ];
+  }
+
+  function draw(t, dt) {
+    const { ctx } = ctl;
+    const w = ctl.w, h = ctl.h;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, w, h);
+
+    const narrow = w < 860;
+    const cx = narrow ? w * 0.5 : w * 0.63;
+    const cy = h * 0.5;
+    const maxR = Math.min(w * (narrow ? 0.44 : 0.33), h * 0.42);
+
+    /* parallax + slow breathing zoom */
+    const k = Math.min(1, dt * 2.2);
+    st.ox += (((st.px - 0.5) * -22) - st.ox) * k;
+    st.oy += (((st.py - 0.5) * -16) - st.oy) * k;
+    st.zoom += ((st.inside ? 1.045 : 1.0) - st.zoom) * Math.min(1, dt * 1.4);
+    const s = st.zoom + 0.014 * Math.sin(t * 0.07);
+
+    ctx.save();
+    ctx.translate(cx + st.ox, cy + st.oy);
+    ctx.scale(s, s);
+
+    /* orbits */
+    ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+    ctx.lineWidth = 1 / s;
+    for (let i = 0; i < AF.length; i++) {
+      const rx = AF[i] * maxR;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, rx, rx * RYF[i], ROT[i], 0, Math.PI * 2);
+      ctx.stroke();
+      /* perihelion tick on +x crossing */
+      const [tx, ty] = planetPos(i, 0, maxR);
+      ctx.beginPath();
+      ctx.moveTo(tx, ty - 3); ctx.lineTo(tx, ty + 3);
+      ctx.stroke();
+    }
+
+    /* sun */
+    ctx.fillStyle = INK;
+    ctx.beginPath(); ctx.arc(0, 0, 4.6, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.14)';
+    ctx.beginPath(); ctx.arc(0, 0, 9.5, 0, Math.PI * 2); ctx.stroke();
+
+    /* planets */
+    for (let i = 0; i < AF.length; i++) {
+      const om = K * Math.pow(AF[i], -1.5);
+      const th = TH0[i] + om * t;
+      const [x, y] = planetPos(i, th, maxR);
+      const indigo = i === IDX_INDIGO;
+
+      /* trailing arc: short segments with alpha ramp */
+      const segs = 15, span = indigo ? 0.85 : 0.5;
+      let [lx, ly] = planetPos(i, th - span, maxR);
+      for (let q = 1; q <= segs; q++) {
+        const a = (q / segs);
+        const [nx, ny] = planetPos(i, th - span + (span * q) / segs, maxR);
+        ctx.strokeStyle = indigo
+          ? `rgba(112,112,255,${(a * a * 0.8).toFixed(3)})`
+          : `rgba(40,42,48,${(a * a * 0.3).toFixed(3)})`;
+        ctx.lineWidth = (indigo ? 1.4 : 1) / s;
+        ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(nx, ny); ctx.stroke();
+        lx = nx; ly = ny;
+      }
+
+      if (indigo) {
+        /* dotted instantaneous-radius line from sun */
+        const r = Math.hypot(x, y);
+        ctx.save();
+        ctx.setLineDash([3, 5]);
+        ctx.strokeStyle = 'rgba(112,112,255,0.55)';
+        ctx.lineWidth = 1 / s;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(x, y); ctx.stroke();
+        ctx.restore();
+
+        ctx.fillStyle = INDIGO;
+        ctx.beginPath(); ctx.arc(x, y, SZ[i], 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = 'rgba(112,112,255,0.35)';
+        ctx.lineWidth = 1 / s;
+        ctx.beginPath(); ctx.arc(x, y, SZ[i] + 5, 0, Math.PI * 2); ctx.stroke();
+
+        /* tiny mono label, flipped by quadrant */
+        const au = (r / (AF[7] * maxR)) * 1.62;
+        ctx.font = `${10 / s}px ui-monospace, Menlo, monospace`;
+        ctx.fillStyle = INK3;
+        ctx.textBaseline = 'middle';
+        const side = x >= 0 ? 1 : -1;
+        ctx.textAlign = side > 0 ? 'left' : 'right';
+        ctx.fillText(`P4 — r ${au.toFixed(2)} au`, x + side * 12, y - 10);
+      } else {
+        ctx.fillStyle = INK;
+        ctx.beginPath(); ctx.arc(x, y, SZ[i], 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
+  trackPointer(ctl.section, (nx, ny, inside) => {
+    st.px = nx; st.py = ny; st.inside = inside;
+  });
+
+  return {
+    update(t, dt) { draw(t, dt); },
+    prime() { draw(23.4, 1 / 60); },
+  };
+});
+
+/* ================================================================
+   HERO 29 — COSMIC WEB
+   Large-scale structure: ~1,500 pts on bowed filaments between
+   cluster nodes, hairline neighbor segments, cursor-ray survey.
+================================================================ */
+makeGL('s29', 16.5, 50, (ctl) => {
+  let seed = 9001;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const grnd = () => (rnd() + rnd() + rnd() - 1.5) * 0.8165;
+
+  /* cluster nodes */
+  const NODES = 9;
+  const nodes = [];
+  for (let i = 0; i < NODES; i++) {
+    nodes.push(new THREE.Vector3(
+      (rnd() * 2 - 1) * 8.2, (rnd() * 2 - 1) * 5.4, (rnd() * 2 - 1) * 8.2));
+  }
+  /* edges: each node to its 2 nearest */
+  const edgeSet = new Set();
+  const edges = [];
+  for (let i = 0; i < NODES; i++) {
+    const d = nodes.map((n, j) => [nodes[i].distanceTo(n), j])
+      .filter(([, j]) => j !== i).sort((a, b) => a[0] - b[0]);
+    for (let k = 0; k < 2; k++) {
+      const j = d[k][1];
+      const key = i < j ? `${i}-${j}` : `${j}-${i}`;
+      if (!edgeSet.has(key)) { edgeSet.add(key); edges.push([i, j]); }
+    }
+  }
+
+  /* scatter points along bowed filaments + cluster blobs */
+  const pts = [];
+  for (const [i, j] of edges) {
+    const a = nodes[i], b = nodes[j];
+    const mid = a.clone().lerp(b, 0.5);
+    const perp = new THREE.Vector3(grnd(), grnd(), grnd()).normalize()
+      .multiplyScalar(a.distanceTo(b) * 0.22);
+    mid.add(perp);
+    const count = Math.floor(a.distanceTo(b) * 18) + 14;
+    for (let q = 0; q < count; q++) {
+      const tt = rnd();
+      /* quadratic bezier a -> mid -> b */
+      const p = new THREE.Vector3(
+        (1 - tt) * (1 - tt) * a.x + 2 * (1 - tt) * tt * mid.x + tt * tt * b.x,
+        (1 - tt) * (1 - tt) * a.y + 2 * (1 - tt) * tt * mid.y + tt * tt * b.y,
+        (1 - tt) * (1 - tt) * a.z + 2 * (1 - tt) * tt * mid.z + tt * tt * b.z);
+      const sig = 0.26 + 0.3 * Math.sin(Math.PI * tt); /* thicker mid-filament */
+      p.x += grnd() * sig; p.y += grnd() * sig; p.z += grnd() * sig;
+      pts.push(p);
+    }
+  }
+  for (const n of nodes) {
+    for (let q = 0; q < 46; q++) {
+      pts.push(new THREE.Vector3(
+        n.x + grnd() * 0.85, n.y + grnd() * 0.85, n.z + grnd() * 0.85));
+    }
+  }
+  while (pts.length > 1500) pts.splice(Math.floor(rnd() * pts.length), 1);
+  const NP = pts.length;
+
+  const pos = new Float32Array(NP * 3);
+  const baseCol = new Float32Array(NP * 3);
+  const col = new Float32Array(NP * 3);
+  const cInk2 = new THREE.Color(INK2), cInk3 = new THREE.Color(INK3),
+        cInk4 = new THREE.Color(INK4), cIndigo = new THREE.Color(INDIGO);
+  for (let i = 0; i < NP; i++) {
+    pos[i * 3] = pts[i].x; pos[i * 3 + 1] = pts[i].y; pos[i * 3 + 2] = pts[i].z;
+    const r = rnd();
+    const c = r < 0.12 ? cInk2 : r < 0.56 ? cInk3 : cInk4;
+    baseCol[i * 3] = c.r; baseCol[i * 3 + 1] = c.g; baseCol[i * 3 + 2] = c.b;
+  }
+  col.set(baseCol);
+
+  /* neighbor hairline segments via spatial hash */
+  const NB_R = 1.0, NB_R2 = NB_R * NB_R;
+  const cellOf = (v) => `${Math.floor(v.x / NB_R)},${Math.floor(v.y / NB_R)},${Math.floor(v.z / NB_R)}`;
+  const grid = new Map();
+  pts.forEach((p, i) => {
+    const key = cellOf(p);
+    if (!grid.has(key)) grid.set(key, []);
+    grid.get(key).push(i);
+  });
+  const degree = new Uint8Array(NP);
+  const segIdx = [];
+  outer:
+  for (let i = 0; i < NP; i++) {
+    if (degree[i] >= 3) continue;
+    const p = pts[i];
+    const ix = Math.floor(p.x / NB_R), iy = Math.floor(p.y / NB_R), iz = Math.floor(p.z / NB_R);
+    for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) for (let dz = -1; dz <= 1; dz++) {
+      const bucket = grid.get(`${ix + dx},${iy + dy},${iz + dz}`);
+      if (!bucket) continue;
+      for (const j of bucket) {
+        if (j <= i || degree[i] >= 3 || degree[j] >= 3) continue;
+        if (pts[i].distanceToSquared(pts[j]) < NB_R2) {
+          segIdx.push(i, j); degree[i]++; degree[j]++;
+          if (segIdx.length >= 5600) break outer;
+        }
+      }
+    }
+  }
+  const segPos = new Float32Array(segIdx.length * 3);
+  for (let s = 0; s < segIdx.length; s++) {
+    const i = segIdx[s];
+    segPos[s * 3] = pts[i].x; segPos[s * 3 + 1] = pts[i].y; segPos[s * 3 + 2] = pts[i].z;
+  }
+
+  const group = new THREE.Group();
+  ctl.scene.add(group);
+
+  const lnGeo = new THREE.BufferGeometry();
+  lnGeo.setAttribute('position', new THREE.BufferAttribute(segPos, 3));
+  const lnMat = new THREE.LineBasicMaterial({
+    color: new THREE.Color(INK), transparent: true, opacity: 0.07, depthWrite: false,
+  });
+  group.add(new THREE.LineSegments(lnGeo, lnMat));
+
+  const ptGeo = new THREE.BufferGeometry();
+  ptGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  ptGeo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  const ptMat = new THREE.PointsMaterial({
+    size: 0.11, map: dotTexture, transparent: true, opacity: 0.95,
+    vertexColors: true, sizeAttenuation: true, depthWrite: false, alphaTest: 0.05,
+  });
+  group.add(new THREE.Points(ptGeo, ptMat));
+
+  const hi = new Float32Array(NP); /* highlight 0..1 with decay */
+  const st = { px: 0.5, py: 0.5, inside: false };
+  const raycaster = new THREE.Raycaster();
+  const ndc = new THREE.Vector2();
+  const invMat = new THREE.Matrix4();
+  const localRay = new THREE.Ray();
+  const tmp = new THREE.Vector3();
+
+  function update(t, dt) {
+    group.rotation.y += dt * 0.05;
+    const tiltX = (st.py - 0.5) * 0.16, tiltZ = (st.px - 0.5) * 0.08;
+    group.rotation.x += (tiltX - group.rotation.x) * Math.min(1, dt * 2.5);
+    group.rotation.z += (tiltZ - group.rotation.z) * Math.min(1, dt * 2.5);
+    group.updateMatrixWorld();
+
+    /* survey highlight along cursor ray, in group-local space */
+    let useRay = st.inside;
+    if (useRay) {
+      ndc.set(st.px * 2 - 1, -(st.py * 2 - 1));
+      raycaster.setFromCamera(ndc, ctl.camera);
+      invMat.copy(group.matrixWorld).invert();
+      localRay.copy(raycaster.ray).applyMatrix4(invMat);
+    }
+    const decay = Math.exp(-dt * 2.2);
+    for (let i = 0; i < NP; i++) {
+      let target = 0;
+      if (useRay) {
+        tmp.set(pos[i * 3], pos[i * 3 + 1], pos[i * 3 + 2]);
+        const d2 = localRay.distanceSqToPoint(tmp);
+        if (d2 < 2.89) target = 1 - Math.sqrt(d2) / 1.7;
+      }
+      const h = Math.max(target, hi[i] * decay);
+      hi[i] = h;
+      col[i * 3]     = baseCol[i * 3]     + (cIndigo.r - baseCol[i * 3]) * h;
+      col[i * 3 + 1] = baseCol[i * 3 + 1] + (cIndigo.g - baseCol[i * 3 + 1]) * h;
+      col[i * 3 + 2] = baseCol[i * 3 + 2] + (cIndigo.b - baseCol[i * 3 + 2]) * h;
+    }
+    ptGeo.attributes.color.needsUpdate = true;
+  }
+
+  trackPointer(ctl.section, (nx, ny, inside) => {
+    st.px = nx; st.py = ny; st.inside = inside;
+  });
+
+  return {
+    update,
+    prime() {
+      st.px = 0.62; st.py = 0.42; st.inside = true;
+      group.rotation.y = 0.7;
+      update(0, 1 / 60);
+      st.inside = false;
+    },
+  };
+});
+
+/* ================================================================
+   HERO 30 — ASCII SUPERNOVA
+   Mono char grid; expanding shockwave shells with indigo leading
+   edge, energized wake, lingering indigo ring ghosts.
+================================================================ */
+make2D('s30', (ctl) => {
+  const FAINT = ['·', '.', ':', '˙'];
+  const MID   = ['-', ';', '=', '+', '~'];
+  const DENSE = ['*', '%', '#', '@', '&'];
+
+  let cell = 12, cols = 0, rows = 0;
+  let E = new Float32Array(0);   /* per-cell energy wake */
+  const waves = [];
+  const st = { t: 0, nextAuto: 1.6 };
+
+  /* color buckets — batch fillText per fillStyle */
+  const BUCKETS = [
+    'rgba(40,42,48,0.16)',   /* 0 faint noise */
+    'rgba(40,42,48,0.30)',   /* 1 noise+ / low wake */
+    'rgba(60,65,73,0.58)',   /* 2 wake / shell back */
+    '#282a30',               /* 3 dense shell */
+    '#7070ff',               /* 4 indigo leading edge */
+    'rgba(112,112,255,0.34)',/* 5 indigo ghost ring */
+  ];
+  let lists = BUCKETS.map(() => []);
+
+  function layout(w, h) {
+    cell = w > 1700 ? 14 : 12;
+    cols = Math.ceil(w / cell);
+    rows = Math.ceil(h / cell);
+    E = new Float32Array(cols * rows);
+    const { ctx } = ctl;
+    ctx.font = `${cell - 1}px ui-monospace, "SF Mono", Menlo, monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+  }
+
+  function spawn(x, y) {
+    if (waves.length >= 4) return;
+    waves.push({
+      x, y, r: 2,
+      maxR: 240 + Math.random() * 240,
+      speed: 210 + Math.random() * 80,
+      dead: false, ghost: 1,
+    });
+  }
+
+  function update(t, dt) {
+    st.t = t;
+    st.nextAuto -= dt;
+    if (st.nextAuto <= 0) {
+      spawn(
+        ctl.w * (0.12 + Math.random() * 0.76),
+        ctl.h * (0.12 + Math.random() * 0.76));
+      st.nextAuto = 3.2 + Math.random() * 2.6;
+    }
+    for (let i = waves.length - 1; i >= 0; i--) {
+      const w = waves[i];
+      if (!w.dead) {
+        w.r += w.speed * dt;
+        if (w.r >= w.maxR) w.dead = true;
+      } else {
+        w.ghost -= dt * 0.5;
+        if (w.ghost <= 0) waves.splice(i, 1);
+      }
+    }
+    draw(t, dt);
+  }
+
+  function draw(t, dt) {
+    const { ctx } = ctl;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, ctl.w, ctl.h);
+
+    for (const L of lists) L.length = 0;
+    const decay = Math.exp(-dt * 1.05);
+    const shimmer = (t * 9) | 0;
+
+    for (let gy = 0; gy < rows; gy++) {
+      const cy = gy * cell + cell * 0.5;
+      for (let gx = 0; gx < cols; gx++) {
+        const idx = gy * cols + gx;
+        const cx = gx * cell + cell * 0.5;
+        let e = E[idx] * decay;
+
+        /* shockwave influence */
+        let lead = 0, shell = 0, ghost = 0;
+        for (let wi = 0; wi < waves.length; wi++) {
+          const w = waves[wi];
+          const adx = cx - w.x, ady = cy - w.y;
+          if (!w.dead) {
+            const lim = w.r + 26;
+            if (adx > lim || adx < -lim || ady > lim || ady < -lim) continue;
+            const d = Math.sqrt(adx * adx + ady * ady);
+            const dr = d - w.r;
+            if (dr > 0 && dr < 9) {
+              const v = 1 - dr / 9;
+              if (v > lead) lead = v;
+            } else if (dr <= 0 && dr > -20) {
+              const v = 1 + dr / 20;
+              if (v > shell) shell = v;
+              if (v > e) e = v; /* energize wake */
+            }
+          } else {
+            const d = Math.sqrt(adx * adx + ady * ady);
+            const dg = Math.abs(d - w.maxR);
+            if (dg < 7) {
+              const v = (1 - dg / 7) * w.ghost;
+              if (v > ghost) ghost = v;
+            }
+          }
+        }
+        E[idx] = e;
+
+        /* stable per-cell hash so chars don't strobe */
+        const hash = ((gx * 73856093) ^ (gy * 19349663)) >>> 0;
+
+        if (lead > 0.22) {
+          lists[4].push(DENSE[(hash + shimmer) % 5], cx, cy);
+        } else if (shell > 0.1) {
+          const ch = DENSE[(hash + ((shell * 4.99) | 0) + shimmer) % 5];
+          lists[shell > 0.45 ? 3 : 2].push(ch, cx, cy);
+        } else if (ghost > 0.14) {
+          lists[5].push(hash & 1 ? '·' : 'o', cx, cy);
+        } else if (e > 0.13) {
+          const ch = MID[Math.min(4, (e * 4.99) | 0)];
+          lists[e > 0.5 ? 2 : 1].push(ch, cx, cy);
+        } else {
+          /* quiet drifting noise field — sparse */
+          const v = noise3(gx * 0.085 + t * 0.05, gy * 0.085, t * 0.045);
+          if (v > 0.16) {
+            const ch = FAINT[Math.min(3, ((v - 0.16) * 5.2) | 0)];
+            lists[v > 0.52 ? 1 : 0].push(ch, cx, cy);
+          }
+        }
+      }
+    }
+
+    for (let b = 0; b < BUCKETS.length; b++) {
+      const L = lists[b];
+      if (!L.length) continue;
+      ctx.fillStyle = BUCKETS[b];
+      for (let q = 0; q < L.length; q += 3) ctx.fillText(L[q], L[q + 1], L[q + 2]);
+    }
+  }
+
+  if (!REDUCED) {
+    ctl.canvas.addEventListener('click', (e) => {
+      const r = ctl.section.getBoundingClientRect();
+      spawn(e.clientX - r.left, e.clientY - r.top);
+    });
+  }
+
+  return {
+    layout,
+    update,
+    prime() {
+      /* mid-expansion static frame */
+      waves.length = 0;
+      waves.push({
+        x: ctl.w * 0.34, y: ctl.h * 0.42, r: 150, maxR: 360,
+        speed: 0, dead: false, ghost: 1,
+      });
+      waves.push({
+        x: ctl.w * 0.78, y: ctl.h * 0.7, r: 0, maxR: 130,
+        speed: 0, dead: true, ghost: 0.7,
+      });
+      draw(4.2, 1 / 60);
+    },
+  };
+});
+
+/* ================================================================
+   Boot: resize, visibility-driven run state, dot nav
+================================================================ */
+const byId = new Map(controllers.map((c) => [c.id, c]));
+const dots = new Map(
+  [...document.querySelectorAll('nav.dots a')].map((a) => [a.dataset.dot, a]));
+
+function resizeAll() { controllers.forEach((c) => c.resize()); }
+window.addEventListener('resize', resizeAll);
+resizeAll();
+
+if (REDUCED) {
+  /* one static, pre-warmed frame per scene; no loops, no pointer fx */
+  controllers.forEach((c) => {
+    c.api.prime();
+    if (c.render) c.render();
+  });
+} else {
+  const runIO = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      const ctl = byId.get(e.target.id);
+      if (!ctl) continue;
+      if (e.isIntersecting) startLoop(ctl); else stopLoop(ctl);
+    }
+  }, { threshold: 0.06 });
+  controllers.forEach((c) => runIO.observe(c.section));
+}
+
+const dotIO = new IntersectionObserver((entries) => {
+  for (const e of entries) {
+    const dot = dots.get(e.target.id);
+    if (!dot) continue;
+    if (e.isIntersecting) {
+      dots.forEach((d) => d.classList.remove('active'));
+      dot.classList.add('active');
+    }
+  }
+}, { threshold: 0.55 });
+controllers.forEach((c) => dotIO.observe(c.section));
+</script>
+
+</body>
+</html>

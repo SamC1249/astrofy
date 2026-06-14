@@ -1,8 +1,8 @@
 ---
 import BaseHead from "../components/BaseHead.astro";
-import Header from "../components/Header.astro";
+import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
-import SideBar from "../components/SideBar.astro";
+import CommandPalette from "../components/CommandPalette.astro";
 import { ViewTransitions } from "astro:transitions";
 
 import { SITE_TITLE, SITE_DESCRIPTION, TRANSITION_API } from "../config";
@@ -11,31 +11,55 @@ const {
   image,
   title = SITE_TITLE,
   description = SITE_DESCRIPTION,
-  includeSidebar = true,
   sideBarActiveItemID,
   ogType,
 } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en" data-theme="lofi">
+<html lang="en">
   <head>
     <BaseHead title={title} description={description} image={image} , ogType={ogType} />
     {TRANSITION_API && <ViewTransitions />}
   </head>
   <body>
-    <div class="bg-base-100 drawer lg:drawer-open">
-      <input id="my-drawer" type="checkbox" class="drawer-toggle" />
-      <div class="drawer-content bg-base-100">
-        <Header title={SITE_TITLE} />
-        <div class="md:flex md:justify-center">
-          <main class="p-6 pt-10 lg:max-w-[900px] max-w-[100vw]">
-            <slot />
-          </main>
-        </div>
-        <Footer />
-      </div>
-      {includeSidebar && <SideBar sideBarActiveItemID={sideBarActiveItemID} />}
-    </div>
+    <Navbar activeItemID={sideBarActiveItemID} />
+    <main class="lx-main">
+      <slot />
+    </main>
+    <Footer />
+    <CommandPalette />
+
+    <script>
+      function initReveals() {
+        const els = document.querySelectorAll(".lx-reveal:not(.lx-in)");
+        if (!els.length) return;
+        if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          els.forEach((el) => el.classList.add("lx-in"));
+          return;
+        }
+        const io = new IntersectionObserver(
+          (entries) =>
+            entries.forEach((e) => {
+              if (e.isIntersecting) {
+                e.target.classList.add("lx-in");
+                io.unobserve(e.target);
+              }
+            }),
+          { threshold: 0.15 }
+        );
+        els.forEach((el) => io.observe(el));
+      }
+      initReveals();
+      document.addEventListener("astro:page-load", initReveals);
+    </script>
+
+    <style>
+      .lx-main {
+        max-width: 1024px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+    </style>
   </body>
 </html>

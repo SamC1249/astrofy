@@ -1,0 +1,206 @@
+---
+---
+
+<div class="lx-particle-name">
+  <canvas id="lx-name-canvas" aria-label="Sam Chen" role="img"></canvas>
+</div>
+
+<style>
+  .lx-particle-name {
+    width: 100%;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: clamp(200px, 30vw, 380px);
+  }
+</style>
+
+<script>
+  // Particle type scatter — ported from design-ideas/06-heroes-particles.html
+  // (hero 03) to 2D canvas: raster-sampled glyphs, spring return, cursor repulsion.
+  const COLORS = ["#282a30", "#3c4149", "#6f6e77", "#7070ff"];
+
+  function initParticleName() {
+    const canvas = document.getElementById("lx-name-canvas") as HTMLCanvasElement | null;
+    if (!canvas || canvas.dataset.lxInit) return;
+    canvas.dataset.lxInit = "1";
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    let homes: Float32Array = new Float32Array(0);
+    let pos: Float32Array = new Float32Array(0);
+    let vel: Float32Array = new Float32Array(0);
+    let phase: Float32Array = new Float32Array(0);
+    let bucket: Uint8Array = new Uint8Array(0);
+    let N = 0;
+    let W = 0, H = 0;
+    let mx = -1e4, my = -1e4, mActive = false;
+    let visible = false;
+    let raf = 0;
+
+    function sample() {
+      W = canvas!.clientWidth;
+      H = canvas!.clientHeight;
+      if (!W || !H) return;
+      canvas!.width = Math.floor(W * dpr);
+      canvas!.height = Math.floor(H * dpr);
+      ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const off = document.createElement("canvas");
+      const ow = 1200, oh = 280;
+      off.width = ow;
+      off.height = oh;
+      const g = off.getContext("2d", { willReadFrequently: true })!;
+      g.fillStyle = "#000";
+      g.textAlign = "center";
+      g.textBaseline = "middle";
+      g.font = "600 176px Switzer, Inter, system-ui, sans-serif";
+      g.fillText("SAM CHEN", ow / 2, oh / 2 + 8);
+      const data = g.getImageData(0, 0, ow, oh).data;
+
+      let step = 3;
+      let raw: number[] = [];
+      do {
+        raw = [];
+        for (let y = 0; y < oh; y += step) {
+          for (let x = 0; x < ow; x += step) {
+            if (data[(y * ow + x) * 4 + 3] > 140) raw.push(x, y);
+          }
+        }
+        step++;
+      } while (raw.length / 2 > 5600);
+
+      let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+      for (let i = 0; i < raw.length; i += 2) {
+        if (raw[i] < minX) minX = raw[i];
+        if (raw[i] > maxX) maxX = raw[i];
+        if (raw[i + 1] < minY) minY = raw[i + 1];
+        if (raw[i + 1] > maxY) maxY = raw[i + 1];
+      }
+      const pxW = maxX - minX || 1;
+      const pxH = maxY - minY || 1;
+      const s = Math.min((W * 0.92) / pxW, (H * 0.72) / pxH);
+      const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+
+      N = raw.length / 2;
+      homes = new Float32Array(N * 2);
+      pos = new Float32Array(N * 2);
+      vel = new Float32Array(N * 2);
+      phase = new Float32Array(N);
+      bucket = new Uint8Array(N);
+      for (let i = 0; i < N; i++) {
+        homes[i * 2] = (raw[i * 2] - cx) * s + W / 2;
+        homes[i * 2 + 1] = (raw[i * 2 + 1] - cy) * s + H / 2;
+        phase[i] = Math.random() * Math.PI * 2;
+        const r = Math.random();
+        bucket[i] = r < 0.45 ? 0 : r < 0.75 ? 1 : r < 0.9 ? 2 : 3;
+        if (reduced) {
+          pos[i * 2] = homes[i * 2];
+          pos[i * 2 + 1] = homes[i * 2 + 1];
+        } else {
+          pos[i * 2] = Math.random() * W;
+          pos[i * 2 + 1] = Math.random() * H;
+        }
+      }
+    }
+
+    const R = () => Math.max(70, W * 0.09);
+
+    let last = 0;
+    function update(t: number, dt: number) {
+      const rr = R(), r2 = rr * rr;
+      const s = Math.min(Math.max(dt * 60, 0.2), 2.0);
+      const damp = Math.pow(0.86, s);
+      for (let i = 0; i < N; i++) {
+        const j = i * 2;
+        let px = pos[j], py = pos[j + 1];
+        const hx = homes[j] + Math.sin(t * 0.9 + phase[i]) * 1.2;
+        const hy = homes[j + 1] + Math.cos(t * 1.1 + phase[i] * 1.7) * 1.2;
+
+        let vx = vel[j] + (hx - px) * 0.052 * s;
+        let vy = vel[j + 1] + (hy - py) * 0.052 * s;
+
+        if (mActive) {
+          const dx = px - mx, dy = py - my;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < r2) {
+            const d = Math.sqrt(d2) || 0.001;
+            const f = (1 - d / rr) * (1 - d / rr) * 0.55 * s * (rr / 18);
+            vx += (dx / d) * f;
+            vy += (dy / d) * f;
+          }
+        }
+
+        vx *= damp;
+        vy *= damp;
+        pos[j] = px + vx * s;
+        pos[j + 1] = py + vy * s;
+        vel[j] = vx;
+        vel[j + 1] = vy;
+      }
+    }
+
+    function draw() {
+      ctx!.clearRect(0, 0, W, H);
+      const sz = Math.max(1.4, W / 640);
+      for (let b = 0; b < 4; b++) {
+        ctx!.fillStyle = COLORS[b];
+        for (let i = 0; i < N; i++) {
+          if (bucket[i] !== b) continue;
+          ctx!.fillRect(pos[i * 2], pos[i * 2 + 1], sz, sz);
+        }
+      }
+    }
+
+    function frame(now: number) {
+      raf = requestAnimationFrame(frame);
+      if (!visible) return;
+      const t = now / 1000;
+      const dt = Math.min((now - last) / 1000, 0.05);
+      last = now;
+      update(t, dt);
+      draw();
+    }
+
+    function start() {
+      const ready = (document as any).fonts?.load("600 176px Switzer") ?? Promise.resolve();
+      Promise.race([ready, new Promise((r) => setTimeout(r, 1500))]).then(() => {
+        sample();
+        if (reduced) {
+          draw();
+          return;
+        }
+        new IntersectionObserver((entries) => {
+          visible = entries[0].isIntersecting;
+        }).observe(canvas!);
+
+        canvas!.addEventListener("pointermove", (e) => {
+          const r = canvas!.getBoundingClientRect();
+          mx = e.clientX - r.left;
+          my = e.clientY - r.top;
+          mActive = true;
+        });
+        canvas!.addEventListener("pointerleave", () => (mActive = false));
+
+        let rt: ReturnType<typeof setTimeout>;
+        addEventListener("resize", () => {
+          clearTimeout(rt);
+          rt = setTimeout(sample, 200);
+        });
+
+        raf = requestAnimationFrame(frame);
+        document.addEventListener("astro:before-swap", () => cancelAnimationFrame(raf), { once: true });
+      });
+    }
+
+    start();
+  }
+
+  initParticleName();
+  document.addEventListener("astro:page-load", initParticleName);
+</script>

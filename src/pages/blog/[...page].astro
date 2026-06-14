@@ -14,20 +14,22 @@ const { page } = Astro.props;
 ---
 
 <BaseLayout title="Blog" sideBarActiveItemID="blog">
-  <div class="mb-5">
-    <div class="text-3xl w-full font-bold">Blog</div>
+  <div class="lx-page-head">
+    <p class="lx-kicker">Writing</p>
+    <h1 class="lx-title-lg">Blog</h1>
   </div>
 
   {
     page.data.length === 0 ? (
-      <div class="bg-base-200 border-l-4 border-secondary w-full p-4 min-w-full">
-        <p class="font-bold">Sorry!</p>
+      <div class="lx-empty">
+        <p class="lx-empty-title">Sorry!</p>
         <p>There are no blog posts to show at the moment. Check back later!</p>
       </div>
     ) : (
-      <ul>
-        {page.data.map((post) => (
+      <ul class="lx-post-list">
+        {page.data.map((post, i) => (
           <>
+            {i > 0 && <div class="lx-row-divider" />}
             <HorizontalCard
               title={post.data.title}
               img={post.data.heroImage}
@@ -37,27 +39,19 @@ const { page } = Astro.props;
               badge={post.data.badge}
               tags={post.data.tags}
             />
-            <div class="divider my-0" />
           </>
         ))}
       </ul>
     )
   }
 
-  <div class="flex justify-between">
+  <div class="lx-pagination">
     {
       page.url.prev ? (
-        <a href={page.url.prev} class="btn btn-ghost my-10 mx-5">
-          {" "}
-          <svg
-            class="h-6 w-6 fill-current md:h-8 md:w-8"
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-          >
-            <path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" />
-          </svg>{" "}
+        <a href={page.url.prev} class="lx-btn lx-btn-ghost">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+            <path d="m15 6-6 6 6 6" />
+          </svg>
           Recent posts
         </a>
       ) : (
@@ -66,17 +60,10 @@ const { page } = Astro.props;
     }
     {
       page.url.next ? (
-        <a href={page.url.next} class="btn btn-ghost my-10 mx-5">
-          Older Posts{" "}
-          <svg
-            class="h-6 w-6 fill-current md:h-8 md:w-8"
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-          >
-            {" "}
-            <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
+        <a href={page.url.next} class="lx-btn lx-btn-ghost">
+          Older posts
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+            <path d="m9 6 6 6-6 6" />
           </svg>
         </a>
       ) : (
@@ -85,3 +72,29 @@ const { page } = Astro.props;
     }
   </div>
 </BaseLayout>
+
+<style>
+  .lx-post-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .lx-empty {
+    border: 1px solid var(--hairline);
+    border-left: 2px solid var(--accent);
+    border-radius: 8px;
+    padding: 16px;
+    background: var(--surface);
+    font-size: 0.875rem;
+    color: var(--text-3);
+  }
+  .lx-empty-title {
+    font-weight: 500;
+    color: var(--text-1);
+  }
+  .lx-pagination {
+    display: flex;
+    justify-content: space-between;
+    margin: 40px 0;
+  }
+</style>

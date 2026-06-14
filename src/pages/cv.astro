@@ -4,11 +4,12 @@ import TimeLineElement from "../components/cv/TimeLine.astro";
 ---
 
 <BaseLayout title="Resume" sideBarActiveItemID="cv">
-  <div class="mb-5">
-    <div class="text-3xl w-full font-bold">Profile</div>
+  <div class="lx-page-head">
+    <p class="lx-kicker">Resume</p>
+    <h1 class="lx-title-lg">Profile</h1>
   </div>
 
-  <div class="mb-10 text-justify">
+  <div class="mb-10 lx-prose-quiet">
     Harvard student studying Pure Mathematics and Computer Science with interests in Applied AI, Software Engineering,
     and Research. Currently conducting research on LLM interpretability and steering vectors at Harvard's Cognitive, Cognition,
     and Development Lab under Post Doc Peng and Professor Ullman. Experienced entrepreneur and engineer with proven track
@@ -17,8 +18,8 @@ import TimeLineElement from "../components/cv/TimeLine.astro";
     education and opportunities.
   </div>
 
-  <div class="mb-5">
-    <div class="text-3xl w-full font-bold">Education</div>
+  <div class="lx-section-head">
+    <h2 class="lx-title-lg">Education</h2>
   </div>
 
   <div class="time-line-container grid gap-4 mb-10">
@@ -28,10 +29,16 @@ import TimeLineElement from "../components/cv/TimeLine.astro";
     >
       Relevant coursework: Introduction to Statistics (110), Proof-based Linear Algebra (22a), Data Structures and Algorithms (120), Reinforcement Learning and Optimal Control (158)
     </TimeLineElement>
+    <TimeLineElement
+      title="Boston Latin School"
+      subtitle="Graduated 2024, Boston, MA"
+    >
+      Six years on Speech & Debate. NSDA National Student Leadership Council member, representing 50,000+ student members. 3x DECA International Career Development Conference qualifier — a school record.
+    </TimeLineElement>
   </div>
 
-  <div class="mb-5">
-    <div class="text-3xl w-full font-bold">Experience</div>
+  <div class="lx-section-head">
+    <h2 class="lx-title-lg">Experience</h2>
   </div>
 
   <div class="time-line-container mb-10">
@@ -51,7 +58,7 @@ import TimeLineElement from "../components/cv/TimeLine.astro";
       title="Co-Founder at Libertas Debate Academy"
       subtitle="September 2023 to Present, Remote"
     >
-      Achieved six-figure revenue in first year of operation. Managed team of 16 USA National Champions; led curriculum for 40 students and summer camp for 25. Oversaw SEO optimization, marketing at national debate tournaments, client and coach calls, hiring, and operations.
+      Achieved six-figure revenue in first year of operation. Managed team of 16 USA National Champions; led curriculum for 40 students and summer camp for 25. Led National Coaching, Debate Camps, and Online Classes; students earned Gold TOC bids and won NCFL Nationals. Oversaw SEO optimization, marketing at national debate tournaments, client and coach calls, hiring, and operations.
     </TimeLineElement>
     <TimeLineElement
       title="Founder & Engineer at IvyLine"
@@ -69,7 +76,7 @@ import TimeLineElement from "../components/cv/TimeLine.astro";
       title="Co-Founder & Board Member at Outreach Debate"
       subtitle="August 2022 to Present, Remote"
     >
-      Founded international nonprofit growing from 6 to 300+ members across 20+ countries and 50 states. Organized camps serving 1,500+ debaters, saving over $1.5M collectively; raised $4,000+ for initiatives. Partnered with Coolidge Foundation and received publicity from the National Speech and Debate Association.
+      Founded international 501(c)(3) nonprofit — the world's largest student-run debate organization — growing from 6 to 300+ members across 20+ countries and 50 states. Organized camps serving 1,500+ debaters, saving over $1.5M collectively; raised $4,000+ for initiatives. Partnered with the Coolidge Foundation to host the Coolidge Qualifier, a national tournament awarding a bid to the Coolidge Cup; received publicity from the National Speech and Debate Association.
     </TimeLineElement>
     <TimeLineElement
       title="Massachusetts Lead at Encode Justice"
@@ -79,19 +86,43 @@ import TimeLineElement from "../components/cv/TimeLine.astro";
     </TimeLineElement>
   </div>
 
-  <div class="mb-5">
-    <div class="text-3xl w-full font-bold">Awards</div>
+  <div class="lx-section-head">
+    <h2 class="lx-title-lg">Awards</h2>
   </div>
 
   <ul class="list-disc mx-6 mb-10 grid gap-2">
     <li>Elks Most Valuable Student (Top 2.7%)</li>
     <li>Coolidge Scholarship Finalist (Top 0.03%)</li>
     <li>NHS Scholarship Recipient (Top 3.5%)</li>
-    <li>Top 6 Public Forum Debater in USA; 9x National Qualifier</li>
+    <li>Vanderbilt Chancellor's Scholarship Recipient</li>
+    <li>Top 6 Public Forum Debater in USA; 9x National Qualifier (2x Gold TOC, 4x NSDA Nationals, 3x NCFL Grand Nationals); 7 career TOC bids</li>
+    <li>Elimination rounds at national championships in four formats: Public Forum, Congress, World Schools, and Policy</li>
+    <li>Top Speaker, Milo Cup; 2nd Speaker, Sunvitational; 5th Speaker, Harvard Round Robin</li>
   </ul>
 
-  <div class="mb-5">
-    <div class="text-3xl w-full font-bold">Skills</div>
+  <div class="lx-section-head">
+    <h2 class="lx-title-lg">Writing & Press</h2>
+  </div>
+
+  <ul class="list-disc mx-6 mb-10 grid gap-2">
+    <li>Contributing writer, International Policy Digest</li>
+    <li>Bylines in Dig Boston and the L.A. Times High School Insider</li>
+    <li>Profiled in The Argo: "Spotlight on Sam Chen"</li>
+  </ul>
+
+  <div class="lx-section-head">
+    <h2 class="lx-title-lg">Activities</h2>
+  </div>
+
+  <ul class="list-disc mx-6 mb-10 grid gap-2">
+    <li>Harvard Intellectual Vitality Student Advisory Board</li>
+    <li>Asian American Dance Troupe</li>
+    <li>Harvard Undergraduate Foreign Policy</li>
+    <li>Asian American Christian Fellowship</li>
+  </ul>
+
+  <div class="lx-section-head">
+    <h2 class="lx-title-lg">Skills</h2>
   </div>
 
   <ul class="list-disc md:columns-5 columns-2 mx-6">

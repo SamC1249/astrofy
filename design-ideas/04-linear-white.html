@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sam Chen</title>
+<meta name="description" content="Sam Chen — researcher, builder, and founder. Sophomore at Harvard studying CS, Math, and Psychology.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
+<style>
+  /* ==========================================================
+     04 — linear-white
+     System: Inter variable / 15px body / one indigo accent
+     ========================================================== */
+
+  :root {
+    /* color */
+    --bg: #fff;
+    --bg-raised: #f9f8f9;
+    --bg-raised-2: #f4f2f4;
+    --text-1: #282a30;
+    --text-2: #3c4149;
+    --text-3: #6f6e77;
+    --text-4: #86848d;
+    --border-1: #e9e8ea;
+    --border-2: #e4e2e4;
+    --hairline: rgba(0, 0, 0, 0.05);
+    --hairline-strong: rgba(0, 0, 0, 0.08);
+    --accent: #7070ff;
+    --accent-hover: #8989f0;
+    --accent-tint: #f1f1ff;
+
+    /* shadow */
+    --shadow-tiny: 0 1px 1px rgba(0, 0, 0, 0.09);
+    --shadow-low: 0 1px 4px -1px rgba(0, 0, 0, 0.09);
+    --shadow-mid: 0 3px 12px rgba(0, 0, 0, 0.09);
+    --shadow-high: 0 7px 24px rgba(0, 0, 0, 0.06);
+
+    /* type */
+    --font: "Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: "Berkeley Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --w-normal: 400;
+    --w-medium: 510;
+    --w-semibold: 590;
+    --w-bold: 680;
+
+    /* motion */
+    --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --speed-hover: 0.1s;
+    --speed-micro: 0.14s;
+    --speed-reveal: 0.22s;
+
+    /* layout */
+    --max: 1024px;
+    --pad-x: 24px;
+    --pad-section: 64px;
+    --nav-h: 64px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: calc(var(--nav-h) + 16px);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text-1);
+    font-family: var(--font);
+    font-size: 0.9375rem; /* 15px */
+    line-height: 1.6;
+    font-weight: var(--w-normal);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "cv05", "ss03";
+  }
+
+  ::selection { background: var(--accent-tint); color: var(--text-1); }
+
+  h1, h2, h3 {
+    font-weight: var(--w-semibold);
+    text-wrap: balance;
+    color: var(--text-1);
+  }
+  p { text-wrap: pretty; }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .wrap {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding-inline: var(--pad-x);
+  }
+
+  /* mono kicker labels */
+  .kicker {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: var(--w-normal);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-4);
+    display: block;
+    margin-bottom: 16px;
+  }
+
+  /* inline text links — the one accent */
+  .link {
+    color: var(--text-2);
+    font-weight: var(--w-medium);
+    border-bottom: 1px solid var(--border-2);
+    transition: color var(--speed-hover) var(--ease), border-color var(--speed-hover) var(--ease);
+  }
+  .link:hover {
+    color: var(--accent);
+    border-color: var(--accent-hover);
+  }
+
+  /* ---------- nav ---------- */
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: var(--nav-h);
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.8);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--hairline-strong);
+  }
+  header .bar {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding-inline: var(--pad-x);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header .name {
+    font-size: 0.9375rem;
+    font-weight: var(--w-semibold);
+    letter-spacing: -0.012em;
+    color: var(--text-1);
+  }
+  header nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  header nav a {
+    font-size: 13px;
+    font-weight: var(--w-medium);
+    color: var(--text-3);
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: color var(--speed-hover) var(--ease), background var(--speed-hover) var(--ease);
+  }
+  header nav a:hover {
+    color: var(--text-1);
+    background: var(--bg-raised);
+  }
+  header nav a.email {
+    color: var(--text-1);
+    background: var(--bg-raised);
+    border: 1px solid var(--hairline-strong);
+    margin-left: 8px;
+    box-shadow: var(--shadow-tiny);
+    transition: color var(--speed-hover) var(--ease), background var(--speed-hover) var(--ease), box-shadow var(--speed-hover) var(--ease);
+  }
+  header nav a.email:hover {
+    background: var(--bg-raised-2);
+    box-shadow: var(--shadow-low);
+  }
+
+  /* ---------- hero ---------- */
+  .hero {
+    padding-top: calc(var(--nav-h) + 96px);
+    padding-bottom: var(--pad-section);
+  }
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    font-weight: var(--w-medium);
+    color: var(--text-3);
+    background: var(--bg-raised);
+    border: 1px solid var(--hairline-strong);
+    border-radius: 9999px;
+    padding: 3px 10px 3px 8px;
+    margin-bottom: 24px;
+  }
+  .status .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 5.4vw, 3.5rem); /* 32 → 56px */
+    line-height: 1.1;
+    letter-spacing: -0.022em;
+    max-width: 17ch;
+  }
+  .hero .sub {
+    margin-top: 20px;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--text-3);
+    max-width: 52ch;
+  }
+  .hero .sub b {
+    font-weight: var(--w-medium);
+    color: var(--text-2);
+  }
+  .hero .meta-row {
+    margin-top: 32px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 13px;
+    color: var(--text-4);
+  }
+  .hero .meta-row a {
+    color: var(--text-3);
+    font-weight: var(--w-medium);
+    transition: color var(--speed-hover) var(--ease);
+  }
+  .hero .meta-row a:hover { color: var(--text-1); }
+  .hero .meta-row .sep {
+    width: 3px; height: 3px;
+    border-radius: 50%;
+    background: var(--border-2);
+  }
+
+  /* ---------- section scaffolding ---------- */
+  section {
+    padding-block: var(--pad-section);
+  }
+  section + section .wrap {
+    border-top: 1px solid var(--hairline);
+    padding-top: var(--pad-section);
+  }
+  section + section { padding-top: 0; }
+
+  section h2 {
+    font-size: 1.25rem; /* 20px */
+    line-height: 1.33;
+    letter-spacing: -0.012em;
+    margin-bottom: 8px;
+  }
+  section .lede {
+    font-size: 0.9375rem;
+    color: var(--text-3);
+    max-width: 56ch;
+    margin-bottom: 40px;
+  }
+
+  /* ---------- about ---------- */
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 64px;
+    align-items: start;
+  }
+  .about-grid .prose p {
+    font-size: 0.9375rem;
+    color: var(--text-2);
+    max-width: 54ch;
+  }
+  .about-grid .prose p + p { margin-top: 14px; }
+  .about-grid .prose .quiet { color: var(--text-3); }
+
+  .facts {
+    border: 1px solid var(--hairline-strong);
+    border-radius: 8px;
+    background: var(--bg-raised);
+    padding: 4px 16px;
+  }
+  .facts dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 24px;
+  }
+  .facts dt, .facts dd {
+    padding-block: 10px;
+    font-size: 13px;
+    border-top: 1px solid var(--hairline);
+  }
+  .facts dt:first-of-type, .facts dd:first-of-type { border-top: none; }
+  .facts dt {
+    color: var(--text-4);
+    font-weight: var(--w-normal);
+    white-space: nowrap;
+  }
+  .facts dd {
+    color: var(--text-2);
+    font-weight: var(--w-medium);
+  }
+
+  /* ---------- projects ---------- */
+  .projects-list {
+    list-style: none;
+    border: 1px solid var(--hairline-strong);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow-low);
+  }
+  .project {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 24px;
+    padding: 20px 24px;
+    border-top: 1px solid var(--hairline);
+    position: relative;
+    transition: background var(--speed-micro) var(--ease);
+  }
+  .projects-list li:first-child .project { border-top: none; }
+  .project:hover { background: var(--bg-raised); }
+
+  .project .title-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .project h3 {
+    font-size: 0.9375rem;
+    font-weight: var(--w-medium);
+    letter-spacing: -0.006em;
+    line-height: 1.4;
+  }
+  .project .tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    color: var(--text-4);
+    background: var(--bg-raised-2);
+    border-radius: 4px;
+    padding: 2px 6px;
+    transition: background var(--speed-micro) var(--ease);
+  }
+  .project:hover .tag { background: var(--border-1); }
+  .project .desc {
+    margin-top: 3px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text-3);
+    max-width: 58ch;
+  }
+  .project .stat {
+    font-size: 13px;
+    color: var(--text-4);
+    white-space: nowrap;
+    text-align: right;
+    transition: transform var(--speed-micro) var(--ease);
+  }
+  .project .chevron {
+    width: 16px;
+    color: var(--text-4);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity var(--speed-micro) var(--ease), transform var(--speed-micro) var(--ease);
+    flex-shrink: 0;
+  }
+  .project:hover .chevron {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .project .right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* ---------- writing ---------- */
+  .posts {
+    list-style: none;
+  }
+  .posts li { border-top: 1px solid var(--hairline); }
+  .posts li:first-child { border-top: none; }
+  .posts a {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 14px 12px;
+    margin-inline: -12px;
+    border-radius: 6px;
+    transition: background var(--speed-micro) var(--ease);
+  }
+  .posts a:hover { background: var(--bg-raised); }
+  .posts .post-title {
+    font-size: 0.9375rem;
+    font-weight: var(--w-medium);
+    color: var(--text-2);
+    letter-spacing: -0.006em;
+    transition: color var(--speed-micro) var(--ease);
+  }
+  .posts a:hover .post-title { color: var(--text-1); }
+  .posts time {
+    font-size: 13px;
+    color: var(--text-4);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- footer ---------- */
+  footer {
+    border-top: 1px solid var(--hairline);
+    padding-block: 40px 56px;
+  }
+  footer .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  footer .copyright {
+    font-size: 13px;
+    color: var(--text-4);
+  }
+  footer nav {
+    display: flex;
+    gap: 20px;
+  }
+  footer nav a {
+    font-size: 13px;
+    font-weight: var(--w-medium);
+    color: var(--text-3);
+    transition: color var(--speed-hover) var(--ease);
+  }
+  footer nav a:hover { color: var(--accent); }
+
+  /* ---------- reveal ---------- */
+  .reveal {
+    opacity: 0;
+    transform: translateY(8px);
+    transition:
+      opacity var(--speed-reveal) var(--ease),
+      transform var(--speed-reveal) var(--ease);
+    transition-delay: var(--d, 0s);
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 720px) {
+    :root { --pad-section: 48px; }
+    .hero { padding-top: calc(var(--nav-h) + 56px); }
+    .about-grid {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    .project {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .project .right { justify-content: flex-start; }
+    .project .stat { text-align: left; }
+    .project .chevron { display: none; }
+    header nav a:not(.email) { display: none; }
+  }
+
+  /* ---------- reduced motion ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      transition-delay: 0s !important;
+    }
+    .reveal { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <a class="name" href="#top">Sam Chen</a>
+    <nav>
+      <a href="#about">About</a>
+      <a href="#projects">Projects</a>
+      <a href="#writing">Writing</a>
+      <a class="email" href="mailto:sam_chen@college.harvard.edu">Email</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- hero -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="status reveal"><span class="dot" aria-hidden="true"></span>Currently in San Francisco</div>
+      <h1 class="reveal" style="--d:.04s">Researcher, builder, and&nbsp;founder.</h1>
+      <p class="sub reveal" style="--d:.08s">
+        I'm a sophomore at Harvard from Boston studying CS, Math, and Psychology.
+        I work on <b>mechanistic interpretability</b> in the Computation, Cognition,
+        and Development Lab, and on <b>hierarchical RL</b> under Kempner and the Brantley&nbsp;Lab.
+      </p>
+      <div class="meta-row reveal" style="--d:.12s">
+        <a href="https://github.com/SamC1249" target="_blank" rel="noopener">GitHub</a>
+        <span class="sep" aria-hidden="true"></span>
+        <a href="https://linkedin.com/in/sam-chen-massachusetts" target="_blank" rel="noopener">LinkedIn</a>
+        <span class="sep" aria-hidden="true"></span>
+        <a href="mailto:sam_chen@college.harvard.edu">sam_chen@college.harvard.edu</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- about -->
+  <section id="about">
+    <div class="wrap">
+      <span class="kicker reveal">About</span>
+      <div class="about-grid">
+        <div class="prose reveal" style="--d:.04s">
+          <p>
+            My research sits at the intersection of how machines learn and how people
+            think — pulling apart transformer internals on one side, and building agents
+            that plan over long horizons on the other.
+          </p>
+          <p>
+            Before research, I spent years in competitive debate, peaking
+            <a class="link" href="#">6th nationally in Public Forum</a>. That turned into
+            Outreach Debate, a nonprofit I founded that grew to 1,800+ members and 300+
+            volunteers, and two education businesses that reached five to six figures in revenue.
+          </p>
+          <p class="quiet">
+            Most recently, I did engineering at AGI House, building people-search infrastructure.
+          </p>
+        </div>
+        <div class="facts reveal" style="--d:.08s">
+          <dl>
+            <dt>Now</dt><dd>Harvard, sophomore</dd>
+            <dt>Studying</dt><dd>CS, Math, Psychology</dd>
+            <dt>From</dt><dd>Boston, MA</dd>
+            <dt>Summer</dt><dd>San Francisco</dd>
+            <dt>Previously</dt><dd>AGI House</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- projects -->
+  <section id="projects">
+    <div class="wrap">
+      <span class="kicker reveal">Projects</span>
+      <h2 class="reveal" style="--d:.03s">Selected work</h2>
+      <p class="lede reveal" style="--d:.06s">Things I've shipped — mostly tools that make hard-to-reach knowledge easier to find.</p>
+      <ul class="projects-list reveal" style="--d:.09s">
+        <li>
+          <a class="project" href="#">
+            <div>
+              <div class="title-row">
+                <h3>IvyLine Search</h3>
+                <span class="tag">semantic search</span>
+              </div>
+              <p class="desc">Semantic search for college advice. Indexes 200+ opportunities so students without counselors can find them — 500 users in the first 5 days, 100K impressions.</p>
+            </div>
+            <div class="right">
+              <span class="stat">500 users / 5 days</span>
+              <svg class="chevron" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </a>
+        </li>
+        <li>
+          <a class="project" href="#">
+            <div>
+              <div class="title-row">
+                <h3>Transformer in Rust</h3>
+                <span class="tag">candle</span>
+              </div>
+              <p class="desc">A transformer implemented from scratch with candle — attention, layer norm, and the training loop, with no framework magic in between.</p>
+            </div>
+            <div class="right">
+              <span class="stat">from scratch</span>
+              <svg class="chevron" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </a>
+        </li>
+        <li>
+          <a class="project" href="#">
+            <div>
+              <div class="title-row">
+                <h3>Ignite Fund</h3>
+                <span class="tag">web</span>
+              </div>
+              <p class="desc">A site for high achievers — surfacing ambitious people and the resources that match their trajectories.</p>
+            </div>
+            <div class="right">
+              <span class="stat">live</span>
+              <svg class="chevron" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 3.5L10.5 8L6 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- writing -->
+  <section id="writing">
+    <div class="wrap">
+      <span class="kicker reveal">Writing</span>
+      <h2 class="reveal" style="--d:.03s">Notes</h2>
+      <p class="lede reveal" style="--d:.06s">Occasional, opinionated.</p>
+      <ul class="posts reveal" style="--d:.09s">
+        <li>
+          <a href="#">
+            <span class="post-title">What sparse autoencoders still can't tell us about features</span>
+            <time datetime="2026-04">Apr 2026</time>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <span class="post-title">Options, subgoals, and why hierarchy is hard in RL</span>
+            <time datetime="2026-02">Feb 2026</time>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <span class="post-title">Everything I know about thinking fast, I learned in a debate round</span>
+            <time datetime="2025-12">Dec 2025</time>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="row">
+      <span class="copyright">&copy; 2026 Sam Chen</span>
+      <nav>
+        <a href="https://github.com/SamC1249" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://linkedin.com/in/sam-chen-massachusetts" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="mailto:sam_chen@college.harvard.edu">Email</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var reveals = document.querySelectorAll(".reveal");
+
+  if (reduced || !("IntersectionObserver" in window)) {
+    reveals.forEach(function (el) { el.classList.add("in"); });
+    return;
+  }
+
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) {
+        e.target.classList.add("in");
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: "0px 0px -5% 0px" });
+
+  reveals.forEach(function (el) { io.observe(el); });
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sam Chen — Hero Concepts 21–25 / Black Holes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ffffff;
+    --text:#282a30;
+    --text-2:#3c4149;
+    --text-3:#6f6e77;
+    --text-4:#86848d;
+    --accent:#7070ff;
+    --accent-tint:#f1f1ff;
+    --accent-hover:#8989f0;
+    --border:rgba(0,0,0,0.08);
+    --ease:cubic-bezier(0.25,0.46,0.45,0.94);
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-snap-type:y mandatory;scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+  }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    font-optical-sizing:auto;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  section.hero{
+    position:relative;
+    height:100vh;
+    height:100svh;
+    scroll-snap-align:start;
+    overflow:hidden;
+    background:var(--bg);
+  }
+  section.hero canvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
+  }
+
+  /* ---- hero copy ---- */
+  .copy{
+    position:absolute;
+    z-index:2;
+    max-width:min(620px, 84vw);
+  }
+  .copy::before{
+    content:"";
+    position:absolute;
+    inset:-20% -24%;
+    z-index:-1;
+    background:radial-gradient(ellipse closest-side,
+      rgba(255,255,255,0.96) 0%,
+      rgba(255,255,255,0.78) 52%,
+      rgba(255,255,255,0) 100%);
+    pointer-events:none;
+  }
+  .copy--left{ left:8vw; top:50%; transform:translateY(-50%); }
+  .copy--center{ left:50%; top:50%; transform:translate(-50%,-50%); text-align:center; }
+  .copy--center .actions{ justify-content:center; }
+  .copy--right{ right:8vw; top:50%; transform:translateY(-50%); text-align:right; }
+  .copy--right .actions{ justify-content:flex-end; }
+  .copy--right .bio{ margin-left:auto; }
+  .copy--bottomleft{ left:8vw; bottom:17vh; }
+  .copy--topleft{ left:8vw; top:13vh; }
+
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.12em;
+    color:var(--text-4);
+    margin:0 0 22px;
+  }
+  .eyebrow .tick{ color:var(--accent); }
+  h1{
+    font-size:clamp(48px, 6.6vw, 72px);
+    font-weight:590;
+    letter-spacing:-0.022em;
+    line-height:1.02;
+    margin:0 0 18px;
+    color:var(--text);
+  }
+  .tagline{
+    font-size:clamp(18px, 2vw, 22px);
+    font-weight:510;
+    letter-spacing:-0.012em;
+    color:var(--text-2);
+    margin:0 0 12px;
+  }
+  .bio{
+    font-size:16px;
+    font-weight:400;
+    line-height:1.6;
+    color:var(--text-3);
+    margin:0 0 30px;
+    max-width:46ch;
+  }
+  .actions{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    height:44px;
+    padding:0 22px;
+    border-radius:8px;
+    font-family:inherit;
+    font-size:15px;
+    font-weight:510;
+    letter-spacing:-0.01em;
+    text-decoration:none;
+    cursor:pointer;
+    border:1px solid transparent;
+    transition:background-color .18s var(--ease), border-color .18s var(--ease),
+               box-shadow .18s var(--ease), transform .18s var(--ease), color .18s var(--ease);
+  }
+  .btn-primary{ background:var(--text); color:#fff; }
+  .btn-primary:hover{
+    background:var(--text-2);
+    transform:translateY(-1px);
+    box-shadow:0 6px 16px rgba(0,0,0,0.09);
+  }
+  .btn-secondary{
+    background:rgba(255,255,255,0.82);
+    color:var(--text);
+    border-color:var(--border);
+  }
+  .btn-secondary:hover{
+    background:#fff;
+    border-color:rgba(0,0,0,0.16);
+    box-shadow:0 2px 8px rgba(0,0,0,0.05);
+  }
+  .link-accent{
+    display:inline-flex;
+    align-items:center;
+    height:44px;
+    padding:0 8px;
+    font-size:15px;
+    font-weight:510;
+    letter-spacing:-0.01em;
+    color:var(--accent);
+    text-decoration:none;
+    transition:color .18s var(--ease);
+  }
+  .link-accent:hover{ color:var(--accent-hover); }
+
+  /* ---- mono spec label ---- */
+  .mono-label{
+    position:absolute;
+    left:28px;
+    bottom:24px;
+    z-index:3;
+    font-family:var(--mono);
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--text-4);
+    background:rgba(255,255,255,0.72);
+    padding:4px 8px;
+    border-radius:6px;
+    max-width:calc(100vw - 90px);
+  }
+
+  /* ---- dot nav ---- */
+  .dots{
+    position:fixed;
+    right:22px;
+    top:50%;
+    transform:translateY(-50%);
+    z-index:10;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .dots button{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    padding:0;
+    border:1px solid rgba(0,0,0,0.28);
+    background:rgba(255,255,255,0.6);
+    cursor:pointer;
+    transition:background-color .18s var(--ease), border-color .18s var(--ease), transform .18s var(--ease);
+  }
+  .dots button:hover{ border-color:var(--text); transform:scale(1.35); }
+  .dots button.active{ background:var(--text); border-color:var(--text); }
+
+  @media (max-width:640px){
+    .copy--right{ right:auto; left:8vw; text-align:left; }
+    .copy--right .actions{ justify-content:flex-start; }
+    .copy--right .bio{ margin-left:0; }
+    .mono-label{ font-size:10px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- HERO 21 — lensed black hole -->
+  <section class="hero" id="hero-21">
+    <canvas aria-hidden="true"></canvas>
+    <div class="copy copy--left">
+      <p class="eyebrow"><span class="tick">●</span>&nbsp; Portfolio — 2026</p>
+      <h1>Sam Chen</h1>
+      <p class="tagline">Researcher, Builder &amp; Founder</p>
+      <p class="bio">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="#">View work</a>
+        <a class="btn btn-secondary" href="#">Get in touch</a>
+      </div>
+    </div>
+    <div class="mono-label">Hero 21 / 30 — Lensed Black Hole — point-mass lens eq · photon ring · einstein arcs</div>
+  </section>
+
+  <!-- HERO 22 — accretion disk -->
+  <section class="hero" id="hero-22">
+    <canvas aria-hidden="true"></canvas>
+    <div class="copy copy--right">
+      <p class="eyebrow">Cambridge, MA — EST</p>
+      <h1>Sam Chen</h1>
+      <p class="tagline">Researcher, Builder &amp; Founder</p>
+      <p class="bio">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="#">View work</a>
+        <a class="btn btn-secondary" href="#">Get in touch</a>
+      </div>
+    </div>
+    <div class="mono-label">Hero 22 / 30 — Accretion Disk — 5,500 keplerian particles · v ∝ 1/√r · doppler tint</div>
+  </section>
+
+  <!-- HERO 23 — ascii black hole -->
+  <section class="hero" id="hero-23">
+    <canvas aria-hidden="true"></canvas>
+    <div class="copy copy--bottomleft">
+      <h1>Sam Chen</h1>
+      <p class="tagline">Researcher, Builder &amp; Founder</p>
+      <p class="bio">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="#">View work</a>
+        <a class="btn btn-secondary" href="#">Get in touch</a>
+      </div>
+    </div>
+    <div class="mono-label">Hero 23 / 30 — ASCII Singularity — analytic lensed disk · 10-char density ramp · type only</div>
+  </section>
+
+  <!-- HERO 24 — gravity well playground -->
+  <section class="hero" id="hero-24">
+    <canvas aria-hidden="true"></canvas>
+    <div class="copy copy--center">
+      <p class="eyebrow"><span class="tick">●</span>&nbsp; Interactive — click to plant a mass</p>
+      <h1>Sam Chen</h1>
+      <p class="tagline">Researcher, Builder &amp; Founder</p>
+      <p class="bio" style="margin-left:auto;margin-right:auto;">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="#">View work</a>
+        <a class="btn btn-secondary" href="#">Get in touch</a>
+      </div>
+    </div>
+    <div class="mono-label">Hero 24 / 30 — Gravity Well — inverse-square cursor · softened orbits · 3 plantable masses</div>
+  </section>
+
+  <!-- HERO 25 — binary orbit diagram -->
+  <section class="hero" id="hero-25">
+    <canvas aria-hidden="true"></canvas>
+    <div class="copy copy--topleft">
+      <p class="eyebrow">Fig. 25 — The two-body problem</p>
+      <h1>Sam Chen</h1>
+      <p class="tagline">Researcher, Builder &amp; Founder</p>
+      <p class="bio">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="#">View work</a>
+        <a class="link-accent" href="#">Get in touch →</a>
+      </div>
+    </div>
+    <div class="mono-label">Hero 25 / 30 — Binary System — kepler solver · e = 0.42 · 220 test particles</div>
+  </section>
+
+  <nav class="dots" id="dots" aria-label="Hero sections"></nav>
+
+  <script type="importmap">
+  { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+  </script>
+
+  <script type="module">
+  import * as THREE from 'three';
+
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+  const STATIC_T = 17.0; // pleasing frozen frame for reduced motion
+  const INK = '#282a30', INK2 = '#3c4149', INK3 = '#6f6e77', INK4 = '#86848d';
+  const ACCENT = '#7070ff';
+
+  /* ================================================================
+     HERO 21 — Lensed black hole (fullscreen-quad shader)
+     ================================================================ */
+
+  const QUAD_VERT = /* glsl */`
+    void main(){ gl_Position = vec4(position.xy, 0.0, 1.0); }
+  `;
+
+  const LENS_FRAG = /* glsl */`
+    uniform float u_time;
+    uniform vec2 u_mouse;
+    uniform vec2 u_resolution;
+    uniform vec2 u_hole;
+
+    float hash21(vec2 p){
+      p = fract(p * vec2(123.34, 456.21));
+      p += dot(p, p + 45.32);
+      return fract(p.x * p.y);
+    }
+
+    // field of small dark "stars" on white; .x = coverage, .y = indigo mask
+    vec2 dotField(vec2 p){
+      vec2 g = floor(p);
+      vec2 f = fract(p);
+      float v = 0.0, ind = 0.0;
+      for(int i = -1; i <= 1; i++)
+      for(int j = -1; j <= 1; j++){
+        vec2 o = vec2(float(i), float(j));
+        vec2 id = g + o;
+        vec2 c = o + vec2(hash21(id), hash21(id + 17.7)) - f;
+        float rad = 0.045 + 0.085 * hash21(id + 3.3);
+        float m = smoothstep(rad, rad * 0.3, length(c));
+        v = max(v, m);
+        ind = max(ind, m * step(0.93, hash21(id + 9.1)));
+      }
+      return vec2(v, ind);
+    }
+
+    void main(){
+      vec2 res = u_resolution;
+      vec2 uv = (gl_FragCoord.xy - 0.5 * res) / res.y;
+      vec2 hole = u_hole + (u_mouse - 0.5) * vec2(0.06, 0.045);
+      vec2 d = uv - hole;
+      float r = length(d);
+      float fw = fwidth(r) * 1.5;
+
+      float rs = 0.155;   // event horizon (screen units)
+      float tE = 0.37;    // einstein radius
+
+      // point-mass lens equation: beta = theta - thetaE^2 / theta
+      float srcR = r - (tE * tE) / max(r, 1e-4);
+      vec2 src = hole + (d / max(r, 1e-4)) * srcR;
+
+      // slow drift of the background field
+      vec2 drift = vec2(u_time * 0.012, -u_time * 0.007);
+      vec2 df = dotField((src + drift) * 8.5 + 31.7);
+
+      // magnification glow near the einstein radius
+      float ein = exp(-pow((r - tE) / 0.085, 2.0));
+      float strength = df.x * (0.55 + 0.45 * ein);
+
+      vec3 inkGray = vec3(0.286, 0.300, 0.330);
+      vec3 indigo = vec3(0.439, 0.439, 1.0);
+      vec3 horizon = vec3(0.157, 0.165, 0.188);  // #282a30
+
+      vec3 bg = mix(vec3(1.0), vec3(0.945, 0.945, 1.0), ein * 0.55);
+      vec3 dotCol = mix(inkGray, indigo, df.y);
+      vec3 col = mix(bg, dotCol, strength);
+
+      // soft gravity shading approaching the horizon
+      col = mix(col, horizon, smoothstep(rs * 2.1, rs * 1.02, r) * 0.10);
+
+      // thin indigo photon ring just outside the shadow
+      float rp = rs * 1.28;
+      float ringW = max(fw, 0.0045);
+      float ring = smoothstep(ringW, ringW * 0.35, abs(r - rp));
+      col = mix(col, indigo, ring * 0.95);
+
+      // the event horizon: a perfect matte disk
+      float hol = 1.0 - smoothstep(rs - fw, rs + fw, r);
+      col = mix(col, horizon, hol);
+
+      gl_FragColor = vec4(col, 1.0);
+    }
+  `;
+
+  function makeRenderer(canvas, maxPR, antialias){
+    const r = new THREE.WebGLRenderer({ canvas, antialias, alpha: false, powerPreference: 'high-performance' });
+    r.setClearColor(0xffffff, 1);
+    r.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxPR));
+    return r;
+  }
+
+  class LensScene {
+    constructor(section){
+      this.section = section;
+      this.renderer = makeRenderer(section.querySelector('canvas'), 1.5, false); // heavy shader: cap DPR
+      this.uniforms = {
+        u_time:       { value: 0 },
+        u_mouse:      { value: new THREE.Vector2(0.5, 0.5) },
+        u_resolution: { value: new THREE.Vector2(1, 1) },
+        u_hole:       { value: new THREE.Vector2(0, 0) }
+      };
+      this.mouseTarget = new THREE.Vector2(0.5, 0.5);
+      this.scene = new THREE.Scene();
+      this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+      const mat = new THREE.ShaderMaterial({
+        vertexShader: QUAD_VERT,
+        fragmentShader: LENS_FRAG,
+        uniforms: this.uniforms,
+        depthTest: false,
+        depthWrite: false
+      });
+      this.scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat));
+      this.active = false;
+      this.resize();
+    }
+    resize(){
+      const w = this.section.clientWidth, h = this.section.clientHeight;
+      this.renderer.setSize(w, h, false);
+      this.renderer.getDrawingBufferSize(this.uniforms.u_resolution.value);
+      const aspect = w / h;
+      // hole sits right of the copy on wide screens, above it on narrow ones
+      this.uniforms.u_hole.value.set(
+        aspect > 1.02 ? Math.min(0.50, (aspect - 0.95) * 0.42) : 0.0,
+        aspect < 0.9 ? 0.24 : 0.0
+      );
+    }
+    setMouse(x, y){ this.mouseTarget.set(x, y); }
+    render(t){
+      this.uniforms.u_time.value = t;
+      this.uniforms.u_mouse.value.lerp(this.mouseTarget, 0.05);
+      this.renderer.render(this.scene, this.camera);
+    }
+    renderStatic(){ this.render(STATIC_T); }
+  }
+
+  /* ================================================================
+     HERO 22 — Accretion disk (three.js Keplerian particle sim)
+     ================================================================ */
+
+  const DISK_VERT = /* glsl */`
+    attribute float aSize;
+    attribute vec3 aColor;
+    uniform float u_scale;
+    varying vec3 vColor;
+    void main(){
+      vColor = aColor;
+      vec4 mv = modelViewMatrix * vec4(position, 1.0);
+      gl_PointSize = aSize * u_scale / (-mv.z);
+      gl_Position = projectionMatrix * mv;
+    }
+  `;
+
+  const DISK_FRAG = /* glsl */`
+    varying vec3 vColor;
+    void main(){
+      float a = smoothstep(0.5, 0.15, length(gl_PointCoord - 0.5));
+      if(a < 0.02) discard;
+      gl_FragColor = vec4(vColor, a * 0.85);
+    }
+  `;
+
+  class DiskScene {
+    constructor(section){
+      this.section = section;
+      this.renderer = makeRenderer(section.querySelector('canvas'), 2, true);
+      this.camera = new THREE.PerspectiveCamera(38, 1, 0.1, 60);
+      this.camera.position.set(0, 3.4, 8.4);
+      this.scene = new THREE.Scene();
+      this.scene.background = new THREE.Color(0xffffff);
+      this.group = new THREE.Group();
+      this.group.rotation.set(0.12, 0, -0.16);
+      this.scene.add(this.group);
+
+      this.N = 5500;
+      this.rIn = 1.05;
+      this.rOut = 4.1;
+      this.r   = new Float32Array(this.N);
+      this.phi = new Float32Array(this.N);
+      this.y0  = new Float32Array(this.N);
+      this.sz  = new Float32Array(this.N);
+      for(let i = 0; i < this.N; i++) this.spawn(i, false);
+
+      this.positions = new Float32Array(this.N * 3);
+      this.colors    = new Float32Array(this.N * 3);
+      this.sizes     = new Float32Array(this.N);
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(this.positions, 3).setUsage(THREE.DynamicDrawUsage));
+      geo.setAttribute('aColor',   new THREE.BufferAttribute(this.colors, 3).setUsage(THREE.DynamicDrawUsage));
+      geo.setAttribute('aSize',    new THREE.BufferAttribute(this.sizes, 1).setUsage(THREE.DynamicDrawUsage));
+      this.uScale = { value: 12 };
+      const mat = new THREE.ShaderMaterial({
+        vertexShader: DISK_VERT,
+        fragmentShader: DISK_FRAG,
+        uniforms: { u_scale: this.uScale },
+        transparent: true,
+        depthWrite: false
+      });
+      this.points = new THREE.Points(geo, mat);
+      this.points.frustumCulled = false;
+      this.group.add(this.points);
+
+      // matte event horizon + hairline ISCO / rim rings
+      this.group.add(new THREE.Mesh(
+        new THREE.SphereGeometry(0.80, 48, 32),
+        new THREE.MeshBasicMaterial({ color: 0x282a30 })
+      ));
+      const ring = (rad, op) => {
+        const pts = [];
+        for(let k = 0; k <= 128; k++){
+          const a = k / 128 * Math.PI * 2;
+          pts.push(new THREE.Vector3(Math.cos(a) * rad, 0, Math.sin(a) * rad));
+        }
+        const l = new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints(pts),
+          new THREE.LineBasicMaterial({ color: 0x282a30, transparent: true, opacity: op })
+        );
+        this.group.add(l);
+      };
+      ring(this.rIn, 0.20);
+      ring(this.rOut, 0.10);
+
+      this.mouseTarget = new THREE.Vector2(0.5, 0.5);
+      this.mouse = new THREE.Vector2(0.5, 0.5);
+      this.active = false;
+      this.resize();
+      this.writeBuffers();
+    }
+    spawn(i, atRim){
+      const { rIn, rOut } = this;
+      this.r[i] = atRim
+        ? rOut * (0.96 + 0.06 * Math.random())
+        : Math.sqrt(THREE.MathUtils.lerp(rIn * rIn, rOut * rOut, Math.random()));
+      this.phi[i] = Math.random() * Math.PI * 2;
+      this.y0[i] = (Math.random() * 2 - 1) * (Math.random() * 2 - 1) * 0.055;
+      this.sz[i] = 0.8 + 0.4 * Math.random();
+    }
+    step(dt){
+      for(let i = 0; i < this.N; i++){
+        const r = this.r[i];
+        this.phi[i] += dt * 1.25 / Math.pow(r, 1.5);  // v ∝ 1/√r
+        this.r[i] -= dt * 0.085 / r;                  // slow inspiral
+        if(this.r[i] < this.rIn) this.spawn(i, true); // swallowed → respawn at rim
+      }
+    }
+    writeBuffers(){
+      const { rIn, rOut } = this;
+      for(let i = 0; i < this.N; i++){
+        const r = this.r[i], phi = this.phi[i];
+        const c = Math.cos(phi), s = Math.sin(phi);
+        const j = i * 3;
+        this.positions[j]     = r * c;
+        this.positions[j + 1] = this.y0[i] * r;
+        this.positions[j + 2] = r * s;
+        const tn = (r - rIn) / (rOut - rIn);
+        const ia = Math.max(0, 1 - tn / 0.40);        // indigo near the inner edge
+        const dop = 0.5 + 0.5 * c;                    // approaching side: darker + larger
+        let g = (0.28 + 0.38 * tn) * (1 - 0.18 * dop);
+        this.colors[j]     = g + (0.439 - g) * ia;
+        this.colors[j + 1] = g + (0.439 - g) * ia;
+        this.colors[j + 2] = g + (1.000 - g) * ia;
+        this.sizes[i] = (1.9 + 1.6 * (1 - tn)) * (0.82 + 0.38 * dop) * this.sz[i];
+      }
+      const geo = this.points.geometry;
+      geo.attributes.position.needsUpdate = true;
+      geo.attributes.aColor.needsUpdate = true;
+      geo.attributes.aSize.needsUpdate = true;
+    }
+    resize(){
+      const w = this.section.clientWidth, h = this.section.clientHeight;
+      this.renderer.setSize(w, h, false);
+      this.camera.aspect = w / h;
+      this.camera.updateProjectionMatrix();
+      // disk sits left of the copy on wide screens
+      this.group.position.x = -Math.min(1.7, Math.max(0, (w / h - 0.85) * 1.15));
+      const buf = new THREE.Vector2();
+      this.renderer.getDrawingBufferSize(buf);
+      this.uScale.value = buf.y * 0.0115;
+    }
+    setMouse(x, y){ this.mouseTarget.set(x, y); }
+    render(t, dt){
+      this.step(Math.min(dt || 0.016, 0.04));
+      this.writeBuffers();
+      this.mouse.lerp(this.mouseTarget, 0.04);
+      this.camera.position.x = (this.mouse.x - 0.5) * 1.3;
+      this.camera.position.y = 3.4 + (this.mouse.y - 0.5) * 1.1;
+      this.camera.lookAt(this.group.position);
+      this.renderer.render(this.scene, this.camera);
+    }
+    renderStatic(){
+      for(let k = 0; k < 240; k++) this.step(1 / 30);  // pre-warm the inspiral
+      this.render(STATIC_T, 0.016);
+    }
+  }
+
+  /* ================================================================
+     HERO 23 — ASCII black hole (2D canvas character grid)
+     ================================================================ */
+
+  class AsciiScene {
+    constructor(section){
+      this.section = section;
+      this.canvas = section.querySelector('canvas');
+      this.ctx = this.canvas.getContext('2d');
+      this.ramp = ' .·:;+*#%@';
+      this.cw = 11;
+      this.ch = 13;
+      this.frame = 0;
+      this.active = false;
+      this.resize();
+    }
+    resize(){
+      const w = this.section.clientWidth, h = this.section.clientHeight;
+      this.w = w; this.h = h;
+      this.canvas.width = Math.round(w * DPR);
+      this.canvas.height = Math.round(h * DPR);
+      this.ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      this.cols = Math.ceil(w / this.cw);
+      this.rows = Math.ceil(h / this.ch);
+      const aspect = w / h;
+      this.cx = w * (aspect > 1.05 ? 0.56 : 0.5);
+      this.cy = h * 0.42;
+      this.rs = Math.min(w, h) * 0.16;   // shadow radius in px
+      if(REDUCED) this.draw(STATIC_T);
+    }
+    hash(x, y){
+      const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
+      return s - Math.floor(s);
+    }
+    // analytic edge-on accretion disk + lensed far-side arcs, in units of rs
+    bright(q, p, rad, t){
+      let B = 0;
+      const aq = Math.abs(q);
+      // direct disk: near side dips in FRONT of the lower shadow (classic silhouette)
+      let p0 = 0;
+      if(aq < 1.45) p0 = 0.46 * Math.cos(aq / 1.45 * Math.PI / 2);
+      const hwid = 0.16 + 0.055 * Math.max(0, aq - 1);
+      const fade = Math.max(0, Math.min(1, (5.2 - aq) / 1.0));
+      const radial = Math.pow(1.5 / Math.max(aq, 1.5), 1.25) * fade;
+      const dopp = 1.16 - 0.34 * Math.tanh(q * 0.7);          // approaching side denser
+      const streak = 0.76 + 0.24 * Math.sin(aq * 3.1 - t * 1.3);
+      const dz = (p - p0) / hwid;
+      B = Math.exp(-dz * dz) * radial * dopp * streak;
+      if(rad > 1.0){
+        // lensed far side: arcs hugging the shadow above and below
+        const da = (rad - 1.32) / 0.30;
+        const arc = Math.exp(-da * da)
+          * Math.pow(Math.abs(p) / Math.max(rad, 1e-3), 1.6)
+          * (p < 0 ? 1.0 : 0.62)
+          * (0.82 + 0.18 * Math.sin(3.0 * Math.atan2(p, q) + t * 0.5));
+        B = Math.max(B, arc);
+        // photon ring: the hottest band, right at the shadow's edge
+        if(rad < 1.16) B = Math.max(B, 0.96);
+      }
+      return Math.min(1, B);
+    }
+    draw(t){
+      const { ctx, w, h, cw, ch, cols, rows, cx, cy, rs, ramp } = this;
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, w, h);
+      ctx.font = '12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      let cur = '';
+      const setFill = (c) => { if(c !== cur){ ctx.fillStyle = c; cur = c; } };
+      for(let row = 0; row < rows; row++){
+        const py = (row + 0.5) * ch;
+        const p = (py - cy) / rs;
+        for(let col = 0; col < cols; col++){
+          const px = (col + 0.5) * cw;
+          const q = (px - cx) / rs;
+          const rad = Math.hypot(q, p);
+          if(rad < 1.0 && Math.abs(p - (Math.abs(q) < 1.45 ? 0.46 * Math.cos(Math.abs(q) / 1.45 * Math.PI / 2) : 0)) > 0.5){
+            continue; // the shadow: a void of space characters
+          }
+          const B = this.bright(q, p, rad, t);
+          if(B < 0.045){
+            // sparse background "stars"
+            if(this.hash(col * 7.31, row * 3.77) > 0.978){
+              setFill('rgba(134,132,141,0.55)');
+              ctx.fillText('·', px, py);
+            }
+            continue;
+          }
+          const idx = Math.min(9, Math.floor(B * 9.999));
+          if(idx === 0) continue;
+          if(B > 0.88)      setFill(ACCENT);   // hottest inner edge in indigo
+          else if(idx >= 7) setFill(INK);
+          else if(idx >= 4) setFill(INK2);
+          else              setFill(INK3);
+          ctx.fillText(ramp[idx], px, py);
+        }
+      }
+    }
+    setMouse(){}
+    render(t){
+      this.frame++;
+      if(this.frame % 2) return;   // 30 fps is plenty for type
+      this.draw(t);
+    }
+    renderStatic(){ this.draw(STATIC_T); }
+  }
+
+  /* ================================================================
+     HERO 24 — Gravity well playground (2D canvas)
+     ================================================================ */
+
+  class WellScene {
+    constructor(section){
+      this.section = section;
+      this.canvas = section.querySelector('canvas');
+      this.ctx = this.canvas.getContext('2d');
+      this.masses = [];                 // planted masses (max 3)
+      this.mouseActive = false;
+      this.cur = { x: 0, y: 0 };        // smoothed cursor well position
+      this.target = { x: 0, y: 0 };
+      this.particles = null;
+      this.active = false;
+      this.resize();
+      if(!REDUCED){
+        section.addEventListener('click', (e) => {
+          if(e.target.closest('.copy, .mono-label, .dots, a, button')) return;
+          const r = section.getBoundingClientRect();
+          this.masses.push({ x: e.clientX - r.left, y: e.clientY - r.top });
+          if(this.masses.length > 3) this.masses.shift();   // oldest replaced
+        });
+      }
+    }
+    resize(){
+      const w = this.section.clientWidth, h = this.section.clientHeight;
+      this.w = w; this.h = h;
+      this.canvas.width = Math.round(w * DPR);
+      this.canvas.height = Math.round(h * DPR);
+      this.ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      const n = Math.max(500, Math.min(1200, Math.round(w * h / 1700)));
+      if(!this.particles || this.particles.length !== n){
+        this.particles = [];
+        for(let i = 0; i < n; i++){
+          const ang = Math.random() * Math.PI * 2;
+          const sp = 14 + 46 * Math.random();
+          this.particles.push({
+            x: Math.random() * w, y: Math.random() * h,
+            vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp
+          });
+        }
+      } else {
+        for(const p of this.particles){
+          p.x = Math.min(p.x, w); p.y = Math.min(p.y, h);
+        }
+      }
+      this.ctx.fillStyle = '#fff';
+      this.ctx.fillRect(0, 0, w, h);
+      if(REDUCED) this.renderStatic();
+    }
+    setMouse(x, y){
+      this.target.x = x * this.w;
+      this.target.y = (1 - y) * this.h;
+      this.mouseActive = true;
+    }
+    autoCursor(t){
+      // before the pointer arrives, the well drifts on a slow lissajous
+      return {
+        x: this.w * (0.5 + 0.28 * Math.cos(t * 0.23)),
+        y: this.h * (0.5 + 0.22 * Math.sin(t * 0.31))
+      };
+    }
+    step(dt, t){
+      if(this.mouseActive){
+        this.cur.x += (this.target.x - this.cur.x) * 0.12;
+        this.cur.y += (this.target.y - this.cur.y) * 0.12;
+      } else {
+        const a = this.autoCursor(t);
+        this.cur.x += (a.x - this.cur.x) * 0.04;
+        this.cur.y += (a.y - this.cur.y) * 0.04;
+      }
+      const wells = [{ x: this.cur.x, y: this.cur.y, g: 3.2e7 }];
+      for(const m of this.masses) wells.push({ x: m.x, y: m.y, g: 2.2e7 });
+      const s2 = 30 * 30, vmax = 650, m = 24;
+      for(const p of this.particles){
+        let ax = 0, ay = 0;
+        for(const wl of wells){
+          const dx = wl.x - p.x, dy = wl.y - p.y;
+          const d2 = dx * dx + dy * dy + s2;
+          const inv = wl.g / (d2 * Math.sqrt(d2));   // softened inverse-square
+          ax += dx * inv; ay += dy * inv;
+        }
+        p.vx += ax * dt; p.vy += ay * dt;
+        const sp = Math.hypot(p.vx, p.vy);
+        if(sp > vmax){ p.vx *= vmax / sp; p.vy *= vmax / sp; }
+        p.x += p.vx * dt; p.y += p.vy * dt;
+        if(p.x < -m) p.x = this.w + m; else if(p.x > this.w + m) p.x = -m;
+        if(p.y < -m) p.y = this.h + m; else if(p.y > this.h + m) p.y = -m;
+      }
+    }
+    draw(){
+      const { ctx, w, h } = this;
+      // low-alpha white fill: trails decay into gray streaks
+      ctx.fillStyle = 'rgba(255,255,255,0.15)';
+      ctx.fillRect(0, 0, w, h);
+      // particles: gray, fast ones (deep in a well) in indigo
+      ctx.fillStyle = 'rgba(60,65,73,0.65)';
+      for(const p of this.particles){
+        if(p.vx * p.vx + p.vy * p.vy <= 330 * 330) ctx.fillRect(p.x - 1, p.y - 1, 2, 2);
+      }
+      ctx.fillStyle = 'rgba(112,112,255,0.80)';
+      for(const p of this.particles){
+        if(p.vx * p.vx + p.vy * p.vy > 330 * 330) ctx.fillRect(p.x - 1, p.y - 1, 2, 2);
+      }
+      // planted masses: dark disks with hairline orbit rings
+      for(const ms of this.masses){
+        ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(ms.x, ms.y, 26, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(ms.x, ms.y, 48, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = INK;
+        ctx.beginPath(); ctx.arc(ms.x, ms.y, 4.5, 0, Math.PI * 2); ctx.fill();
+      }
+      // the cursor well
+      ctx.strokeStyle = 'rgba(112,112,255,0.40)';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(this.cur.x, this.cur.y, 14, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = ACCENT;
+      ctx.beginPath(); ctx.arc(this.cur.x, this.cur.y, 2.5, 0, Math.PI * 2); ctx.fill();
+    }
+    render(t, dt){
+      this.step(Math.min(dt || 0.016, 0.033), t);
+      this.draw();
+    }
+    renderStatic(){
+      // pre-warm: two preset masses + fixed well, sim a few seconds, freeze
+      this.masses = [
+        { x: this.w * 0.32, y: this.h * 0.30 },
+        { x: this.w * 0.70, y: this.h * 0.62 }
+      ];
+      this.cur = { x: this.w * 0.55, y: this.h * 0.40 };
+      this.mouseActive = true;
+      this.target = { ...this.cur };
+      for(let k = 0; k < 200; k++){
+        this.step(1 / 60, k / 60);
+        this.draw();
+      }
+    }
+  }
+
+  /* ================================================================
+     HERO 25 — Binary orbit diagram (2D canvas, Kepler solver)
+     ================================================================ */
+
+  class BinaryScene {
+    constructor(section){
+      this.section = section;
+      this.canvas = section.querySelector('canvas');
+      this.ctx = this.canvas.getContext('2d');
+      this.e = 0.42;          // eccentricity
+      this.om = -0.55;        // argument of periapsis (visual tilt)
+      this.n = 0.55;          // mean motion, rad/s
+      this.hist1 = [];
+      this.hist2 = [];
+      this.test = null;
+      this.mx = 0.5; this.my = 0.5;
+      this.tmx = 0.5; this.tmy = 0.5;
+      this.active = false;
+      this.resize();
+    }
+    resize(){
+      const w = this.section.clientWidth, h = this.section.clientHeight;
+      this.w = w; this.h = h;
+      this.canvas.width = Math.round(w * DPR);
+      this.canvas.height = Math.round(h * DPR);
+      this.ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      const aspect = w / h;
+      this.cx = w * (aspect > 1.05 ? 0.60 : 0.5);
+      this.cy = h * (aspect > 1.05 ? 0.52 : 0.60);
+      const A = Math.min(w, h) * 0.30;
+      this.a2 = A * 2 / 3;    // m1 : m2 = 2 : 1
+      this.a1 = A * 1 / 3;
+      this.b1 = this.a1 * Math.sqrt(1 - this.e * this.e);
+      this.b2 = this.a2 * Math.sqrt(1 - this.e * this.e);
+      if(!this.test){
+        this.test = [];
+        for(let i = 0; i < 220; i++) this.test.push(this.spawnTest(true));
+      }
+      if(REDUCED) this.renderStatic();
+    }
+    spawnTest(anywhere){
+      return {
+        x: anywhere ? Math.random() * this.w : -10,
+        y: Math.random() * this.h,
+        vx: 50 + 70 * Math.random(),
+        vy: (Math.random() - 0.5) * 30
+      };
+    }
+    kepler(M){
+      let E = M + this.e * Math.sin(M);
+      for(let k = 0; k < 6; k++){
+        E -= (E - this.e * Math.sin(E) - M) / (1 - this.e * Math.cos(E));
+      }
+      return E;
+    }
+    posAt(t){
+      const M = (this.n * t) % (Math.PI * 2);
+      const E = this.kepler(M);
+      const co = Math.cos(this.om), so = Math.sin(this.om);
+      const x2 = this.a2 * (Math.cos(E) - this.e);
+      const y2 = this.b2 * Math.sin(E);
+      const p2 = { x: this.cx + (x2 * co - y2 * so), y: this.cy + (x2 * so + y2 * co) };
+      const ratio = this.a1 / this.a2;
+      const p1 = { x: this.cx - (x2 * co - y2 * so) * ratio, y: this.cy - (x2 * so + y2 * co) * ratio };
+      return [p1, p2];
+    }
+    stepTest(dt, p1, p2){
+      const s2 = 26 * 26, G1 = 3.0e6, G2 = 1.5e6;
+      for(const p of this.test){
+        p.px = p.x; p.py = p.y;
+        let dx = p1.x - p.x, dy = p1.y - p.y;
+        let d2 = dx * dx + dy * dy + s2;
+        let inv = G1 / (d2 * Math.sqrt(d2));
+        let ax = dx * inv, ay = dy * inv;
+        dx = p2.x - p.x; dy = p2.y - p.y;
+        d2 = dx * dx + dy * dy + s2;
+        inv = G2 / (d2 * Math.sqrt(d2));
+        ax += dx * inv; ay += dy * inv;
+        p.vx += ax * dt; p.vy += ay * dt;
+        const sp = Math.hypot(p.vx, p.vy);
+        if(sp > 420){ p.vx *= 420 / sp; p.vy *= 420 / sp; }
+        p.x += p.vx * dt; p.y += p.vy * dt;
+        if(p.x > this.w + 20 || p.y < -40 || p.y > this.h + 40){
+          Object.assign(p, this.spawnTest(false), { px: -10, py: p.y });
+        }
+      }
+    }
+    ellipsePath(a, b, sign){
+      // each body's ellipse has the barycenter at a focus
+      const { ctx, cx, cy, om, e } = this;
+      const co = Math.cos(om), so = Math.sin(om);
+      const ox = -sign * a * e;
+      ctx.beginPath();
+      ctx.ellipse(cx + ox * co, cy + ox * so, a, b, om, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    draw(t){
+      const { ctx, w, h, cx, cy } = this;
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, w, h);
+      ctx.save();
+      ctx.translate((this.mx - 0.5) * 8, (0.5 - this.my) * 6);   // whisper of parallax
+
+      const [p1, p2] = this.posAt(t);
+
+      // hairline orbit ellipses
+      ctx.strokeStyle = 'rgba(0,0,0,0.10)';
+      ctx.lineWidth = 1;
+      this.ellipsePath(this.a2, this.b2, 1);
+      this.ellipsePath(this.a1, this.b1, -1);
+
+      // test particles: short velocity tails
+      ctx.strokeStyle = 'rgba(111,110,119,0.45)';
+      ctx.beginPath();
+      for(const p of this.test){
+        ctx.moveTo(p.x - p.vx * 0.06, p.y - p.vy * 0.06);
+        ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+
+      // line through the barycenter connecting the bodies
+      ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+      ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+
+      // barycenter cross-mark
+      ctx.strokeStyle = 'rgba(40,42,48,0.45)';
+      ctx.beginPath();
+      ctx.moveTo(cx - 6, cy); ctx.lineTo(cx + 6, cy);
+      ctx.moveTo(cx, cy - 6); ctx.lineTo(cx, cy + 6);
+      ctx.stroke();
+
+      // trailing motion blur
+      const trail = (hist, col) => {
+        for(let i = 1; i < hist.length; i++){
+          ctx.strokeStyle = col + (i / hist.length * 0.40) + ')';
+          ctx.beginPath();
+          ctx.moveTo(hist[i - 1].x, hist[i - 1].y);
+          ctx.lineTo(hist[i].x, hist[i].y);
+          ctx.stroke();
+        }
+      };
+      ctx.lineWidth = 1.5;
+      trail(this.hist1, 'rgba(40,42,48,');
+      trail(this.hist2, 'rgba(112,112,255,');
+
+      // the two bodies
+      ctx.fillStyle = INK;
+      ctx.beginPath(); ctx.arc(p1.x, p1.y, 11, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = ACCENT;
+      ctx.beginPath(); ctx.arc(p2.x, p2.y, 7.5, 0, Math.PI * 2); ctx.fill();
+
+      // mono annotations
+      ctx.font = '11px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillStyle = INK3;
+      ctx.fillText('m₁', p1.x + 15, p1.y - 13);
+      ctx.fillStyle = ACCENT;
+      ctx.fillText('m₂', p2.x + 12, p2.y - 10);
+      ctx.fillStyle = INK4;
+      ctx.fillText('barycenter', cx + 10, cy + 18);
+      ctx.fillText('e = 0.42 · m₁ : m₂ = 2 : 1', cx - this.a2 * 0.6, cy - this.b2 - 18);
+
+      ctx.restore();
+    }
+    setMouse(x, y){ this.tmx = x; this.tmy = y; }
+    render(t, dt){
+      this.mx += (this.tmx - this.mx) * 0.05;
+      this.my += (this.tmy - this.my) * 0.05;
+      const [p1, p2] = this.posAt(t);
+      this.hist1.push(p1); this.hist2.push(p2);
+      if(this.hist1.length > 64){ this.hist1.shift(); this.hist2.shift(); }
+      this.stepTest(Math.min(dt || 0.016, 0.033), p1, p2);
+      this.draw(t);
+    }
+    renderStatic(){
+      this.hist1 = []; this.hist2 = [];
+      for(let k = 63; k >= 0; k--){
+        const [p1, p2] = this.posAt(STATIC_T - k * 0.05);
+        this.hist1.push(p1); this.hist2.push(p2);
+      }
+      const [p1, p2] = this.posAt(STATIC_T);
+      for(let k = 0; k < 400; k++) this.stepTest(1 / 50, p1, p2);
+      this.draw(STATIC_T);
+    }
+  }
+
+  /* ================================================================
+     Wiring: mouse, dot nav, intersection-gated render loop
+     ================================================================ */
+
+  const sections = Array.from(document.querySelectorAll('section.hero'));
+  const sceneList = [
+    new LensScene(sections[0]),
+    new DiskScene(sections[1]),
+    new AsciiScene(sections[2]),
+    new WellScene(sections[3]),
+    new BinaryScene(sections[4])
+  ];
+
+  // pointer -> normalized (0..1, y up), per section
+  if(!REDUCED){
+    sections.forEach((section, i) => {
+      section.addEventListener('pointermove', (e) => {
+        const r = section.getBoundingClientRect();
+        sceneList[i].setMouse(
+          (e.clientX - r.left) / r.width,
+          1 - (e.clientY - r.top) / r.height
+        );
+      }, { passive: true });
+    });
+  }
+
+  // dot nav
+  const dotsWrap = document.getElementById('dots');
+  const dots = sections.map((section, i) => {
+    const b = document.createElement('button');
+    b.setAttribute('aria-label', 'Go to hero ' + (21 + i));
+    b.addEventListener('click', () => section.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth' }));
+    dotsWrap.appendChild(b);
+    return b;
+  });
+  dots[0].classList.add('active');
+
+  // only render sections currently intersecting
+  const io = new IntersectionObserver((entries) => {
+    for(const entry of entries){
+      const i = sections.indexOf(entry.target);
+      if(i === -1) continue;
+      sceneList[i].active = entry.isIntersecting;
+      if(entry.intersectionRatio >= 0.5){
+        dots.forEach((d, j) => d.classList.toggle('active', j === i));
+      }
+    }
+  }, { threshold: [0, 0.5] });
+  sections.forEach(s => io.observe(s));
+
+  // render loop (or one pre-warmed static frame each for reduced motion)
+  if(REDUCED){
+    sceneList.forEach(sc => sc.renderStatic());
+  } else {
+    let last = performance.now() / 1000;
+    const t0 = last;
+    const tick = () => {
+      const now = performance.now() / 1000;
+      const dt = Math.min(now - last, 0.05);
+      last = now;
+      const t = now - t0;
+      for(const sc of sceneList){
+        if(sc.active) sc.render(t, dt);
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  window.addEventListener('resize', () => {
+    for(const sc of sceneList) sc.resize();
+  });
+  </script>
+</body>
+</html>

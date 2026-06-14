@@ -2,11 +2,34 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
-<BaseLayout title = "404: Not Found" includeSidebar={false}>
-  <div class="text-center">
-    <h1 class="text-9xl font-bold mb-4">🏝</h1>
-    <h1 class="text-9xl font-bold mb-2">404</h1>
-    <h3 class="text-2xl">The page you're looking for couldn't be found.</h3>
-    <a class="btn btn-accent mt-9" href="/">Home</a>
+<BaseLayout title = "404: Not Found">
+  <div class="lx-404">
+    <p class="lx-kicker">Error</p>
+    <h1 class="lx-404-code">404</h1>
+    <h3 class="lx-prose-quiet">The page you're looking for couldn't be found.</h3>
+    <a class="lx-btn lx-btn-primary" href="/">Home</a>
   </div>
 </BaseLayout>
+
+<style>
+  .lx-404 {
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 12px;
+    padding: 64px 0;
+  }
+  .lx-404-code {
+    font-size: 96px;
+    line-height: 1;
+    letter-spacing: -0.022em;
+    font-weight: 600;
+    color: var(--text-1);
+  }
+  .lx-btn {
+    margin-top: 12px;
+  }
+</style>

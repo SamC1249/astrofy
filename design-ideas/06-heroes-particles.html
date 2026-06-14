@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sam Chen — Hero Concepts 01–05 / Particles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --ink: #282a30;
+    --ink-2: #3c4149;
+    --ink-3: #6f6e77;
+    --ink-4: #86848d;
+    --accent: #7070ff;
+    --accent-tint: #f1f1ff;
+    --hairline: rgba(0, 0, 0, 0.08);
+    --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html {
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-optical-sizing: auto;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overscroll-behavior: none;
+  }
+
+  ::selection { background: var(--accent-tint); color: var(--ink); }
+
+  .visually-hidden {
+    position: absolute; width: 1px; height: 1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+
+  /* ---------- sections ---------- */
+  section.hero {
+    position: relative;
+    height: 100vh;
+    height: 100dvh;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    overflow: hidden;
+    background: var(--bg);
+  }
+  section.hero canvas.webgl {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+  }
+
+  /* ---------- mono labels ---------- */
+  .mono-label {
+    position: absolute;
+    left: 28px;
+    bottom: 24px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-4);
+    pointer-events: none;
+    z-index: 4;
+    white-space: nowrap;
+  }
+  .mono-label b {
+    font-weight: 400;
+    color: var(--ink-2);
+  }
+  .mono-label .tick {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-right: 10px;
+    vertical-align: 1px;
+  }
+
+  /* fixed gallery chrome */
+  .chrome {
+    position: fixed;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-4);
+    z-index: 20;
+    pointer-events: none;
+  }
+  .chrome.tl { top: 24px; left: 28px; }
+  .chrome.tr { top: 24px; right: 28px; }
+  .chrome.tl b { color: var(--ink); font-weight: 400; }
+
+  /* ---------- dot nav ---------- */
+  nav.dots {
+    position: fixed;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    z-index: 30;
+  }
+  nav.dots a {
+    display: block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.14);
+    transition: background 0.3s var(--ease), transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+  }
+  nav.dots a:hover { background: var(--ink-4); transform: scale(1.25); }
+  nav.dots a.active {
+    background: var(--accent);
+    transform: scale(1.25);
+    box-shadow: 0 0 0 4px var(--accent-tint);
+  }
+
+  /* ---------- hero copy ---------- */
+  .copy {
+    position: absolute;
+    z-index: 3;
+    pointer-events: none;
+  }
+  .copy .kicker {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 22px;
+  }
+  .copy h1, .copy .h1 {
+    font-size: clamp(48px, 6.4vw, 72px);
+    font-weight: 590;
+    letter-spacing: -0.022em;
+    line-height: 1.02;
+    color: var(--ink);
+    margin-bottom: 18px;
+  }
+  .copy .tagline {
+    font-size: 19px;
+    font-weight: 510;
+    letter-spacing: -0.012em;
+    color: var(--ink-2);
+    margin-bottom: 10px;
+  }
+  .copy .bio {
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.55;
+    color: var(--ink-3);
+    max-width: 46ch;
+    margin-bottom: 30px;
+  }
+  .copy .actions { display: flex; gap: 10px; }
+  .copy.center .actions { justify-content: center; }
+
+  .btn {
+    pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 18px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 510;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: transform 0.25s var(--ease), background 0.25s var(--ease),
+                border-color 0.25s var(--ease), box-shadow 0.25s var(--ease);
+  }
+  .btn.primary {
+    background: var(--ink);
+    color: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.09);
+  }
+  .btn.primary:hover { background: #16171b; transform: translateY(-1px); }
+  .btn.secondary {
+    background: #fff;
+    color: var(--ink-2);
+    border-color: var(--hairline);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+  .btn.secondary:hover {
+    background: #f9f9fb;
+    border-color: rgba(0, 0, 0, 0.14);
+    transform: translateY(-1px);
+  }
+  .btn .arrow { font-size: 13px; transition: transform 0.25s var(--ease); }
+  .btn:hover .arrow { transform: translateX(2px); }
+
+  /* placement variants */
+  .copy.center {
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .copy.center::before {
+    /* soft legibility halo over the particle field */
+    content: "";
+    position: absolute;
+    width: min(880px, 90vw);
+    height: 480px;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(255,255,255,0.92) 35%, rgba(255,255,255,0) 100%);
+    z-index: -1;
+  }
+
+  .copy.left {
+    left: 8vw;
+    top: 50%;
+    transform: translateY(-50%);
+    max-width: 600px;
+  }
+
+  .copy.lower-center {
+    left: 50%;
+    top: 56%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .copy.bottom-left {
+    left: 8vw;
+    bottom: 13vh;
+    max-width: 600px;
+  }
+
+  .copy.top-left {
+    left: 8vw;
+    top: 13vh;
+    max-width: 640px;
+  }
+
+  .hint {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-4);
+    margin-top: 26px;
+  }
+  .hint::before {
+    content: "";
+    display: inline-block;
+    width: 18px; height: 1px;
+    background: var(--accent);
+    margin-right: 10px;
+    vertical-align: 4px;
+  }
+
+  @media (max-width: 720px) {
+    .mono-label { font-size: 10px; left: 18px; bottom: 18px; }
+    .chrome.tr { display: none; }
+    .chrome.tl { left: 18px; }
+    nav.dots { right: 12px; }
+    .copy.left, .copy.bottom-left, .copy.top-left { left: 24px; right: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="chrome tl"><b>Sam Chen</b>&nbsp;&nbsp;—&nbsp;&nbsp;Hero Concepts</div>
+<div class="chrome tr">06 / Particle Systems</div>
+
+<nav class="dots" aria-label="Section navigation">
+  <a href="#s1" data-dot="1" aria-label="Hero 01 — Particle morph"></a>
+  <a href="#s2" data-dot="2" aria-label="Hero 02 — Flow field"></a>
+  <a href="#s3" data-dot="3" aria-label="Hero 03 — Type scatter"></a>
+  <a href="#s4" data-dot="4" aria-label="Hero 04 — Galaxy"></a>
+  <a href="#s5" data-dot="5" aria-label="Hero 05 — Ripple grid"></a>
+</nav>
+
+<!-- ============ 01 · PARTICLE MORPH ============ -->
+<section class="hero" id="s1">
+  <canvas class="webgl" aria-hidden="true"></canvas>
+  <div class="copy center">
+    <div class="kicker">Portfolio — 2026</div>
+    <h1>Sam Chen</h1>
+    <div class="tagline">Researcher, Builder &amp; Founder</div>
+    <p class="bio">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+    <div class="actions">
+      <a class="btn primary" href="#">View work <span class="arrow">→</span></a>
+      <a class="btn secondary" href="#">Get in touch</a>
+    </div>
+  </div>
+  <div class="mono-label"><span class="tick"></span>Hero 01 / 20 — <b>Particle Morph</b> — 5,200 pts · sphere → knot → grid</div>
+</section>
+
+<!-- ============ 02 · CURL-NOISE FLOW FIELD ============ -->
+<section class="hero" id="s2">
+  <canvas class="webgl" aria-hidden="true"></canvas>
+  <div class="copy left">
+    <div class="kicker">Cambridge, MA</div>
+    <h1>Sam Chen</h1>
+    <div class="tagline">Researcher, Builder &amp; Founder</div>
+    <p class="bio">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+    <div class="actions">
+      <a class="btn primary" href="#">View work <span class="arrow">→</span></a>
+      <a class="btn secondary" href="#">Read research</a>
+    </div>
+    <div class="hint">Move the pointer to bend the field</div>
+  </div>
+  <div class="mono-label"><span class="tick"></span>Hero 02 / 20 — <b>Flow Field</b> — curl noise · 3,500 pts · pointer perturbs</div>
+</section>
+
+<!-- ============ 03 · PARTICLE TYPE SCATTER ============ -->
+<section class="hero" id="s3">
+  <canvas class="webgl" aria-hidden="true"></canvas>
+  <h1 class="visually-hidden">Sam Chen</h1>
+  <div class="copy lower-center">
+    <div class="tagline">Researcher, Builder &amp; Founder</div>
+    <p class="bio">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+    <div class="actions">
+      <a class="btn primary" href="#">View work <span class="arrow">→</span></a>
+      <a class="btn secondary" href="#">Get in touch</a>
+    </div>
+    <div class="hint">Run your cursor through the name</div>
+  </div>
+  <div class="mono-label"><span class="tick"></span>Hero 03 / 20 — <b>Type Scatter</b> — raster-sampled glyphs · spring return</div>
+</section>
+
+<!-- ============ 04 · GALAXY SPIRAL ============ -->
+<section class="hero" id="s4">
+  <canvas class="webgl" aria-hidden="true"></canvas>
+  <div class="copy bottom-left">
+    <div class="kicker">Selected work · 2022 — 2026</div>
+    <h1>Sam Chen</h1>
+    <div class="tagline">Researcher, Builder &amp; Founder</div>
+    <p class="bio">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+    <div class="actions">
+      <a class="btn primary" href="#">View work <span class="arrow">→</span></a>
+      <a class="btn secondary" href="#">About me</a>
+    </div>
+  </div>
+  <div class="mono-label"><span class="tick"></span>Hero 04 / 20 — <b>Galaxy</b> — log spiral · 9,000 pts · parallax tilt</div>
+</section>
+
+<!-- ============ 05 · RIPPLE GRID ============ -->
+<section class="hero" id="s5">
+  <canvas class="webgl" aria-hidden="true"></canvas>
+  <div class="copy top-left">
+    <div class="kicker">sam_chen@neosigma.ai</div>
+    <h1>Sam Chen</h1>
+    <div class="tagline">Researcher, Builder &amp; Founder</div>
+    <p class="bio">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+    <div class="actions">
+      <a class="btn primary" href="#">View work <span class="arrow">→</span></a>
+      <a class="btn secondary" href="#">Get in touch</a>
+    </div>
+    <div class="hint">Click the surface to cast a wave</div>
+  </div>
+  <div class="mono-label"><span class="tick"></span>Hero 05 / 20 — <b>Ripple Grid</b> — gaussian wavefronts · click to disturb</div>
+</section>
+
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+/* ================================================================
+   Shared
+================================================================ */
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const DPR = Math.min(window.devicePixelRatio || 1, 2);
+
+const PALETTE = {
+  ink:  new THREE.Color('#282a30'),
+  ink2: new THREE.Color('#3c4149'),
+  ink3: new THREE.Color('#6f6e77'),
+  ink4: new THREE.Color('#86848d'),
+  indigo: new THREE.Color('#7070ff'),
+};
+const GRAYS = [PALETTE.ink, PALETTE.ink2, PALETTE.ink3, PALETTE.ink4];
+
+function gauss() {
+  return (Math.random() + Math.random() + Math.random() - 1.5) * 0.8165;
+}
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+
+/* round-sprite texture (shared Texture object; three uploads per-context) */
+const dotTexture = (() => {
+  const c = document.createElement('canvas');
+  c.width = c.height = 64;
+  const g = c.getContext('2d');
+  const grd = g.createRadialGradient(32, 32, 0, 32, 32, 30);
+  grd.addColorStop(0, 'rgba(255,255,255,1)');
+  grd.addColorStop(0.72, 'rgba(255,255,255,1)');
+  grd.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = grd;
+  g.beginPath(); g.arc(32, 32, 30, 0, Math.PI * 2); g.fill();
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+})();
+
+function pointsMaterial(size, opacity) {
+  return new THREE.PointsMaterial({
+    size,
+    map: dotTexture,
+    transparent: true,
+    opacity,
+    vertexColors: true,
+    sizeAttenuation: true,
+    depthWrite: false,
+    alphaTest: 0.05,
+  });
+}
+
+/* ---------------- classic Perlin gradient noise (3D) ---------------- */
+const PERM = new Uint8Array(512);
+(() => {
+  const p = new Uint8Array(256);
+  for (let i = 0; i < 256; i++) p[i] = i;
+  let seed = 1337;
+  const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 255; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    const t = p[i]; p[i] = p[j]; p[j] = t;
+  }
+  for (let i = 0; i < 512; i++) PERM[i] = p[i & 255];
+})();
+function fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+function lerp(a, b, t) { return a + (b - a) * t; }
+function grad3(h, x, y, z) {
+  const g = h & 15;
+  const u = g < 8 ? x : y;
+  const v = g < 4 ? y : (g === 12 || g === 14 ? x : z);
+  return ((g & 1) ? -u : u) + ((g & 2) ? -v : v);
+}
+function noise3(x, y, z) {
+  const X = Math.floor(x) & 255, Y = Math.floor(y) & 255, Z = Math.floor(z) & 255;
+  x -= Math.floor(x); y -= Math.floor(y); z -= Math.floor(z);
+  const u = fade(x), v = fade(y), w = fade(z);
+  const A = PERM[X] + Y, AA = PERM[A] + Z, AB = PERM[A + 1] + Z;
+  const B = PERM[X + 1] + Y, BA = PERM[B] + Z, BB = PERM[B + 1] + Z;
+  return lerp(
+    lerp(
+      lerp(grad3(PERM[AA], x, y, z),     grad3(PERM[BA], x - 1, y, z), u),
+      lerp(grad3(PERM[AB], x, y - 1, z), grad3(PERM[BB], x - 1, y - 1, z), u), v),
+    lerp(
+      lerp(grad3(PERM[AA + 1], x, y, z - 1),     grad3(PERM[BA + 1], x - 1, y, z - 1), u),
+      lerp(grad3(PERM[AB + 1], x, y - 1, z - 1), grad3(PERM[BB + 1], x - 1, y - 1, z - 1), u), v),
+    w);
+}
+
+/* ================================================================
+   Hero controller framework
+   buildFn(ctl) -> { update(t, dt), pointer(wx, wy, active),
+                     click(wx, wy), prime() }
+================================================================ */
+const controllers = [];
+
+/* All scenes are built inside boot(), which waits for Inter to load —
+   the type-scatter hero rasterizes "SAM CHEN" and must sample the
+   real font, not the fallback. */
+
+function makeHero(id, cameraZ, buildFn) {
+  const section = document.getElementById(id);
+  const canvas = section.querySelector('canvas.webgl');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+  renderer.setClearColor(0xffffff, 1);
+  renderer.setPixelRatio(DPR);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 200);
+  camera.position.set(0, 0, cameraZ);
+
+  const ctl = {
+    id, section, canvas, renderer, scene, camera,
+    running: false, time: 0, raf: 0, api: null,
+  };
+
+  ctl.api = buildFn(ctl);
+
+  function resize() {
+    const w = section.clientWidth, h = section.clientHeight;
+    if (w === 0 || h === 0) return;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    if (REDUCED) renderer.render(scene, camera);
+  }
+  ctl.resize = resize;
+  resize();
+
+  let last = 0;
+  function frame(now) {
+    if (!ctl.running) return;
+    ctl.raf = requestAnimationFrame(frame);
+    const dt = clamp((now - last) / 1000, 0, 0.05);
+    last = now;
+    ctl.time += dt;
+    ctl.api.update(ctl.time, dt);
+    renderer.render(scene, camera);
+  }
+  ctl.start = () => {
+    if (ctl.running || REDUCED) return;
+    ctl.running = true;
+    last = performance.now();
+    ctl.raf = requestAnimationFrame(frame);
+  };
+  ctl.stop = () => {
+    ctl.running = false;
+    cancelAnimationFrame(ctl.raf);
+  };
+
+  /* pointer mapping: NDC -> world on z=0 plane (camera on +z axis) */
+  function ndcToWorld(nx, ny) {
+    const dist = camera.position.z;
+    const halfH = Math.tan(camera.fov * Math.PI / 360) * dist;
+    const halfW = halfH * camera.aspect;
+    return [nx * halfW, ny * halfH];
+  }
+  ctl.ndcToWorld = ndcToWorld;
+
+  if (!REDUCED) {
+    section.addEventListener('pointermove', (e) => {
+      const r = section.getBoundingClientRect();
+      const nx = ((e.clientX - r.left) / r.width) * 2 - 1;
+      const ny = -(((e.clientY - r.top) / r.height) * 2 - 1);
+      ctl.api.pointer && ctl.api.pointer(nx, ny, true);
+    });
+    section.addEventListener('pointerleave', () => {
+      ctl.api.pointer && ctl.api.pointer(0, 0, false);
+    });
+    section.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.btn')) return;
+      const r = section.getBoundingClientRect();
+      const nx = ((e.clientX - r.left) / r.width) * 2 - 1;
+      const ny = -(((e.clientY - r.top) / r.height) * 2 - 1);
+      ctl.api.click && ctl.api.click(nx, ny);
+    });
+  }
+
+  controllers.push(ctl);
+  return ctl;
+}
+
+function boot() {
+
+/* ================================================================
+   HERO 01 — Particle morph: sphere -> torus knot -> wave grid
+================================================================ */
+makeHero('s1', 7.5, (ctl) => {
+  const N = 5200;
+
+  /* target A: fibonacci sphere */
+  const sphere = new Float32Array(N * 3);
+  {
+    const phi = Math.PI * (3 - Math.sqrt(5));
+    for (let i = 0; i < N; i++) {
+      const y = 1 - (i / (N - 1)) * 2;
+      const rad = Math.sqrt(1 - y * y);
+      const th = phi * i;
+      const r = 2.35 + gauss() * 0.02;
+      sphere[i * 3]     = Math.cos(th) * rad * r;
+      sphere[i * 3 + 1] = y * r;
+      sphere[i * 3 + 2] = Math.sin(th) * rad * r;
+    }
+  }
+
+  /* target B: torus knot (p=2, q=3) with tube scatter */
+  const knot = new Float32Array(N * 3);
+  {
+    for (let i = 0; i < N; i++) {
+      const t = (i / N) * Math.PI * 2;
+      const cu = Math.cos(3 * t);
+      const cx = (2 + cu) * Math.cos(2 * t);
+      const cy = (2 + cu) * Math.sin(2 * t);
+      const cz = Math.sin(3 * t);
+      const s = 0.78;
+      const sc = 0.30;
+      knot[i * 3]     = cx * s + gauss() * sc;
+      knot[i * 3 + 1] = cy * s + gauss() * sc;
+      knot[i * 3 + 2] = cz * s * 1.4 + gauss() * sc;
+    }
+  }
+
+  /* target C: wave grid plane */
+  const grid = new Float32Array(N * 3);
+  {
+    const cols = 104, rows = Math.ceil(N / 104);
+    for (let i = 0; i < N; i++) {
+      const gx = i % cols, gz = Math.floor(i / cols);
+      const x = (gx / (cols - 1) - 0.5) * 7.4;
+      const z = (gz / (rows - 1) - 0.5) * 4.0;
+      grid[i * 3]     = x;
+      grid[i * 3 + 1] = Math.sin(x * 1.35) * Math.cos(z * 1.5) * 0.32;
+      grid[i * 3 + 2] = z;
+    }
+  }
+
+  const targets = [sphere, knot, grid];
+  const delays = new Float32Array(N);
+  for (let i = 0; i < N; i++) delays[i] = Math.random();
+
+  const positions = new Float32Array(sphere);
+  const colors = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) {
+    const c = Math.random() < 0.08 ? PALETTE.indigo : GRAYS[(Math.random() * 4) | 0];
+    colors[i * 3] = c.r; colors[i * 3 + 1] = c.g; colors[i * 3 + 2] = c.b;
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const pts = new THREE.Points(geo, pointsMaterial(0.05, 0.85));
+  pts.rotation.x = 0.12;
+  ctl.scene.add(pts);
+
+  const HOLD = 2.4, MORPH = 1.7, CYCLE = HOLD + MORPH;
+  const STAGGER = 0.28; /* fraction of morph used for per-particle delay */
+  let mx = 0, my = 0, mActive = false;
+
+  function update(t, dt) {
+    const cycleT = t % CYCLE;
+    const idx = Math.floor(t / CYCLE) % 3;
+    const from = targets[idx];
+    const to = targets[(idx + 1) % 3];
+    const posAttr = geo.attributes.position;
+    const p = posAttr.array;
+
+    if (cycleT >= HOLD) {
+      const raw = (cycleT - HOLD) / MORPH;
+      for (let i = 0; i < N; i++) {
+        const local = clamp((raw - delays[i] * STAGGER) / (1 - STAGGER), 0, 1);
+        const k = easeInOutCubic(local);
+        const j = i * 3;
+        p[j]     = from[j]     + (to[j]     - from[j])     * k;
+        p[j + 1] = from[j + 1] + (to[j + 1] - from[j + 1]) * k;
+        p[j + 2] = from[j + 2] + (to[j + 2] - from[j + 2]) * k;
+      }
+    } else {
+      for (let i = 0; i < N * 3; i++) p[i] = from[i];
+    }
+    posAttr.needsUpdate = true;
+
+    pts.rotation.y = t * 0.14;
+    /* gentle parallax */
+    const tx = mActive ? my * 0.18 : 0;
+    const ty = mActive ? mx * 0.22 : 0;
+    ctl.camera.position.x += (ty - ctl.camera.position.x) * Math.min(1, dt * 2.5);
+    ctl.camera.position.y += (-tx - ctl.camera.position.y) * Math.min(1, dt * 2.5);
+    ctl.camera.lookAt(0, 0, 0);
+  }
+
+  return {
+    update,
+    pointer(nx, ny, active) { mx = nx; my = ny; mActive = active; },
+    prime() { update(0.0, 1 / 60); },
+  };
+});
+
+/* ================================================================
+   HERO 02 — Curl-noise flow field
+================================================================ */
+makeHero('s2', 8, (ctl) => {
+  const N = 3500;
+  const BX = 7.4, BY = 4.2;       /* half-extent of domain */
+  const FREQ = 0.30, SPEED = 1.15, DRIFT = 0.42;
+  const EPS = 0.09;
+
+  const positions = new Float32Array(N * 3);
+  const colors = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) {
+    positions[i * 3]     = (Math.random() * 2 - 1) * BX;
+    positions[i * 3 + 1] = (Math.random() * 2 - 1) * BY;
+    positions[i * 3 + 2] = (Math.random() * 2 - 1) * 0.8;
+    const c = Math.random() < 0.07 ? PALETTE.indigo : GRAYS[(Math.random() * 4) | 0];
+    colors[i * 3] = c.r; colors[i * 3 + 1] = c.g; colors[i * 3 + 2] = c.b;
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const pts = new THREE.Points(geo, pointsMaterial(0.038, 0.6));
+  ctl.scene.add(pts);
+
+  let mx = 0, my = 0, mActive = false;
+
+  function update(t, dt) {
+    const p = geo.attributes.position.array;
+    const zt = t * 0.10;
+    const step = Math.min(dt, 1 / 30);
+    for (let i = 0; i < N; i++) {
+      const j = i * 3;
+      let px = p[j], py = p[j + 1];
+      const sx = px * FREQ, sy = py * FREQ;
+      /* 2D curl of perlin potential */
+      let vx = (noise3(sx, sy + EPS, zt) - noise3(sx, sy - EPS, zt)) / (2 * EPS) * SPEED + DRIFT;
+      let vy = -(noise3(sx + EPS, sy, zt) - noise3(sx - EPS, sy, zt)) / (2 * EPS) * SPEED;
+
+      /* pointer perturbation: swirl + push */
+      if (mActive) {
+        const dx = px - mx, dy = py - my;
+        const d2 = dx * dx + dy * dy;
+        const R = 1.7, R2 = R * R;
+        if (d2 < R2) {
+          const d = Math.sqrt(d2) || 0.001;
+          const f = (1 - d / R) * 2.4;
+          vx += (-dy / d) * f * 1.5 + (dx / d) * f * 0.7;
+          vy += ( dx / d) * f * 1.5 + (dy / d) * f * 0.7;
+        }
+      }
+
+      px += vx * step;
+      py += vy * step;
+
+      /* wrap / respawn keeps the streams continuous */
+      if (px > BX)  { px = -BX; py = (Math.random() * 2 - 1) * BY; }
+      if (px < -BX) { px = BX;  py = (Math.random() * 2 - 1) * BY; }
+      if (py > BY)  py = -BY;
+      if (py < -BY) py = BY;
+
+      p[j] = px; p[j + 1] = py;
+    }
+    geo.attributes.position.needsUpdate = true;
+  }
+
+  return {
+    update,
+    pointer(nx, ny, active) {
+      const [wx, wy] = ctl.ndcToWorld(nx, ny);
+      mx = wx; my = wy; mActive = active;
+    },
+    prime() {
+      /* warm the field so the static frame shows streams, not confetti */
+      for (let i = 0; i < 240; i++) update(i / 60, 1 / 60);
+    },
+  };
+});
+
+/* ================================================================
+   HERO 03 — Particle type scatter ("SAM CHEN")
+================================================================ */
+makeHero('s3', 8, (ctl) => {
+  /* rasterize the name and sample dark pixels */
+  function samplePoints() {
+    const W = 1200, H = 280;
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const g = c.getContext('2d', { willReadFrequently: true });
+    g.clearRect(0, 0, W, H);
+    g.fillStyle = '#000';
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.font = '590 176px Inter, system-ui, sans-serif';
+    g.fillText('SAM CHEN', W / 2, H / 2 + 8);
+    const data = g.getImageData(0, 0, W, H).data;
+
+    let step = 3;
+    let raw = [];
+    do {
+      raw = [];
+      for (let y = 0; y < H; y += step) {
+        for (let x = 0; x < W; x += step) {
+          if (data[(y * W + x) * 4 + 3] > 140) raw.push(x, y);
+        }
+      }
+      step++;
+    } while (raw.length / 2 > 7800);
+
+    /* bounds for centering */
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (let i = 0; i < raw.length; i += 2) {
+      if (raw[i] < minX) minX = raw[i];
+      if (raw[i] > maxX) maxX = raw[i];
+      if (raw[i + 1] < minY) minY = raw[i + 1];
+      if (raw[i + 1] > maxY) maxY = raw[i + 1];
+    }
+    const pxW = maxX - minX || 1;
+    const worldW = 7.6;
+    const s = worldW / pxW;
+    const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+    const offsetY = 1.15; /* name sits above the lower-center copy block */
+
+    const homes = new Float32Array(raw.length);
+    for (let i = 0; i < raw.length; i += 2) {
+      homes[i]     = (raw[i] - cx) * s;
+      homes[i + 1] = -(raw[i + 1] - cy) * s + offsetY;
+    }
+    return homes;
+  }
+
+  const homes = samplePoints();
+  const N = homes.length / 2;
+
+  const positions = new Float32Array(N * 3);
+  const vel = new Float32Array(N * 2);
+  const phase = new Float32Array(N);
+  const colors = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) {
+    /* scattered entrance */
+    positions[i * 3]     = (Math.random() * 2 - 1) * 9;
+    positions[i * 3 + 1] = (Math.random() * 2 - 1) * 5.5;
+    positions[i * 3 + 2] = (Math.random() * 2 - 1) * 0.15;
+    phase[i] = Math.random() * Math.PI * 2;
+    let c;
+    const r = Math.random();
+    if (r < 0.10) c = PALETTE.indigo;
+    else if (r < 0.55) c = PALETTE.ink;
+    else if (r < 0.85) c = PALETTE.ink2;
+    else c = PALETTE.ink3;
+    colors[i * 3] = c.r; colors[i * 3 + 1] = c.g; colors[i * 3 + 2] = c.b;
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const pts = new THREE.Points(geo, pointsMaterial(0.045, 0.92));
+  ctl.scene.add(pts);
+
+  let mx = 0, my = 0, mActive = false;
+  const R = 1.25, R2 = R * R;
+
+  function update(t, dt) {
+    const p = geo.attributes.position.array;
+    const s = clamp(dt * 60, 0.2, 2.0); /* frame-rate normalized step */
+    for (let i = 0; i < N; i++) {
+      const j3 = i * 3, j2 = i * 2;
+      let px = p[j3], py = p[j3 + 1];
+      /* breathing home target */
+      const hx = homes[j2]     + Math.sin(t * 0.9 + phase[i]) * 0.012;
+      const hy = homes[j2 + 1] + Math.cos(t * 1.1 + phase[i] * 1.7) * 0.012;
+
+      let vx = vel[j2], vy = vel[j2 + 1];
+      /* spring to home */
+      vx += (hx - px) * 0.052 * s;
+      vy += (hy - py) * 0.052 * s;
+
+      /* local pointer repulsion */
+      if (mActive) {
+        const dx = px - mx, dy = py - my;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < R2) {
+          const d = Math.sqrt(d2) || 0.001;
+          const f = (1 - d / R) * (1 - d / R) * 0.55 * s;
+          vx += (dx / d) * f;
+          vy += (dy / d) * f;
+        }
+      }
+
+      /* damping */
+      const damp = Math.pow(0.86, s);
+      vx *= damp; vy *= damp;
+
+      px += vx * s; py += vy * s;
+      vel[j2] = vx; vel[j2 + 1] = vy;
+      p[j3] = px; p[j3 + 1] = py;
+    }
+    geo.attributes.position.needsUpdate = true;
+  }
+
+  return {
+    update,
+    pointer(nx, ny, active) {
+      const [wx, wy] = ctl.ndcToWorld(nx, ny);
+      mx = wx; my = wy; mActive = active;
+    },
+    prime() {
+      /* assemble instantly for the static frame */
+      const p = geo.attributes.position.array;
+      for (let i = 0; i < N; i++) {
+        p[i * 3] = homes[i * 2];
+        p[i * 3 + 1] = homes[i * 2 + 1];
+        p[i * 3 + 2] = 0;
+      }
+      geo.attributes.position.needsUpdate = true;
+    },
+  };
+});
+
+/* ================================================================
+   HERO 04 — Galaxy spiral
+================================================================ */
+makeHero('s4', 7.5, (ctl) => {
+  const N = 9000, ARMS = 3;
+  const positions = new Float32Array(N * 3);
+  const colors = new Float32Array(N * 3);
+  const tmp = new THREE.Color();
+
+  for (let i = 0; i < N; i++) {
+    const t = Math.pow(Math.random(), 0.62);       /* density bias to core */
+    const r = 0.12 + t * 4.4;
+    const arm = i % ARMS;
+    const spread = 0.34 * (1.25 - t);              /* tighter arms outward */
+    const theta = arm * (Math.PI * 2 / ARMS) + Math.log(r + 1) * 2.7 + gauss() * spread;
+    positions[i * 3]     = Math.cos(theta) * r + gauss() * 0.07;
+    positions[i * 3 + 1] = Math.sin(theta) * r + gauss() * 0.07;
+    positions[i * 3 + 2] = gauss() * 0.14 * (1.3 - t);
+
+    /* grayscale core -> indigo tips */
+    const k = clamp((t - 0.22) / 0.7, 0, 1);
+    tmp.copy(PALETTE.ink2).lerp(PALETTE.indigo, k * k * (3 - 2 * k));
+    /* slight per-point lightness variation (reads as density on white) */
+    const lighten = Math.random() * 0.32;
+    tmp.lerp(new THREE.Color('#ffffff'), lighten * (0.4 + t * 0.6));
+    colors[i * 3] = tmp.r; colors[i * 3 + 1] = tmp.g; colors[i * 3 + 2] = tmp.b;
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const pts = new THREE.Points(geo, pointsMaterial(0.034, 0.8));
+
+  const group = new THREE.Group();
+  group.add(pts);
+  group.rotation.x = -1.02;
+  group.position.set(1.25, 0.55, 0);
+  ctl.scene.add(group);
+
+  const BASE_X = -1.02;
+  let mx = 0, my = 0, mActive = false;
+
+  function update(t, dt) {
+    pts.rotation.z = t * 0.055;
+    const targetX = BASE_X + (mActive ? -my * 0.09 : 0);
+    const targetY = mActive ? mx * 0.12 : 0;
+    const k = Math.min(1, dt * 2.2);
+    group.rotation.x += (targetX - group.rotation.x) * k;
+    group.rotation.y += (targetY - group.rotation.y) * k;
+  }
+
+  return {
+    update,
+    pointer(nx, ny, active) { mx = nx; my = ny; mActive = active; },
+    prime() { pts.rotation.z = 0.8; },
+  };
+});
+
+/* ================================================================
+   HERO 05 — Ripple grid
+================================================================ */
+makeHero('s5', 10, (ctl) => {
+  const COLS = 150, ROWS = 92, GAP = 0.085;
+  const N = COLS * ROWS;
+  const W = (COLS - 1) * GAP, D = (ROWS - 1) * GAP;
+
+  ctl.camera.position.set(0, 4.4, 7.0);
+  ctl.camera.lookAt(0, -0.55, 0);
+
+  const baseX = new Float32Array(N);
+  const baseZ = new Float32Array(N);
+  const positions = new Float32Array(N * 3);
+  const colors = new Float32Array(N * 3);
+
+  const base = PALETTE.ink4.clone().lerp(new THREE.Color('#ffffff'), 0.25);
+  for (let i = 0; i < N; i++) {
+    const cx = i % COLS, rz = Math.floor(i / COLS);
+    baseX[i] = (cx / (COLS - 1) - 0.5) * W;
+    baseZ[i] = (rz / (ROWS - 1) - 0.5) * D;
+    positions[i * 3] = baseX[i];
+    positions[i * 3 + 1] = 0;
+    positions[i * 3 + 2] = baseZ[i];
+    colors[i * 3] = base.r; colors[i * 3 + 1] = base.g; colors[i * 3 + 2] = base.b;
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const pts = new THREE.Points(geo, pointsMaterial(0.05, 0.9));
+  ctl.scene.add(pts);
+
+  /* ripples: {x, z, t0, amp} */
+  const ripples = [];
+  const SPEED = 2.7, SIGMA2 = 0.22, DECAY = 1.05, FREQ = 7.0;
+  const MAX_RIPPLES = 12;
+  function addRipple(x, z, t0, amp) {
+    if (ripples.length >= MAX_RIPPLES) ripples.shift();
+    ripples.push({ x, z, t0, amp });
+  }
+
+  const raycaster = new THREE.Raycaster();
+  const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+  const hit = new THREE.Vector3();
+  const ndc = new THREE.Vector2();
+  function pointerToPlane(nx, ny) {
+    ndc.set(nx, ny);
+    raycaster.setFromCamera(ndc, ctl.camera);
+    return raycaster.ray.intersectPlane(plane, hit) ? hit : null;
+  }
+
+  let lastSpawn = 0, lastX = 1e9, lastZ = 1e9;
+  let nextAuto = 1.2;
+  let now = 0;
+
+  const iR = PALETTE.indigo.r, iG = PALETTE.indigo.g, iB = PALETTE.indigo.b;
+  const dR = PALETTE.ink2.r, dG = PALETTE.ink2.g, dB = PALETTE.ink2.b;
+
+  function update(t, dt) {
+    now = t;
+
+    /* ambient life: a soft ripple every few seconds */
+    if (t > nextAuto) {
+      addRipple((Math.random() - 0.5) * W * 0.7, (Math.random() - 0.5) * D * 0.7, t, 0.16);
+      nextAuto = t + 2.4 + Math.random() * 1.6;
+    }
+    /* expire old ripples */
+    for (let i = ripples.length - 1; i >= 0; i--) {
+      if (t - ripples[i].t0 > 6) ripples.splice(i, 1);
+    }
+
+    const p = geo.attributes.position.array;
+    const c = geo.attributes.color.array;
+    const M = ripples.length;
+
+    for (let i = 0; i < N; i++) {
+      let y = 0;
+      const bx = baseX[i], bz = baseZ[i];
+      for (let m = 0; m < M; m++) {
+        const rp = ripples[m];
+        const age = t - rp.t0;
+        const dx = bx - rp.x, dz = bz - rp.z;
+        const d = Math.sqrt(dx * dx + dz * dz);
+        const front = d - SPEED * age;
+        if (front > 1.2 || front < -2.4) continue;
+        y += rp.amp * Math.exp(-(front * front) / SIGMA2)
+           * Math.cos(front * FREQ)
+           * Math.exp(-age * DECAY);
+      }
+      p[i * 3 + 1] = y;
+
+      /* tint toward indigo (and darker) by displacement */
+      const m1 = clamp(Math.abs(y) * 4.0, 0, 1);
+      const j = i * 3;
+      if (m1 > 0.01) {
+        const mix = y > 0 ? 1 : 0.55;
+        c[j]     = base.r + ((y > 0 ? iR : dR) - base.r) * m1 * mix;
+        c[j + 1] = base.g + ((y > 0 ? iG : dG) - base.g) * m1 * mix;
+        c[j + 2] = base.b + ((y > 0 ? iB : dB) - base.b) * m1 * mix;
+      } else {
+        c[j] = base.r; c[j + 1] = base.g; c[j + 2] = base.b;
+      }
+    }
+    geo.attributes.position.needsUpdate = true;
+    geo.attributes.color.needsUpdate = true;
+  }
+
+  return {
+    update,
+    pointer(nx, ny, active) {
+      if (!active) return;
+      const h = pointerToPlane(nx, ny);
+      if (!h) return;
+      const dx = h.x - lastX, dz = h.z - lastZ;
+      const moved = dx * dx + dz * dz > 0.5;
+      if (moved && now - lastSpawn > 0.13) {
+        addRipple(h.x, h.z, now, 0.13);
+        lastSpawn = now; lastX = h.x; lastZ = h.z;
+      }
+    },
+    click(nx, ny) {
+      const h = pointerToPlane(nx, ny);
+      if (h) addRipple(h.x, h.z, now, 0.5);
+    },
+    prime() {
+      addRipple(-2.5, -0.5, -0.7, 0.45);
+      addRipple(2.2, 1.0, -1.6, 0.4);
+      addRipple(0.5, -2.0, -2.6, 0.35);
+      update(0, 1 / 60);
+    },
+  };
+});
+
+/* ================================================================
+   Orchestration: visibility, resize, dot nav, reduced motion
+================================================================ */
+const byId = {};
+controllers.forEach(c => { byId[c.id] = c; });
+
+if (REDUCED) {
+  /* one considered static frame per scene; no loops, no listeners */
+  controllers.forEach(c => {
+    c.api.prime && c.api.prime();
+    c.api.update(0.001, 1 / 60);
+    c.renderer.render(c.scene, c.camera);
+  });
+} else {
+  const playObserver = new IntersectionObserver((entries) => {
+    entries.forEach(en => {
+      const c = byId[en.target.id];
+      if (!c) return;
+      if (en.isIntersecting) c.start(); else c.stop();
+    });
+  }, { threshold: 0.05 });
+  controllers.forEach(c => playObserver.observe(c.section));
+}
+
+/* dot nav active state */
+const dots = Array.from(document.querySelectorAll('nav.dots a'));
+const navObserver = new IntersectionObserver((entries) => {
+  entries.forEach(en => {
+    if (!en.isIntersecting) return;
+    const idx = Number(en.target.id.slice(1)) - 1;
+    dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+  });
+}, { threshold: 0.6 });
+controllers.forEach(c => navObserver.observe(c.section));
+
+/* resize */
+let resizeT = 0;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeT);
+  resizeT = setTimeout(() => controllers.forEach(c => c.resize()), 120);
+});
+
+} /* end boot() */
+
+/* Wait for Inter (needed for type rasterization) — but never block
+   longer than 1.5s if the font request stalls. */
+const fontReady = (document.fonts && document.fonts.load)
+  ? Promise.race([
+      document.fonts.load('590 176px Inter').catch(() => {}),
+      new Promise(r => setTimeout(r, 1500)),
+    ])
+  : Promise.resolve();
+fontReady.then(boot);
+</script>
+</body>
+</html>

@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sam Chen — Researcher, Builder, Founder</title>
+<meta name="description" content="Sam Chen — researcher, builder, and founder. Harvard CS, mathematics & psychology. Mechanistic interpretability and hierarchical RL." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  /* ============================================================
+     THE ANNOTATED PAGE — editorial mockup for samchen
+     paper, ink, one color of oxblood. nothing else.
+     ============================================================ */
+
+  :root {
+    --paper:        #faf7f2;
+    --paper-deep:   #f3eee5;
+    --paper-shade:  #ece5d8;
+    --ink:          #1d1a17;
+    --ink-soft:     #50483f;
+    --ink-faint:    #8d8377;
+    --oxblood:      #76202a;
+    --oxblood-soft: #9b4a51;
+    --hairline:     rgba(29, 26, 23, 0.18);
+    --hairline-lt:  rgba(29, 26, 23, 0.09);
+
+    --serif:   "Fraunces", "Iowan Old Style", Georgia, serif;
+    --text:    "Newsreader", "Iowan Old Style", Georgia, serif;
+    --mono:    "IBM Plex Mono", "SFMono-Regular", Menlo, monospace;
+
+    --measure: 60ch;
+    --margin-col: 15rem;
+    --gutter: 3.25rem;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+
+  ::selection { background: var(--oxblood); color: var(--paper); }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--text);
+    font-size: 1.1875rem;
+    line-height: 1.62;
+    font-variant-numeric: oldstyle-nums;
+    -webkit-font-smoothing: antialiased;
+    /* faint laid-paper texture, pure CSS */
+    background-image:
+      repeating-linear-gradient(0deg,
+        rgba(29,26,23,0.012) 0px, rgba(29,26,23,0.012) 1px,
+        transparent 1px, transparent 4px);
+  }
+
+  /* ---------- shell grid: gutter / main / margin / gutter ---------- */
+  .sheet {
+    max-width: 76rem;
+    margin: 0 auto;
+    padding: 0 clamp(1.25rem, 5vw, 4rem);
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--margin-col);
+    column-gap: var(--gutter);
+    align-items: start;
+  }
+
+  .measure { max-width: var(--measure); }
+
+  /* ---------- type primitives ---------- */
+  .label {
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .label .tick { color: var(--oxblood); }
+
+  .section-label {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+  .section-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--hairline);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.15s;
+    align-self: center;
+  }
+  .revealed .section-label::after { transform: scaleX(1); }
+
+  /* drawing rules */
+  .rule {
+    border: none;
+    height: 1px;
+    background: var(--hairline);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 1.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .revealed .rule, .rule.revealed { transform: scaleX(1); }
+
+  h1, h2, h3 {
+    font-family: var(--serif);
+    font-weight: 420;
+    font-variation-settings: "opsz" 90, "SOFT" 30, "WONK" 1;
+    line-height: 1.08;
+    letter-spacing: -0.012em;
+  }
+
+  /* ---------- links: ink underline that settles ---------- */
+  a { color: inherit; text-decoration: none; }
+
+  .lk {
+    position: relative;
+    color: var(--oxblood);
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 100% 1px;
+    background-position: 0 calc(100% - 0.08em);
+    background-repeat: no-repeat;
+    transition: background-size 0.35s cubic-bezier(0.22, 1, 0.36, 1), color 0.25s ease;
+  }
+  .lk:hover { background-size: 0% 1px; background-position: 100% calc(100% - 0.08em); }
+
+  .lk-quiet {
+    color: inherit;
+    background-image: linear-gradient(var(--hairline), var(--hairline));
+    background-size: 0% 1px;
+    background-position: 0 calc(100% - 0.05em);
+    background-repeat: no-repeat;
+    transition: background-size 0.35s cubic-bezier(0.22, 1, 0.36, 1), color 0.25s ease;
+  }
+  .lk-quiet:hover {
+    background-image: linear-gradient(var(--oxblood), var(--oxblood));
+    background-size: 100% 1px;
+    color: var(--oxblood);
+  }
+
+  /* ---------- reveal-on-scroll ---------- */
+  .reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .reveal.revealed { opacity: 1; transform: none; }
+  .reveal[data-delay="1"] { transition-delay: 0.12s; }
+  .reveal[data-delay="2"] { transition-delay: 0.24s; }
+  .reveal[data-delay="3"] { transition-delay: 0.36s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .rule, .section-label::after, .lk, .lk-quiet, .fig-plate::after {
+      transition: none !important;
+      animation: none !important;
+    }
+    .reveal { opacity: 1; transform: none; }
+    .rule, .section-label::after { transform: scaleX(1); }
+  }
+
+  /* ============================================================
+     MASTHEAD / NAV
+     ============================================================ */
+  nav.masthead {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--paper) 92%, transparent);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--hairline-lt);
+  }
+  .masthead-inner {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-top: 1.1rem;
+    padding-bottom: 1.05rem;
+    gap: 2rem;
+  }
+  .masthead .wordmark {
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .masthead .wordmark em {
+    font-style: italic;
+    color: var(--oxblood);
+  }
+  .masthead ul {
+    display: flex;
+    gap: 2.25rem;
+    list-style: none;
+  }
+  .masthead ul a {
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .masthead ul a sup {
+    font-size: 0.55rem;
+    color: var(--oxblood);
+    margin-right: 0.3em;
+    letter-spacing: 0;
+  }
+
+  /* ============================================================
+     HERO — the article opening
+     ============================================================ */
+  header.hero { padding: clamp(4rem, 9vw, 7.5rem) 0 clamp(3rem, 6vw, 5rem); }
+
+  .hero .running-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 3.25rem;
+  }
+
+  .hero h1 {
+    font-size: clamp(3.25rem, 9.5vw, 6.75rem);
+    font-weight: 380;
+    margin-left: -0.04em; /* optical alignment of the S */
+    margin-bottom: 1.75rem;
+  }
+  .hero h1 .comma { color: var(--oxblood); }
+
+  .hero .deck {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 340;
+    font-variation-settings: "opsz" 40, "SOFT" 50, "WONK" 0;
+    font-size: clamp(1.35rem, 3vw, 1.9rem);
+    line-height: 1.3;
+    color: var(--ink-soft);
+    max-width: 28ch;
+  }
+  .hero .deck .amp {
+    font-style: italic;
+    color: var(--oxblood);
+  }
+
+  .hero-meta {
+    margin-top: 3.25rem;
+    padding-top: 1.4rem;
+    border-top: 1px solid var(--hairline);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 3rem;
+  }
+  .hero-meta dl { display: flex; gap: 0.75em; align-items: baseline; }
+  .hero-meta dt {
+    font-family: var(--mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .hero-meta dd {
+    font-family: var(--text);
+    font-size: 0.95rem;
+    font-style: italic;
+  }
+
+  /* ============================================================
+     SECTIONS
+     ============================================================ */
+  section { padding: clamp(3.5rem, 7vw, 5.5rem) 0; }
+  section + section { border-top: 1px solid var(--hairline-lt); }
+
+  /* ---------- abstract / about ---------- */
+  .abstract-body p + p { margin-top: 1.35em; }
+
+  .abstract-body .opening::first-letter {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-variation-settings: "opsz" 144, "SOFT" 0, "WONK" 1;
+    font-size: 3.4em;
+    line-height: 0.82;
+    float: left;
+    padding: 0.08em 0.12em 0 0;
+    color: var(--oxblood);
+  }
+
+  sup.fnref {
+    font-family: var(--mono);
+    font-size: 0.62em;
+    color: var(--oxblood);
+    cursor: help;
+    padding: 0 0.15em;
+    transition: background 0.25s ease;
+    border-radius: 2px;
+  }
+  sup.fnref.lit { background: var(--paper-shade); }
+
+  .margin-notes { padding-top: 0.4rem; }
+  .sidenote {
+    font-size: 0.84rem;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    padding: 0 0 1.4rem 1rem;
+    border-left: 1px solid var(--hairline-lt);
+    transition: border-color 0.3s ease, color 0.3s ease;
+  }
+  .sidenote .sn-num {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--oxblood);
+    display: block;
+    margin-bottom: 0.3rem;
+    letter-spacing: 0.12em;
+  }
+  .sidenote.lit { border-left-color: var(--oxblood); color: var(--ink); }
+  .sidenote em { font-style: italic; }
+
+  .prior-list { margin-top: 2.75rem; }
+  .prior-list .label { display: block; margin-bottom: 1.1rem; }
+  .prior-list ul { list-style: none; }
+  .prior-list li {
+    display: grid;
+    grid-template-columns: 2.6rem 1fr;
+    gap: 1rem;
+    padding: 0.85rem 0;
+    border-top: 1px solid var(--hairline-lt);
+    font-size: 1.02rem;
+  }
+  .prior-list li:last-child { border-bottom: 1px solid var(--hairline-lt); }
+  .prior-list .pn {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--oxblood);
+    padding-top: 0.35rem;
+    letter-spacing: 0.1em;
+  }
+  .prior-list strong { font-weight: 500; }
+
+  /* ============================================================
+     PROJECTS — figures
+     ============================================================ */
+  .figure {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--margin-col);
+    column-gap: var(--gutter);
+    align-items: end;
+    padding: 2.75rem 0;
+  }
+  .figure + .figure { border-top: 1px solid var(--hairline-lt); }
+
+  .fig-plate {
+    position: relative;
+    height: clamp(11rem, 24vw, 15rem);
+    border: 1px solid var(--hairline);
+    overflow: hidden;
+  }
+  .fig-plate::after {
+    /* glassy sheen that drifts on hover — ink under light */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 35%, rgba(250,247,242,0.22) 50%, transparent 65%);
+    transform: translateX(-100%);
+    transition: transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+  }
+  .figure:hover .fig-plate::after { transform: translateX(100%); }
+
+  .plate-1 {
+    background:
+      repeating-linear-gradient(90deg, rgba(250,247,242,0.13) 0 1px, transparent 1px 14px),
+      repeating-linear-gradient(0deg, rgba(250,247,242,0.13) 0 1px, transparent 1px 14px),
+      radial-gradient(circle at 24% 38%, #9b4a51 0%, transparent 42%),
+      linear-gradient(150deg, #76202a 0%, #3c1117 70%, #241014 100%);
+  }
+  .plate-2 {
+    background:
+      repeating-linear-gradient(45deg, rgba(118,32,42,0.5) 0 2px, transparent 2px 18px),
+      linear-gradient(160deg, #efe7d9 0%, #d9cdb8 55%, #c4b49a 100%);
+  }
+  .plate-3 {
+    background:
+      radial-gradient(circle at 78% 18%, rgba(250,247,242,0.28) 0%, transparent 34%),
+      repeating-radial-gradient(circle at 78% 18%, transparent 0 26px, rgba(250,247,242,0.1) 26px 27px),
+      linear-gradient(200deg, #2c2620 0%, #1d1a17 60%, #76202a 160%);
+  }
+
+  .fig-caption { padding-top: 1.35rem; }
+  .fig-caption .fig-no {
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--oxblood);
+  }
+  .fig-caption h3 {
+    font-size: clamp(1.45rem, 3vw, 1.85rem);
+    margin: 0.55rem 0 0.7rem;
+  }
+  .fig-caption p {
+    font-size: 1.02rem;
+    color: var(--ink-soft);
+    max-width: 52ch;
+  }
+
+  .fig-margin {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    line-height: 1.7;
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+    padding-bottom: 0.2rem;
+  }
+  .fig-margin .stat {
+    display: block;
+    border-top: 1px solid var(--hairline-lt);
+    padding: 0.5rem 0;
+  }
+  .fig-margin .stat:last-child { border-bottom: 1px solid var(--hairline-lt); }
+  .fig-margin .stat b {
+    font-weight: 500;
+    color: var(--ink);
+    font-size: 0.85rem;
+  }
+
+  /* ============================================================
+     WRITING — table of contents style
+     ============================================================ */
+  .toc { list-style: none; }
+  .toc li { border-top: 1px solid var(--hairline-lt); }
+  .toc li:last-child { border-bottom: 1px solid var(--hairline-lt); }
+  .toc a {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr) auto;
+    gap: 1.5rem;
+    align-items: baseline;
+    padding: 1.4rem 0.25rem;
+    transition: background 0.3s ease;
+  }
+  .toc a:hover { background: var(--paper-deep); }
+  .toc .toc-no {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--oxblood);
+  }
+  .toc .toc-title {
+    font-family: var(--serif);
+    font-weight: 420;
+    font-size: clamp(1.15rem, 2.4vw, 1.5rem);
+    line-height: 1.25;
+  }
+  .toc .toc-title em { font-style: italic; }
+  .toc a:hover .toc-title { color: var(--oxblood); }
+  .toc .toc-date {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+  .toc .leader {
+    /* dotted leader, like a contents page */
+    overflow: hidden;
+    align-self: center;
+  }
+
+  /* ============================================================
+     FOOTER — colophon
+     ============================================================ */
+  footer.colophon {
+    border-top: 1px solid var(--hairline);
+    padding: 3.25rem 0 4rem;
+  }
+  .colophon-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--margin-col);
+    column-gap: var(--gutter);
+    row-gap: 2rem;
+  }
+  .colophon .label { display: block; margin-bottom: 1rem; }
+  .contact-links { list-style: none; }
+  .contact-links li {
+    display: flex;
+    gap: 1.25rem;
+    align-items: baseline;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--hairline-lt);
+    font-size: 1rem;
+  }
+  .contact-links .cl-key {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    width: 5.5rem;
+    flex-shrink: 0;
+  }
+  .colophon-note {
+    font-size: 0.84rem;
+    font-style: italic;
+    color: var(--ink-faint);
+    line-height: 1.6;
+  }
+  .colophon-note .fleuron {
+    color: var(--oxblood);
+    font-style: normal;
+    display: block;
+    font-size: 1.1rem;
+    margin-bottom: 0.6rem;
+  }
+  .end-mark {
+    text-align: center;
+    margin-top: 3.5rem;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    color: var(--ink-faint);
+  }
+  .end-mark .glyph { color: var(--oxblood); letter-spacing: 0; }
+
+  /* ============================================================
+     RESPONSIVE — margin notes fold inward
+     ============================================================ */
+  @media (max-width: 56rem) {
+    .row, .figure, .colophon-grid { grid-template-columns: 1fr; row-gap: 1.75rem; }
+    .margin-notes {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+      gap: 0 1.5rem;
+      border-top: 1px solid var(--hairline-lt);
+      padding-top: 1.5rem;
+    }
+    .fig-margin { display: flex; gap: 1.5rem; flex-wrap: wrap; padding-top: 0.25rem; }
+    .fig-margin .stat { border: none; padding: 0; }
+    .toc a { grid-template-columns: 3rem minmax(0,1fr); }
+    .toc .toc-date { grid-column: 2; }
+    .masthead ul { gap: 1.25rem; }
+    .masthead ul a .nav-word { display: none; }
+    .masthead ul a sup { font-size: 0.7rem; margin: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ======================= MASTHEAD ======================= -->
+<nav class="masthead" aria-label="Primary">
+  <div class="sheet masthead-inner">
+    <a class="wordmark" href="#top">Sam Chen<em>.</em></a>
+    <ul>
+      <li><a class="lk-quiet" href="#abstract"><sup>i</sup><span class="nav-word">Abstract</span></a></li>
+      <li><a class="lk-quiet" href="#figures"><sup>ii</sup><span class="nav-word">Figures</span></a></li>
+      <li><a class="lk-quiet" href="#writing"><sup>iii</sup><span class="nav-word">Writing</span></a></li>
+      <li><a class="lk-quiet" href="#colophon"><sup>iv</sup><span class="nav-word">Contact</span></a></li>
+    </ul>
+  </div>
+</nav>
+
+<main id="top">
+
+  <!-- ======================= HERO ======================= -->
+  <header class="hero sheet">
+    <div class="running-head reveal">
+      <span class="label"><span class="tick">Vol. II</span> &nbsp;·&nbsp; No. 2026</span>
+      <span class="label">Cambridge, Mass. → San Francisco</span>
+    </div>
+
+    <h1 class="reveal" data-delay="1">Sam Chen<span class="comma">.</span></h1>
+
+    <p class="deck reveal" data-delay="2">Researcher, builder, <span class="amp">&amp;</span> founder — studying how minds, human and artificial, come to understand things.</p>
+
+    <div class="hero-meta reveal" data-delay="3">
+      <dl><dt>Affiliation</dt><dd>Harvard College, Class of 2028</dd></dl>
+      <dl><dt>Fields</dt><dd>CS · Mathematics · Psychology</dd></dl>
+      <dl><dt>Status</dt><dd>In SF this summer</dd></dl>
+    </div>
+  </header>
+
+  <!-- ======================= ABSTRACT / ABOUT ======================= -->
+  <section id="abstract" class="sheet reveal">
+    <div class="section-label">
+      <span class="label"><span class="tick">§ i</span>&nbsp;&nbsp;Abstract</span>
+    </div>
+
+    <div class="row">
+      <div class="abstract-body measure">
+        <p class="opening">Sam Chen is a sophomore at Harvard from Boston, studying computer science, mathematics, and psychology. His research sits at the seam between machine and mind: mechanistic interpretability in the Computation, Cognition, and Development Lab,<sup class="fnref" data-note="1" tabindex="0">1</sup> and hierarchical reinforcement learning under the Kempner Institute and the Brantley Lab.<sup class="fnref" data-note="2" tabindex="0">2</sup></p>
+
+        <p>Previously, he built people-search infrastructure as an engineer at AGI House.<sup class="fnref" data-note="3" tabindex="0">3</sup> Before that, a decade-adjacent career in competitive debate — peaking 6th nationally in Public Forum — which he converted into Outreach Debate, a free coaching organization now counting 1,800+ members and 300+ volunteers, alongside two education businesses doing five-to-six-figure revenue.</p>
+
+        <p>The through-line, if one must be named: taking opaque systems — neural networks, admissions, argument — and making them legible to people standing outside them.</p>
+
+        <div class="prior-list">
+          <span class="label">Prior &amp; ongoing</span>
+          <ul>
+            <li><span class="pn">a.</span><span><strong>Engineering, AGI House</strong> — people-search infrastructure.</span></li>
+            <li><span class="pn">b.</span><span><strong>Public Forum debate</strong> — peaked 6th in national rankings.</span></li>
+            <li><span class="pn">c.</span><span><strong>Founder, Outreach Debate</strong> — 1,800+ members, 300+ volunteer coaches.</span></li>
+            <li><span class="pn">d.</span><span><strong>Founder, two education businesses</strong> — 5–6 figures in revenue.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <aside class="margin-notes" aria-label="Margin notes">
+        <div class="sidenote" id="note-1">
+          <span class="sn-num">1.</span>
+          The <em>Computation, Cognition, and Development Lab</em> — reverse-engineering what models have actually learned, circuit by circuit.
+        </div>
+        <div class="sidenote" id="note-2">
+          <span class="sn-num">2.</span>
+          Hierarchical RL: agents that plan in chapters, not keystrokes. Joint work under <em>Kempner</em> &amp; the <em>Brantley Lab</em>.
+        </div>
+        <div class="sidenote" id="note-3">
+          <span class="sn-num">3.</span>
+          AGI House, the hacker residence &amp; community in the Bay — infrastructure for finding the right person, fast.
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ======================= PROJECTS / FIGURES ======================= -->
+  <section id="figures" class="sheet reveal">
+    <div class="section-label">
+      <span class="label"><span class="tick">§ ii</span>&nbsp;&nbsp;Selected Figures</span>
+    </div>
+
+    <article class="figure reveal">
+      <div>
+        <div class="fig-plate plate-1" role="img" aria-label="Abstract plate in oxblood with a fine grid"></div>
+        <div class="fig-caption">
+          <span class="fig-no">Fig. 1 — Search</span>
+          <h3><a class="lk-quiet" href="#">IvyLine Search</a></h3>
+          <p>Semantic search that democratizes college advice — 200+ curated opportunities surfaced by meaning, not keyword. Reached 500 users in its first five days and 100K impressions on LinkedIn.</p>
+        </div>
+      </div>
+      <div class="fig-margin">
+        <span class="stat"><b>500</b> users / 5 days</span>
+        <span class="stat"><b>200+</b> opportunities</span>
+        <span class="stat"><b>100K</b> impressions</span>
+      </div>
+    </article>
+
+    <article class="figure reveal">
+      <div>
+        <div class="fig-plate plate-2" role="img" aria-label="Abstract plate of parchment with oxblood hatching"></div>
+        <div class="fig-caption">
+          <span class="fig-no">Fig. 2 — Systems</span>
+          <h3><a class="lk-quiet" href="#">Transformer in Rust</a></h3>
+          <p>A transformer built from scratch in Rust with candle — attention, embeddings, and the training loop assembled by hand, because the best way to interpret a mechanism is to have machined it yourself.</p>
+        </div>
+      </div>
+      <div class="fig-margin">
+        <span class="stat"><b>Rust</b> + candle</span>
+        <span class="stat"><b>0</b> frameworks leaned on</span>
+        <span class="stat"><b>From</b> first principles</span>
+      </div>
+    </article>
+
+    <article class="figure reveal">
+      <div>
+        <div class="fig-plate plate-3" role="img" aria-label="Dark abstract plate with concentric rings"></div>
+        <div class="fig-caption">
+          <span class="fig-no">Fig. 3 — Community</span>
+          <h3><a class="lk-quiet" href="#">Ignite Fund</a></h3>
+          <p>A site for high achievers — a home for the ambitious to find backing, peers, and a reason to start sooner than they planned to.</p>
+        </div>
+      </div>
+      <div class="fig-margin">
+        <span class="stat"><b>For</b> high achievers</span>
+        <span class="stat"><b>Live</b> on the web</span>
+      </div>
+    </article>
+  </section>
+
+  <!-- ======================= WRITING ======================= -->
+  <section id="writing" class="sheet reveal">
+    <div class="section-label">
+      <span class="label"><span class="tick">§ iii</span>&nbsp;&nbsp;Writing</span>
+    </div>
+
+    <ul class="toc">
+      <li class="reveal">
+        <a href="#">
+          <span class="toc-no">No. 03</span>
+          <span class="toc-title">What a Circuit Wants: Notes Toward Honest Interpretability</span>
+          <span class="toc-date">May 2026</span>
+        </a>
+      </li>
+      <li class="reveal" data-delay="1">
+        <a href="#">
+          <span class="toc-no">No. 02</span>
+          <span class="toc-title">Options All the Way Down — <em>On Hierarchy in Reinforcement Learning</em></span>
+          <span class="toc-date">Mar 2026</span>
+        </a>
+      </li>
+      <li class="reveal" data-delay="2">
+        <a href="#">
+          <span class="toc-no">No. 01</span>
+          <span class="toc-title">Cross-Examination as an Alignment Protocol: What Debate Taught Me About Eliciting Truth</span>
+          <span class="toc-date">Jan 2026</span>
+        </a>
+      </li>
+    </ul>
+  </section>
+
+</main>
+
+<!-- ======================= COLOPHON ======================= -->
+<footer id="colophon" class="colophon">
+  <div class="sheet">
+    <div class="colophon-grid reveal">
+      <div>
+        <span class="label"><span class="tick">§ iv</span>&nbsp;&nbsp;Correspondence</span>
+        <ul class="contact-links measure">
+          <li><span class="cl-key">Email</span><a class="lk" href="mailto:sam_chen@college.harvard.edu">sam_chen@college.harvard.edu</a></li>
+          <li><span class="cl-key">GitHub</span><a class="lk" href="https://github.com/SamC1249">github.com/SamC1249</a></li>
+          <li><span class="cl-key">LinkedIn</span><a class="lk" href="https://linkedin.com/in/sam-chen-massachusetts">linkedin.com/in/sam-chen-massachusetts</a></li>
+        </ul>
+      </div>
+      <div class="colophon-note">
+        <span class="fleuron">❧</span>
+        Set in Fraunces, Newsreader, &amp; IBM Plex Mono on warm paper. Hand-built; no template was harmed. Last revised June&nbsp;2026, somewhere between Cambridge and San&nbsp;Francisco.
+      </div>
+    </div>
+    <hr class="rule reveal" style="margin-top:3rem" />
+    <div class="end-mark">FIN <span class="glyph">·</span> S.C. <span class="glyph">·</span> MMXXVI</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---- ink-settling reveals ---- */
+  var targets = document.querySelectorAll(".reveal, .rule");
+  if (reduced || !("IntersectionObserver" in window)) {
+    targets.forEach(function (el) { el.classList.add("revealed"); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("revealed");
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
+    targets.forEach(function (el) { io.observe(el); });
+  }
+
+  /* ---- footnote ↔ sidenote conversation ---- */
+  document.querySelectorAll("sup.fnref").forEach(function (ref) {
+    var note = document.getElementById("note-" + ref.dataset.note);
+    if (!note) return;
+    function lit(on) {
+      ref.classList.toggle("lit", on);
+      note.classList.toggle("lit", on);
+    }
+    ref.addEventListener("mouseenter", function () { lit(true); });
+    ref.addEventListener("mouseleave", function () { lit(false); });
+    ref.addEventListener("focus", function () { lit(true); });
+    ref.addEventListener("blur", function () { lit(false); });
+    note.addEventListener("mouseenter", function () { lit(true); });
+    note.addEventListener("mouseleave", function () { lit(false); });
+  });
+})();
+</script>
+
+</body>
+</html>

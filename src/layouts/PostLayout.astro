@@ -13,31 +13,62 @@ import { Image } from "astro:assets";
 ---
 
 <BaseLayout title={title} description={description} image={heroImage}, ogType="article">
-  <main class="md:flex md:justify-center">
-    <article class="prose prose-lg max-w-[750px] prose-img:mx-auto">
-      {heroImage && <Image width={750} height={422} format="webp" src={heroImage} alt={title} class="w-full mb-6" />}
-      <h1 class="title my-2 text-4xl font-bold">{title}</h1>
-      {pubDate && <time>{displayDate}</time>}
-      <br />
-      {badge && <div class="badge badge-secondary my-1">{badge}</div>}
-      {
-        tags &&
-          tags.map((tag) => (
-            <a href={`/blog/tag/${tag}`} class="badge badge-outline ml-2 no-underline">
-              {tag}
-            </a>
-          ))
-      }
+  <main class="lx-post">
+    <article class="prose max-w-[720px] mx-auto prose-img:mx-auto prose-img:rounded-lg">
+      {heroImage && <Image width={750} height={422} format="webp" src={heroImage} alt={title} class="w-full mb-6 rounded-lg" />}
+      <div class="lx-post-meta">
+        {pubDate && <time class="lx-kicker">{displayDate}</time>}
+        {badge && <span class="lx-badge lx-badge-indigo">{badge}</span>}
+        {
+          tags &&
+            tags.map((tag) => (
+              <a href={`/blog/tag/${tag}`} class="lx-badge no-underline">
+                {tag}
+              </a>
+            ))
+        }
+      </div>
+      <h1 class="lx-post-title">{title}</h1>
       {
         updatedDate && (
-          <div>
-            {" "}
-            Last updated on <time>{updatedDate}</time>{" "}
+          <div class="lx-post-updated">
+            Last updated on <time>{updatedDate}</time>
           </div>
         )
       }
-      <div class="divider my-2"></div>
+      <div class="lx-post-divider"></div>
       <slot />
     </article>
   </main>
 </BaseLayout>
+
+<style>
+  .lx-post {
+    padding-top: 48px;
+  }
+  .lx-post-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .lx-post-title {
+    font-size: 32px;
+    line-height: 1.125;
+    letter-spacing: -0.022em;
+    font-weight: 600;
+    color: var(--text-1);
+    text-wrap: balance;
+    margin: 0 0 8px;
+  }
+  .lx-post-updated {
+    font-size: 0.8125rem;
+    color: var(--text-4);
+  }
+  .lx-post-divider {
+    height: 1px;
+    background: var(--hairline-soft);
+    margin: 24px 0;
+  }
+</style>

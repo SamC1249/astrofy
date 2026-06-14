@@ -1,0 +1,248 @@
+---
+---
+
+<section class="lx-ascii-contact">
+  <canvas id="lx-knot-canvas" aria-hidden="true"></canvas>
+  <div class="lx-ascii-copy">
+    <slot />
+  </div>
+</section>
+
+<style>
+  .lx-ascii-contact {
+    position: relative;
+    min-height: 480px;
+    display: flex;
+    align-items: center;
+    margin-top: 64px;
+    border-top: 1px solid var(--hairline-soft);
+  }
+  canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .lx-ascii-copy {
+    position: relative;
+    z-index: 1;
+    max-width: 480px;
+    padding: 64px 0;
+    pointer-events: none;
+  }
+  .lx-ascii-copy :global(a) {
+    pointer-events: auto;
+  }
+  @media (max-width: 880px) {
+    .lx-ascii-contact {
+      align-items: flex-end;
+      min-height: 560px;
+    }
+    .lx-ascii-copy {
+      padding-bottom: 48px;
+    }
+  }
+</style>
+
+<script>
+  // ASCII torus-knot sculpture — ported from design-ideas/09-heroes-ascii.html
+  // (hero 16), software-rendered: parametric (2,3) knot -> shaded luminance
+  // grid -> " .:-=+*#%@" ramp. No WebGL needed.
+  const RAMP = " .:-=+*#%@";
+  const CELL = 11;
+  const STYLES = ["rgba(40,42,48,0.30)", "rgba(60,65,73,0.62)", "#282a30", "#7070ff"];
+
+  function initKnot() {
+    const canvas = document.getElementById("lx-knot-canvas") as HTMLCanvasElement | null;
+    if (!canvas || canvas.dataset.lxInit) return;
+    canvas.dataset.lxInit = "1";
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    // ---- precomputed unrotated surface points + normals ----
+    const P = 2, Q = 3, RADIUS = 1.65, TUBE = 0.52;
+    const U_STEPS = 460, V_STEPS = 20;
+    const N = U_STEPS * V_STEPS;
+    const pts = new Float32Array(N * 3);
+    const nrm = new Float32Array(N * 3);
+
+    (function buildKnot() {
+      const curve = (u: number) => {
+        const cs = Math.cos((Q / P) * u);
+        return [
+          RADIUS * (2 + cs) * 0.5 * Math.cos(P * u),
+          RADIUS * (2 + cs) * 0.5 * Math.sin(P * u),
+          RADIUS * Math.sin((Q / P) * u) * 0.5,
+        ];
+      };
+      const norm = (v: number[]) => {
+        const l = Math.hypot(v[0], v[1], v[2]) || 1;
+        return [v[0] / l, v[1] / l, v[2] / l];
+      };
+      const cross = (a: number[], b: number[]) => [
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0],
+      ];
+      let k = 0;
+      for (let i = 0; i < U_STEPS; i++) {
+        const u = (i / U_STEPS) * Math.PI * 2 * P;
+        const p0 = curve(u);
+        const p1 = curve(u + 0.01);
+        const T = norm([p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]]);
+        const B = norm(cross(T, p0));
+        const Nv = norm(cross(B, T));
+        for (let j = 0; j < V_STEPS; j++) {
+          const v = (j / V_STEPS) * Math.PI * 2;
+          const cv = Math.cos(v), sv = Math.sin(v);
+          const nx = cv * Nv[0] + sv * B[0];
+          const ny = cv * Nv[1] + sv * B[1];
+          const nz = cv * Nv[2] + sv * B[2];
+          pts[k] = p0[0] + TUBE * nx;
+          pts[k + 1] = p0[1] + TUBE * ny;
+          pts[k + 2] = p0[2] + TUBE * nz;
+          nrm[k] = nx; nrm[k + 1] = ny; nrm[k + 2] = nz;
+          k += 3;
+        }
+      }
+    })();
+
+    // lights (match the gallery look)
+    const L1 = (() => { const l = Math.hypot(2.5, 3, 4); return [2.5 / l, 3 / l, 4 / l]; })();
+    const L2 = (() => { const l = Math.hypot(-3, -2, 2); return [-3 / l, -2 / l, 2 / l]; })();
+
+    let cssW = 0, cssH = 0, gw = 0, gh = 0;
+    let lum: Float32Array = new Float32Array(0);
+    let zb: Float32Array = new Float32Array(0);
+    let visible = false;
+    let raf = 0;
+    let tmx = 0, tmy = 0, mx = 0, my = 0;
+
+    function resize() {
+      cssW = canvas!.clientWidth;
+      cssH = canvas!.clientHeight;
+      if (!cssW || !cssH) return;
+      canvas!.width = Math.floor(cssW * dpr);
+      canvas!.height = Math.floor(cssH * dpr);
+      gw = Math.max(24, Math.floor(cssW / CELL));
+      gh = Math.max(18, Math.floor(cssH / (CELL * 1.25)));
+      lum = new Float32Array(gw * gh);
+      zb = new Float32Array(gw * gh);
+    }
+
+    function drawFrame(t: number) {
+      lum.fill(0);
+      zb.fill(1e9);
+
+      const rx = t * 0.32 + my * 0.35;
+      const ry = t * 0.45 + mx * 0.35;
+      const cx = Math.cos(rx), sx = Math.sin(rx);
+      const cy = Math.cos(ry), sy = Math.sin(ry);
+
+      const aspect = cssW / cssH;
+      const offX = aspect > 1.02 ? 1.7 : 0;
+      const offY = aspect > 1.02 ? 0 : 0.9;
+      const camZ = 7.2;
+      const fPx = (cssH / 2) / Math.tan((38 * Math.PI) / 360);
+      const chW = cssW / gw, chH = cssH / gh;
+
+      for (let k = 0; k < N * 3; k += 3) {
+        let x = pts[k], y = pts[k + 1], z = pts[k + 2];
+        let nx = nrm[k], ny = nrm[k + 1], nz = nrm[k + 2];
+
+        // rotate X then Y (points and normals)
+        let y1 = y * cx - z * sx, z1 = y * sx + z * cx;
+        let x1 = x * cy + z1 * sy; z1 = -x * sy + z1 * cy;
+        let ny1 = ny * cx - nz * sx, nz1 = ny * sx + nz * cx;
+        let nx1 = nx * cy + nz1 * sy; nz1 = -nx * sy + nz1 * cy;
+
+        x1 += offX; y1 += offY;
+        const viewZ = camZ - z1;
+        if (viewZ < 0.5) continue;
+        const sxp = cssW / 2 + (x1 * fPx) / viewZ;
+        const syp = cssH / 2 - (y1 * fPx) / viewZ;
+        const ix = Math.floor(sxp / chW);
+        const iy = Math.floor(syp / chH);
+        if (ix < 0 || ix >= gw || iy < 0 || iy >= gh) continue;
+        const cell = iy * gw + ix;
+        if (viewZ >= zb[cell]) continue;
+        zb[cell] = viewZ;
+
+        let l = 0.16;
+        const d1 = nx1 * L1[0] + ny1 * L1[1] + nz1 * L1[2];
+        if (d1 > 0) l += d1 * 0.72;
+        const d2 = nx1 * L2[0] + ny1 * L2[1] + nz1 * L2[2];
+        if (d2 > 0) l += d2 * 0.28;
+        lum[cell] = Math.min(1, l);
+      }
+
+      ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx!.clearRect(0, 0, cssW, cssH);
+      ctx!.font = `${Math.ceil(chH * 0.92)}px "IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace`;
+      ctx!.textBaseline = "top";
+
+      const buckets: Array<Array<string | number>> = [[], [], [], []];
+      for (let yy = 0; yy < gh; yy++) {
+        for (let xx = 0; xx < gw; xx++) {
+          const v = lum[yy * gw + xx];
+          if (v < 0.045) continue;
+          const ch = RAMP[Math.min(RAMP.length - 1, Math.floor(v * RAMP.length))];
+          if (ch === " ") continue;
+          const b = v > 0.82 ? 3 : v > 0.55 ? 2 : v > 0.28 ? 1 : 0;
+          buckets[b].push(ch, xx * chW, yy * chH);
+        }
+      }
+      for (let b = 0; b < 4; b++) {
+        const arr = buckets[b];
+        if (!arr.length) continue;
+        ctx!.fillStyle = STYLES[b];
+        for (let k = 0; k < arr.length; k += 3) {
+          ctx!.fillText(arr[k] as string, arr[k + 1] as number, arr[k + 2] as number);
+        }
+      }
+    }
+
+    resize();
+
+    if (reduced) {
+      drawFrame(17.0);
+      return;
+    }
+
+    new IntersectionObserver((entries) => {
+      visible = entries[0].isIntersecting;
+    }).observe(canvas);
+
+    addEventListener(
+      "mousemove",
+      (e) => {
+        tmx = (e.clientX / innerWidth) * 2 - 1;
+        tmy = (e.clientY / innerHeight) * 2 - 1;
+      },
+      { passive: true }
+    );
+
+    let rt: ReturnType<typeof setTimeout>;
+    addEventListener("resize", () => {
+      clearTimeout(rt);
+      rt = setTimeout(resize, 200);
+    });
+
+    function frame(now: number) {
+      raf = requestAnimationFrame(frame);
+      if (!visible) return;
+      mx += (tmx - mx) * 0.04;
+      my += (tmy - my) * 0.04;
+      drawFrame(now / 1000);
+    }
+    raf = requestAnimationFrame(frame);
+    document.addEventListener("astro:before-swap", () => cancelAnimationFrame(raf), { once: true });
+  }
+
+  initKnot();
+  document.addEventListener("astro:page-load", initKnot);
+</script>

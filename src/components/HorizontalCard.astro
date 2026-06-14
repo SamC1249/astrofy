@@ -4,40 +4,105 @@ import { Image } from "astro:assets";
 const tag_url = url.split("/").slice(0, -1).join("/") + "/tag";
 ---
 
-<div
-  class="rounded-lg bg-base-100 hover:shadow-xl transition ease-in-out hover:scale-[102%]"
->
-  <a href={url} target={target}>
-    <div class="hero-content flex-col md:flex-row">
-      {
-        img && (
-          <Image
-            src={img}
-            width={750}
-            height={422}
-            format="webp"
-            alt={title}
-            class="max-w-full md:max-w-[13rem] rounded-lg"
-          />
-        )
-      }
-      <div class="grow w-full">
-        <h1 class="text-xl font-bold">
-          {title}
-          {badge && <div class="badge badge-secondary mx-2">{badge}</div>}
-        </h1>
-        <p class="py-1 text-1xl">{desc}</p>
-        <div class="card-actions justify-end">
-          {
-            tags &&
-              tags.map((tag) => (
-                <a href={`${tag_url}/${tag}`} class="badge badge-outline">
-                  {tag}
-                </a>
-              ))
-          }
-        </div>
-      </div>
+<div class="lx-row lx-card-row">
+  {
+    img && (
+      <Image
+        src={img}
+        width={300}
+        height={169}
+        format="webp"
+        alt={title}
+        class="lx-thumb"
+      />
+    )
+  }
+  <div class="lx-card-body">
+    <div class="lx-card-title">
+      <a href={url} target={target} class="lx-card-link">{title}</a>
+      {badge && <span class="lx-badge lx-badge-indigo">{badge}</span>}
     </div>
-  </a>
+    <p class="lx-card-desc">{desc}</p>
+    {
+      tags && (
+        <div class="lx-card-tags">
+          {tags.map((tag: string) => (
+            <a href={`${tag_url}/${tag}`} class="lx-badge">
+              {tag}
+            </a>
+          ))}
+        </div>
+      )
+    }
+  </div>
+  <svg class="lx-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+    <path d="m9 6 6 6-6 6"></path>
+  </svg>
 </div>
+
+<style>
+  .lx-card-row {
+    position: relative;
+    align-items: flex-start;
+  }
+  /* stretched link: the title's pseudo-element makes the whole row clickable */
+  .lx-card-link {
+    color: inherit;
+    text-decoration: none;
+  }
+  .lx-card-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+  }
+  .lx-thumb {
+    width: 104px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--hairline-soft);
+    flex: none;
+  }
+  .lx-card-body {
+    flex: 1;
+    min-width: 0;
+  }
+  .lx-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    letter-spacing: -0.012em;
+    color: var(--text-1);
+  }
+  .lx-card-desc {
+    margin-top: 2px;
+    font-size: 0.8125rem;
+    color: var(--text-3);
+    text-wrap: pretty;
+  }
+  .lx-card-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .lx-card-tags .lx-badge {
+    position: relative;
+    z-index: 1;
+  }
+  .lx-card-tags .lx-badge:hover {
+    color: var(--text-1);
+  }
+  .lx-chev {
+    margin-top: 4px;
+  }
+  @media (max-width: 560px) {
+    .lx-thumb {
+      display: none;
+    }
+  }
+</style>

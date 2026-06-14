@@ -1,0 +1,90 @@
+---
+const { activeItemID } = Astro.props;
+
+const items = [
+  { id: "home", label: "Home", href: "/" },
+  { id: "projects", label: "Projects", href: "/projects" },
+  { id: "blog", label: "Blog", href: "/blog/" },
+  { id: "cv", label: "CV", href: "/cv" },
+];
+---
+
+<header class="lx-nav">
+  <div class="lx-nav-inner">
+    <a class="lx-wordmark" href="/">Sam Chen</a>
+    <nav>
+      {
+        items.map((item) => (
+          <a href={item.href} class:list={["lx-nav-link", { active: item.id === activeItemID }]}>
+            {item.label}
+          </a>
+        ))
+      }
+      <button class="lx-nav-link lx-nav-kbd" data-palette-open aria-label="Open command palette">
+        <kbd class="lx-kbd">⌘K</kbd>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .lx-nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .lx-nav-inner {
+    width: 100%;
+    max-width: 1024px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .lx-wordmark {
+    font-weight: 600;
+    font-size: 0.9375rem;
+    letter-spacing: -0.012em;
+    color: var(--text-1);
+    text-decoration: none;
+  }
+  nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .lx-nav-link {
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-3);
+    text-decoration: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    transition: color 0.1s var(--ease), background 0.1s var(--ease);
+  }
+  .lx-nav-link:hover {
+    color: var(--text-1);
+    background: var(--surface-2);
+  }
+  .lx-nav-link.active {
+    color: var(--text-1);
+  }
+  .lx-nav-kbd {
+    padding: 4px 6px;
+  }
+  @media (max-width: 480px) {
+    .lx-nav-kbd { display: none; }
+  }
+</style>

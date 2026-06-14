@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Component Lab — Sam Chen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet" />
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+</script>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f9f8f9;
+    --surface-2: #f4f2f4;
+    --text-1: #282a30;
+    --text-2: #3c4149;
+    --text-3: #6f6e77;
+    --text-4: #86848d;
+    --border: #e9e8ea;
+    --hairline: rgba(0, 0, 0, 0.08);
+    --hairline-soft: rgba(0, 0, 0, 0.05);
+    --accent: #7070ff;
+    --accent-hover: #8989f0;
+    --accent-tint: #f1f1ff;
+    --shadow-tiny: 0 1px 1px rgba(0,0,0,0.09);
+    --shadow-low: 0 1px 4px -1px rgba(0,0,0,0.09);
+    --shadow-med: 0 3px 12px rgba(0,0,0,0.09);
+    --shadow-high: 0 7px 24px rgba(0,0,0,0.06);
+    --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --mono: "Berkeley Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "Inter", "SF Pro Display", -apple-system, sans-serif;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--text-2);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 { color: var(--text-1); font-weight: 590; text-wrap: balance; }
+  p { text-wrap: pretty; }
+  ::selection { background: var(--accent-tint); color: var(--text-1); }
+
+  /* ---------- chrome ---------- */
+  .progress {
+    position: fixed; top: 0; left: 0; height: 2px; width: 0;
+    background: var(--accent); z-index: 100;
+  }
+  header {
+    position: sticky; top: 0; z-index: 50; height: 64px;
+    display: flex; align-items: center;
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .nav-inner {
+    width: 100%; max-width: 1024px; margin: 0 auto; padding: 0 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .wordmark { font-weight: 590; font-size: 0.9375rem; color: var(--text-1); letter-spacing: -0.012em; }
+  .wordmark span { color: var(--text-4); font-weight: 400; }
+  nav.sections { display: flex; gap: 4px; }
+  nav.sections a {
+    font-size: 0.8125rem; color: var(--text-3); text-decoration: none;
+    padding: 6px 10px; border-radius: 6px;
+    transition: color 0.1s var(--ease), background 0.1s var(--ease);
+  }
+  nav.sections a:hover { color: var(--text-1); background: var(--surface-2); }
+
+  main { max-width: 1024px; margin: 0 auto; padding: 0 24px; }
+
+  .hero { padding: 96px 0 64px; }
+  .kicker {
+    font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text-4); display: block; margin-bottom: 16px;
+  }
+  .hero h1 { font-size: 40px; line-height: 1.1; letter-spacing: -0.022em; margin-bottom: 16px; }
+  .hero p { max-width: 560px; color: var(--text-3); }
+
+  section.lab { padding: 64px 0; border-top: 1px solid var(--hairline-soft); }
+  .section-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 32px; }
+  .section-head h2 { font-size: 20px; line-height: 1.33; letter-spacing: -0.012em; }
+  .section-head .index { font-family: var(--mono); font-size: 0.75rem; color: var(--text-4); }
+
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .grid .wide { grid-column: span 2; }
+  @media (max-width: 880px) { .grid { grid-template-columns: 1fr; } .grid .wide { grid-column: span 1; } }
+
+  .cell {
+    border: 1px solid var(--hairline); border-radius: 8px; background: var(--bg);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .demo {
+    flex: 1; min-height: 180px; padding: 24px;
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px; flex-wrap: wrap; position: relative;
+  }
+  .demo.canvas-demo { padding: 0; min-height: 260px; }
+  .spec {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    padding: 10px 14px; border-top: 1px solid var(--hairline-soft); background: var(--surface);
+  }
+  .spec-name { font-size: 0.8125rem; font-weight: 510; color: var(--text-2); white-space: nowrap; }
+  .spec-meta { font-family: var(--mono); font-size: 0.625rem; color: var(--text-4); text-align: right; }
+
+  canvas.three { display: block; width: 100%; height: 260px; }
+
+  /* ---------- primitives ---------- */
+  .btn {
+    font: inherit; font-size: 0.8125rem; font-weight: 510; letter-spacing: -0.012em;
+    padding: 7px 14px; border-radius: 8px; cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.1s var(--ease), color 0.1s var(--ease),
+                border-color 0.1s var(--ease), box-shadow 0.1s var(--ease),
+                transform 0.16s var(--ease);
+  }
+  .btn-primary { background: var(--text-1); color: #fff; box-shadow: var(--shadow-tiny); }
+  .btn-primary:hover { background: #3c4149; }
+  .btn-secondary { background: var(--bg); color: var(--text-2); border-color: var(--border); box-shadow: var(--shadow-tiny); }
+  .btn-secondary:hover { border-color: #dcdbdd; color: var(--text-1); }
+  .btn-ghost { background: transparent; color: var(--text-3); }
+  .btn-ghost:hover { background: var(--surface-2); color: var(--text-1); }
+  .btn:active { transform: scale(0.98); }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 0.8125rem; color: var(--text-2);
+    border: 1px solid var(--border); border-radius: 9999px; padding: 5px 12px;
+    background: var(--bg); box-shadow: var(--shadow-tiny);
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); position: relative; }
+  .dot::after {
+    content: ""; position: absolute; inset: -3px; border-radius: 50%;
+    border: 1px solid var(--accent); opacity: 0; animation: pulse 2.4s var(--ease) infinite;
+  }
+  @keyframes pulse { 0% { transform: scale(0.6); opacity: 0.7; } 70%, 100% { transform: scale(1.4); opacity: 0; } }
+  .badge {
+    font-size: 0.75rem; font-weight: 510; padding: 2px 8px; border-radius: 4px;
+    background: var(--surface-2); color: var(--text-3);
+  }
+  .badge.indigo { background: var(--accent-tint); color: var(--accent); }
+
+  .search {
+    display: flex; align-items: center; gap: 8px; width: 100%; max-width: 280px;
+    border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px;
+    background: var(--bg); box-shadow: var(--shadow-tiny);
+    transition: border-color 0.1s var(--ease), box-shadow 0.1s var(--ease);
+  }
+  .search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-tint); }
+  .search svg { flex: none; color: var(--text-4); }
+  .search input { border: 0; outline: 0; font: inherit; font-size: 0.8125rem; color: var(--text-1); width: 100%; background: transparent; }
+  .search input::placeholder { color: var(--text-4); }
+  kbd {
+    font-family: var(--mono); font-size: 0.625rem; color: var(--text-4);
+    border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px;
+    padding: 2px 5px; background: var(--surface);
+  }
+
+  .tabs { position: relative; display: flex; gap: 2px; border: 1px solid var(--border); border-radius: 8px; padding: 3px; background: var(--surface); }
+  .tabs button {
+    font: inherit; font-size: 0.8125rem; font-weight: 510; color: var(--text-3);
+    border: 0; background: transparent; padding: 5px 12px; border-radius: 6px; cursor: pointer;
+    position: relative; z-index: 1; transition: color 0.16s var(--ease);
+  }
+  .tabs button.active { color: var(--text-1); }
+  .tab-thumb {
+    position: absolute; top: 3px; bottom: 3px; border-radius: 6px;
+    background: var(--bg); box-shadow: var(--shadow-tiny); border: 1px solid var(--hairline-soft);
+    transition: left 0.2s var(--ease), width 0.2s var(--ease);
+  }
+
+  .toggle {
+    width: 36px; height: 21px; border-radius: 9999px; border: 1px solid var(--border);
+    background: var(--surface-2); cursor: pointer; position: relative;
+    transition: background 0.16s var(--ease), border-color 0.16s var(--ease);
+  }
+  .toggle::after {
+    content: ""; position: absolute; top: 2px; left: 2px; width: 15px; height: 15px;
+    border-radius: 50%; background: #fff; box-shadow: var(--shadow-low);
+    transition: transform 0.16s var(--ease);
+  }
+  .toggle.on { background: var(--accent); border-color: var(--accent); }
+  .toggle.on::after { transform: translateX(15px); }
+
+  .tip-wrap { position: relative; }
+  .tip {
+    position: absolute; bottom: calc(100% + 8px); left: 50%;
+    transform: translateX(-50%) translateY(3px); opacity: 0; pointer-events: none;
+    background: var(--text-1); color: #fff; font-size: 0.75rem; font-weight: 510;
+    padding: 5px 9px; border-radius: 6px; white-space: nowrap;
+    transition: opacity 0.12s var(--ease), transform 0.12s var(--ease);
+  }
+  .tip-wrap:hover .tip, .tip-wrap:focus-within .tip { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ---------- clean motion ---------- */
+  a.u-link { color: var(--text-1); text-decoration: none; font-weight: 510; font-size: 0.875rem; position: relative; }
+  a.u-link::after {
+    content: ""; position: absolute; left: 0; bottom: -2px; height: 1px; width: 100%;
+    background: var(--text-1); transform: scaleX(0); transform-origin: right;
+    transition: transform 0.2s var(--ease);
+  }
+  a.u-link:hover::after { transform: scaleX(1); transform-origin: left; }
+  a.arrow-link { color: var(--accent); text-decoration: none; font-weight: 510; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 4px; }
+  a.arrow-link svg { transition: transform 0.16s var(--ease); }
+  a.arrow-link:hover { color: var(--accent-hover); }
+  a.arrow-link:hover svg { transform: translateX(3px); }
+
+  .rows { width: 100%; }
+  .row {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 12px 14px; margin: 0 -14px; border-radius: 8px; cursor: pointer;
+    transition: background 0.14s var(--ease);
+  }
+  .row + .row { border-top: 1px solid var(--hairline-soft); }
+  .row:hover { background: var(--surface); }
+  .row .r-title { font-size: 0.875rem; font-weight: 510; color: var(--text-1); }
+  .row .r-sub { font-size: 0.8125rem; color: var(--text-4); }
+  .row .chev { color: var(--text-4); opacity: 0; transform: translateX(-6px); transition: opacity 0.14s var(--ease), transform 0.14s var(--ease); }
+  .row:hover .chev { opacity: 1; transform: translateX(0); }
+
+  .lift-card {
+    width: 100%; max-width: 260px; border: 1px solid var(--border); border-radius: 8px;
+    padding: 16px; background: var(--bg); box-shadow: var(--shadow-tiny); cursor: pointer;
+    transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
+  }
+  .lift-card:hover { transform: translateY(-3.5px); box-shadow: var(--shadow-med); border-color: #dcdbdd; }
+  .lift-card h3 { font-size: 0.9375rem; letter-spacing: -0.012em; margin-bottom: 4px; }
+  .lift-card p { font-size: 0.8125rem; color: var(--text-3); }
+
+  .metrics { display: flex; gap: 32px; }
+  .metric .num { font-size: 24px; font-weight: 590; letter-spacing: -0.012em; color: var(--text-1); font-variant-numeric: tabular-nums; }
+  .metric .lbl { font-size: 0.75rem; color: var(--text-4); }
+
+  .skeleton { width: 100%; max-width: 260px; display: grid; gap: 10px; }
+  .sk { height: 12px; border-radius: 4px; background: var(--surface-2); position: relative; overflow: hidden; }
+  .sk::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
+    transform: translateX(-100%); animation: shimmer 1.6s var(--ease) infinite;
+  }
+  .sk.w60 { width: 60%; } .sk.w80 { width: 80%; }
+  @keyframes shimmer { to { transform: translateX(100%); } }
+
+  .stagger-list { width: 100%; max-width: 260px; display: grid; gap: 8px; }
+  .stagger-list .it {
+    display: flex; align-items: center; gap: 10px; font-size: 0.8125rem; color: var(--text-2);
+    padding: 8px 12px; border: 1px solid var(--hairline); border-radius: 8px; background: var(--bg);
+    opacity: 0; transform: translateY(8px);
+  }
+  .stagger-list.play .it { animation: rise 0.22s var(--ease) forwards; }
+  .stagger-list.play .it:nth-child(2) { animation-delay: 60ms; }
+  .stagger-list.play .it:nth-child(3) { animation-delay: 120ms; }
+  .stagger-list.play .it:nth-child(4) { animation-delay: 180ms; }
+  @keyframes rise { to { opacity: 1; transform: translateY(0); } }
+  .replay {
+    position: absolute; top: 10px; right: 10px;
+  }
+
+  .copy-btn { display: inline-flex; align-items: center; gap: 8px; }
+  .copy-btn .swap { position: relative; width: 14px; height: 14px; }
+  .copy-btn .swap svg { position: absolute; inset: 0; transition: opacity 0.16s var(--ease), transform 0.16s var(--ease); }
+  .copy-btn .icon-check { opacity: 0; transform: scale(0.6); color: var(--accent); }
+  .copy-btn.copied .icon-copy { opacity: 0; transform: scale(0.6); }
+  .copy-btn.copied .icon-check { opacity: 1; transform: scale(1); }
+
+  /* ---------- complex ---------- */
+  .magnet-zone { padding: 24px; }
+  .magnetic { will-change: transform; transition: transform 0.18s var(--ease); }
+
+  .spotlight {
+    position: relative; width: 100%; max-width: 280px; border-radius: 8px;
+    background: var(--bg); border: 1px solid var(--hairline); padding: 18px;
+    --mx: 50%; --my: 50%;
+  }
+  .spotlight::before {
+    content: ""; position: absolute; inset: -1px; border-radius: 9px; padding: 1px;
+    background: radial-gradient(140px circle at var(--mx) var(--my), rgba(112,112,255,0.5), rgba(0,0,0,0.04) 70%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor; mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    opacity: 0; transition: opacity 0.2s var(--ease); pointer-events: none;
+  }
+  .spotlight:hover::before { opacity: 1; }
+  .spotlight h3 { font-size: 0.9375rem; letter-spacing: -0.012em; margin-bottom: 4px; }
+  .spotlight p { font-size: 0.8125rem; color: var(--text-3); }
+
+  .scramble {
+    font-family: var(--mono); font-size: 0.875rem; color: var(--text-1);
+    cursor: default; letter-spacing: 0.02em;
+  }
+  .typewriter { font-family: var(--mono); font-size: 0.8125rem; color: var(--text-3); }
+  .typewriter .caret {
+    display: inline-block; width: 7px; height: 14px; background: var(--accent);
+    vertical-align: -2px; margin-left: 2px; animation: blink 1.1s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .palette-overlay {
+    position: fixed; inset: 0; z-index: 200; display: none;
+    align-items: flex-start; justify-content: center; padding-top: 18vh;
+    background: rgba(40, 42, 48, 0.15);
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  }
+  .palette-overlay.open { display: flex; }
+  .palette {
+    width: 90%; max-width: 540px; background: var(--bg); border-radius: 12px;
+    border: 1px solid var(--hairline); box-shadow: var(--shadow-high), var(--shadow-med);
+    overflow: hidden;
+    animation: pal-in 0.18s var(--ease);
+  }
+  @keyframes pal-in { from { opacity: 0; transform: scale(0.98) translateY(-4px); } }
+  .palette input {
+    width: 100%; border: 0; outline: 0; font: inherit; font-size: 0.9375rem;
+    padding: 16px 18px; color: var(--text-1); border-bottom: 1px solid var(--hairline-soft);
+  }
+  .palette input::placeholder { color: var(--text-4); }
+  .palette ul { list-style: none; padding: 6px; max-height: 280px; overflow-y: auto; }
+  .palette li {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 9px 12px; border-radius: 6px; font-size: 0.875rem; color: var(--text-2);
+    cursor: pointer; transition: background 0.1s var(--ease);
+  }
+  .palette li:hover, .palette li.sel { background: var(--surface); color: var(--text-1); }
+  .palette li .group { font-size: 0.75rem; color: var(--text-4); }
+
+  .toast {
+    position: fixed; bottom: 24px; right: 24px; z-index: 300;
+    display: flex; align-items: center; gap: 10px;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; font-size: 0.8125rem; color: var(--text-1); font-weight: 510;
+    box-shadow: var(--shadow-med);
+    transform: translateY(12px); opacity: 0; pointer-events: none;
+    transition: transform 0.2s var(--ease), opacity 0.2s var(--ease);
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast .dot { animation: none; }
+
+  .marquee { width: 100%; overflow: hidden;
+    -webkit-mask: linear-gradient(90deg, transparent, #fff 12%, #fff 88%, transparent);
+    mask: linear-gradient(90deg, transparent, #fff 12%, #fff 88%, transparent);
+  }
+  .marquee-track { display: flex; gap: 32px; width: max-content; animation: scroll 28s linear infinite; }
+  .marquee:hover .marquee-track { animation-play-state: paused; }
+  .marquee-track span {
+    font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--text-4); white-space: nowrap;
+  }
+  @keyframes scroll { to { transform: translateX(-50%); } }
+
+  /* ---------- entrance reveals ---------- */
+  .reveal { opacity: 0; transform: translateY(8px); transition: opacity 0.22s var(--ease), transform 0.22s var(--ease); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  footer {
+    border-top: 1px solid var(--hairline-soft); margin-top: 64px; padding: 32px 0 48px;
+  }
+  footer .inner { max-width: 1024px; margin: 0 auto; padding: 0 24px; display: flex; justify-content: space-between; }
+  footer p { font-size: 0.8125rem; color: var(--text-4); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    html { scroll-behavior: auto; }
+    .reveal, .stagger-list .it { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<header>
+  <div class="nav-inner">
+    <div class="wordmark">Component Lab <span>/ Sam Chen</span></div>
+    <nav class="sections">
+      <a href="#ambient">Ambient</a>
+      <a href="#primitives">Primitives</a>
+      <a href="#motion">Motion</a>
+      <a href="#interactive">Interactive</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <span class="kicker">Parts bin · v1</span>
+    <h1>Components for the redesign.</h1>
+    <p>A working inventory of pieces that could ship on the new site — from ambient three.js backdrops to micro-interactions. Every cell lists its implementation spec. Hover, click, and press <kbd>⌘K</kbd>.</p>
+  </div>
+
+  <!-- ================= 01 AMBIENT ================= -->
+  <section class="lab" id="ambient">
+    <div class="section-head"><span class="index">01</span><h2>Ambient — three.js</h2></div>
+    <div class="grid">
+      <div class="cell reveal wide">
+        <div class="demo canvas-demo"><canvas class="three" id="c-sphere"></canvas></div>
+        <div class="spec"><span class="spec-name">Particle sphere</span><span class="spec-meta">1,400 pts · mouse parallax · pauses offscreen</span></div>
+      </div>
+      <div class="cell reveal">
+        <div class="demo canvas-demo"><canvas class="three" id="c-ico"></canvas></div>
+        <div class="spec"><span class="spec-name">Wireframe solid</span><span class="spec-meta">icosahedron · indigo vertices · 0.15 rad/s</span></div>
+      </div>
+      <div class="cell reveal" style="grid-column: 1 / -1;">
+        <div class="demo canvas-demo"><canvas class="three" id="c-wave" style="height: 220px;"></canvas></div>
+        <div class="spec"><span class="spec-name">Dot field</span><span class="spec-meta">72×26 grid · sin/cos displacement · grayscale only</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 02 PRIMITIVES ================= -->
+  <section class="lab" id="primitives">
+    <div class="section-head"><span class="index">02</span><h2>Primitives</h2></div>
+    <div class="grid">
+      <div class="cell reveal">
+        <div class="demo">
+          <button class="btn btn-primary">Get in touch</button>
+          <button class="btn btn-secondary">View work</button>
+          <button class="btn btn-ghost">Resume</button>
+        </div>
+        <div class="spec"><span class="spec-name">Buttons</span><span class="spec-meta">wt 510 · 8px radius · active scale 0.98</span></div>
+      </div>
+      <div class="cell reveal">
+        <div class="demo" style="flex-direction: column;">
+          <span class="pill"><span class="dot"></span>Currently in San Francisco</span>
+          <div style="display:flex; gap:8px;">
+            <span class="badge">Research</span><span class="badge indigo">Interpretability</span><span class="badge">RL</span>
+          </div>
+        </div>
+        <div class="spec"><span class="spec-name">Status pill &amp; badges</span><span class="spec-meta">pulse ring 2.4s · tint #f1f1ff</span></div>
+      </div>
+      <div class="cell reveal">
+        <div class="demo">
+          <div class="search">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input placeholder="Search projects…" />
+            <kbd>⌘K</kbd>
+          </div>
+        </div>
+        <div class="spec"><span class="spec-name">Search input</span><span class="spec-meta">focus ring 3px tint · kbd hint</span></div>
+      </div>
+      <div class="cell reveal">
+        <div class="demo">
+          <div class="tabs" id="tabs">
+            <div class="tab-thumb" id="tab-thumb"></div>
+            <button class="active">Projects</button>
+            <button>Writing</button>
+            <button>Research</button>
+          </div>
+        </div>
+        <div class="spec"><span class="spec-name">Tabs</span><span class="spec-meta">sliding thumb · 200ms ease-out-quad</span></div>
+      </div>
+      <div class="cell reveal">
+        <div class="demo">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="toggle on" role="switch" aria-checked="true" tabindex="0"></div>
+            <span style="font-size:0.8125rem; color:var(--text-3);">Email updates</span>
+          </div>
+        </div>
+        <div class="spec"><span class="spec-name">Toggle</span><span class="spec-meta">160ms · knob translateX</span></div>
+      </div>
+      <div class="cell reveal">
+        <div class="demo">
+          <div class="tip-wrap">
+            <button class="btn btn-secondary">Hover me</button>
+            <span class="tip">Opens the CV — last updated May 2026</span>
+          </div>
+          <div style="display:flex; gap:4px;"><kbd>G</kbd><kbd>then</kbd><kbd>P</kbd></div>
+        </div>
+        <div class="spec"><span class="spec-name">Tooltip &amp; shortcuts</span><span class="spec-meta">120ms · translateY 3px</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 03 MOTION ================= -->
+  <section class="lab" id="motion">
+    <div class="section-head"><span class="index">03</span><h2>Clean motion</h2></div>
+    <div class="grid">
+      <div class="cell reveal">
+        <div class="demo" style="gap: 24px;">
+          <a class="u-link" href="#motion">Underline slide</a>
+          <a class="arrow-link" href="#motion">Read more
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+        <div class="spec"><span class="spec-name">Link treatments</span><span class="spec-meta">scaleX origin swap · arrow nudge 3px</span></div>
+      </div>
+      <div class="cell reveal wide">
+        <div class="demo" style="align-items: stretch;">
+          <div class="rows">
+            <div class="row">
+              <div><div class="r-title">IvyLine Search</div><div class="r-sub">Semantic search · 500 users in 5 days</div></div>
+              <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 6 6 6-6 6"/></svg>
+            </div>
+            <div class="row">
+              <div><div class="r-title">Transformer in Rust</div><div class="r-sub">From scratch, with candle</div></div>
+              <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 6 6 6-6 6"/></svg>
+            </div>
+            <div class="row">
+              <div><div class="r-title">Ignite Fund</div><div class="r-sub">A site for high achievers</div></div>
+              <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m9 6 6 6-6 6"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="spec"><span class="spec-name">List rows</span><span class="spec-meta">bg → #f9f8f9 · chevron slide 140ms</span></div>
+      </div>
+      <div class="cell reveal">
+        <div class="demo">
+          <div class="lift-card">
+            <h3>Hover lift</h3>
+            <p>translateY(-3.5px) with a soft shadow swap — Linear's exact lift distance.</p>
+          </div>
+        </div>
+        <div class="spec"><span class="spec-name">Card lift</span><span class="spec-meta">-3.5px · shadow-med · 200ms</span></div>
+      </div>
+      <div class="cell reveal">
+        <div class="demo">
+          <div class="metrics">
+            <div class="metric"><div class="num" data-count="1800" data-suffix="+">0</div><div class="lbl">Members</div></div>
+            <div class="metric"><div class="num" data-count="100" data-suffix="K">0</div><div class="lbl">Impressions</div></div>
+            <div class="metric"><div class="num" data-count="500" data-suffix="">0</div><div class="lbl">Users / 5 days</div></div>
+          </div>
+        </div>
+        <div class="spec"><span class="spec-name">Count-up metrics</span><span class="spec-meta">IO trigger · 900ms ease-out · tabular-nums</span></div>
+      </div>
+      <div class="cell reveal">
+        <div class="demo" style="flex-direction: column; align-items: flex-start;">
+          <div class="skeleton">
+            <div class="sk w60"></div><div class="sk"></div><div class="sk w80"></div>
+          </div>
+        </div>
+        <div class="spec"><span class="spec-name">Skeleton shimmer</span><span class="spec-meta">1.6s sweep · white 70% highlight</span></div>
+      </div>
+      <div class="cell reveal">
+        <div class="demo">
+          <div class="stagger-list play" id="stagger">
+            <div class="it"><span class="dot" style="background:var(--text-4);"></span>Mechanistic interpretability</div>
+            <div class="it"><span class="dot" style="background:var(--text-4);"></span>Hierarchical RL</div>
+            <div class="it"><span class="dot" style="background:var(--text-4);"></span>Outreach Debate</div>
+            <div class="it"><span class="dot" style="background:var(--text-4);"></span>IvyLine Search</div>
+          </div>
+          <button class="btn btn-ghost replay" id="replay" aria-label="Replay">↻</button>
+        </div>
+        <div class="spec"><span class="spec-name">Staggered reveal</span><span class="spec-meta">220ms · 60ms stagger · opacity+8px</span></div>
+      </div>
+      <div class="cell reveal">
+        <div class="demo">
+          <button class="btn btn-secondary copy-btn" id="copy">
+            <span class="swap">
+              <svg class="icon-copy" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+              <svg class="icon-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m5 13 4 4L19 7"/></svg>
+            </span>
+            sam_chen@college.harvard.edu
+          </button>
+        </div>
+        <div class="spec"><span class="spec-name">Copy morph</span><span class="spec-meta">icon swap 160ms · reverts 1.4s</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 04 INTERACTIVE ================= -->
+  <section class="lab" id="interactive">
+    <div class="section-head"><span class="index">04</span><h2>Interactive</h2></div>
+    <div class="grid">
+      <div class="cell reveal">
+        <div class="demo magnet-zone" id="magnet-zone">
+          <button class="btn btn-primary magnetic" id="magnet">Magnetic</button>
+        </div>
+        <div class="spec"><span class="spec-name">Magnetic button</span><span class="spec-meta">≤6px pull · 180ms release</span></div>
+      </div>
+      <div class="cell reveal">
+        <div class="demo">
+          <div class="spotlight" id="spot">
+            <h3>Spotlight border</h3>
+            <p>An indigo gradient traces the border under the cursor. Subtle enough for a light theme.</p>
+          </div>
+        </div>
+        <div class="spec"><span class="spec-name">Spotlight border</span><span class="spec-meta">radial 140px · mask-composite exclude</span></div>
+      </div>
+      <div class="cell reveal">
+        <div class="demo">
+          <span class="scramble" id="scramble" data-text="mechanistic interpretability">mechanistic interpretability</span>
+        </div>
+        <div class="spec"><span class="spec-name">Text scramble</span><span class="spec-meta">hover · resolves L→R · 30ms ticks</span></div>
+      </div>
+      <div class="cell reveal">
+        <div class="demo">
+          <div class="typewriter"><span id="type"></span><span class="caret"></span></div>
+        </div>
+        <div class="spec"><span class="spec-name">Typewriter</span><span class="spec-meta">type 55ms · hold 1.8s · delete 28ms</span></div>
+      </div>
+      <div class="cell reveal">
+        <div class="demo">
+          <button class="btn btn-secondary" id="open-palette">Open command palette <kbd style="margin-left:6px;">⌘K</kbd></button>
+        </div>
+        <div class="spec"><span class="spec-name">Command palette</span><span class="spec-meta">scale 0.98→1 · blur(4px) scrim · 180ms</span></div>
+      </div>
+      <div class="cell reveal">
+        <div class="demo">
+          <button class="btn btn-secondary" id="toast-btn">Trigger toast</button>
+        </div>
+        <div class="spec"><span class="spec-name">Toast</span><span class="spec-meta">bottom-right · 200ms in · 2.4s auto-dismiss</span></div>
+      </div>
+      <div class="cell reveal" style="grid-column: 1 / -1;">
+        <div class="demo" style="padding: 32px 0;">
+          <div class="marquee">
+            <div class="marquee-track" id="marquee-track">
+              <span>Mechanistic interpretability</span><span>·</span>
+              <span>Hierarchical RL</span><span>·</span>
+              <span>Pure mathematics</span><span>·</span>
+              <span>Public Forum debate</span><span>·</span>
+              <span>Education access</span><span>·</span>
+              <span>Building things</span><span>·</span>
+            </div>
+          </div>
+        </div>
+        <div class="spec"><span class="spec-name">Masked ticker</span><span class="spec-meta">28s linear · 12% edge fade · pause on hover</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="palette-overlay" id="palette-overlay">
+  <div class="palette" role="dialog" aria-label="Command palette">
+    <input id="palette-input" placeholder="Type a command or search…" />
+    <ul id="palette-list">
+      <li data-label="Go to Projects"><span>Go to Projects</span><span class="group">Navigation</span></li>
+      <li data-label="Go to Writing"><span>Go to Writing</span><span class="group">Navigation</span></li>
+      <li data-label="Read the CV"><span>Read the CV</span><span class="group">Navigation</span></li>
+      <li data-label="Copy email address"><span>Copy email address</span><span class="group">Actions</span></li>
+      <li data-label="Open GitHub"><span>Open GitHub</span><span class="group">Links</span></li>
+      <li data-label="Open LinkedIn"><span>Open LinkedIn</span><span class="group">Links</span></li>
+    </ul>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span class="dot"></span>Email copied to clipboard</div>
+
+<footer>
+  <div class="inner">
+    <p>Component Lab — built for the site redesign</p>
+    <p>Inter · #7070ff · ease-out-quad</p>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* scroll progress */
+  const progress = document.getElementById('progress');
+  addEventListener('scroll', () => {
+    const h = document.documentElement;
+    progress.style.width = (h.scrollTop / (h.scrollHeight - h.clientHeight) * 100) + '%';
+  }, { passive: true });
+
+  /* entrance reveals */
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }), { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  /* tabs */
+  const tabs = document.getElementById('tabs');
+  const thumb = document.getElementById('tab-thumb');
+  function placeThumb(btn) { thumb.style.left = btn.offsetLeft + 'px'; thumb.style.width = btn.offsetWidth + 'px'; }
+  const tabBtns = tabs.querySelectorAll('button');
+  placeThumb(tabs.querySelector('.active'));
+  tabBtns.forEach(b => b.addEventListener('click', () => {
+    tabs.querySelector('.active').classList.remove('active');
+    b.classList.add('active'); placeThumb(b);
+  }));
+
+  /* toggle */
+  document.querySelectorAll('.toggle').forEach(t => {
+    const flip = () => { t.classList.toggle('on'); t.setAttribute('aria-checked', t.classList.contains('on')); };
+    t.addEventListener('click', flip);
+    t.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } });
+  });
+
+  /* count-up */
+  const fmt = new Intl.NumberFormat('en-US');
+  const cio = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return;
+    cio.unobserve(e.target);
+    const el = e.target, end = +el.dataset.count, suf = el.dataset.suffix || '';
+    if (RM) { el.textContent = fmt.format(end) + suf; return; }
+    const t0 = performance.now(), dur = 900;
+    (function tick(t) {
+      const p = Math.min((t - t0) / dur, 1), eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt.format(Math.round(end * eased)) + suf;
+      if (p < 1) requestAnimationFrame(tick);
+    })(t0);
+  }), { threshold: 0.5 });
+  document.querySelectorAll('[data-count]').forEach(el => cio.observe(el));
+
+  /* stagger replay */
+  const stagger = document.getElementById('stagger');
+  document.getElementById('replay').addEventListener('click', () => {
+    stagger.classList.remove('play'); void stagger.offsetWidth; stagger.classList.add('play');
+  });
+
+  /* copy morph + toast */
+  const toast = document.getElementById('toast');
+  let toastTimer;
+  function showToast() {
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
+  }
+  const copyBtn = document.getElementById('copy');
+  copyBtn.addEventListener('click', () => {
+    try { navigator.clipboard.writeText('sam_chen@college.harvard.edu'); } catch (_) {}
+    copyBtn.classList.add('copied'); showToast();
+    setTimeout(() => copyBtn.classList.remove('copied'), 1400);
+  });
+  document.getElementById('toast-btn').addEventListener('click', showToast);
+
+  /* magnetic button */
+  const zone = document.getElementById('magnet-zone'), mag = document.getElementById('magnet');
+  if (!RM) {
+    zone.addEventListener('mousemove', e => {
+      const r = mag.getBoundingClientRect();
+      const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+      const d = Math.hypot(dx, dy), max = 110;
+      if (d < max) {
+        const pull = (1 - d / max) * 6;
+        mag.style.transform = `translate(${(dx / d) * pull || 0}px, ${(dy / d) * pull || 0}px)`;
+      } else mag.style.transform = '';
+    });
+    zone.addEventListener('mouseleave', () => { mag.style.transform = ''; });
+  }
+
+  /* spotlight border */
+  const spot = document.getElementById('spot');
+  spot.addEventListener('mousemove', e => {
+    const r = spot.getBoundingClientRect();
+    spot.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+    spot.style.setProperty('--my', (e.clientY - r.top) + 'px');
+  });
+
+  /* text scramble */
+  const sc = document.getElementById('scramble');
+  const CHARS = '!<>-_\\/[]{}—=+*^?#________';
+  let scrambling = false;
+  sc.addEventListener('mouseenter', () => {
+    if (RM || scrambling) return;
+    scrambling = true;
+    const target = sc.dataset.text;
+    let frame = 0;
+    const iv = setInterval(() => {
+      frame++;
+      const resolved = Math.floor(frame / 2);
+      sc.textContent = target.split('').map((ch, i) => {
+        if (ch === ' ') return ' ';
+        if (i < resolved) return ch;
+        return CHARS[Math.floor(Math.random() * CHARS.length)];
+      }).join('');
+      if (resolved >= target.length) { clearInterval(iv); sc.textContent = target; scrambling = false; }
+    }, 30);
+  });
+
+  /* typewriter */
+  const lines = ['sam@harvard ~ % studying interpretability', 'sam@harvard ~ % building in SF this summer', 'sam@harvard ~ % proving things, occasionally'];
+  const typeEl = document.getElementById('type');
+  if (RM) { typeEl.textContent = lines[0]; }
+  else {
+    let li = 0, ci = 0, deleting = false;
+    (function loop() {
+      const line = lines[li];
+      if (!deleting) {
+        ci++; typeEl.textContent = line.slice(0, ci);
+        if (ci === line.length) { deleting = true; setTimeout(loop, 1800); return; }
+        setTimeout(loop, 55);
+      } else {
+        ci--; typeEl.textContent = line.slice(0, ci);
+        if (ci === 0) { deleting = false; li = (li + 1) % lines.length; setTimeout(loop, 350); return; }
+        setTimeout(loop, 28);
+      }
+    })();
+  }
+
+  /* command palette */
+  const overlay = document.getElementById('palette-overlay');
+  const palInput = document.getElementById('palette-input');
+  const palList = document.getElementById('palette-list');
+  function openPal() { overlay.classList.add('open'); palInput.value = ''; filterPal(''); palInput.focus(); }
+  function closePal() { overlay.classList.remove('open'); }
+  document.getElementById('open-palette').addEventListener('click', openPal);
+  addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); overlay.classList.contains('open') ? closePal() : openPal(); }
+    if (e.key === 'Escape') closePal();
+  });
+  overlay.addEventListener('click', e => { if (e.target === overlay) closePal(); });
+  function filterPal(q) {
+    palList.querySelectorAll('li').forEach(li => {
+      li.style.display = li.dataset.label.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+    });
+  }
+  palInput.addEventListener('input', () => filterPal(palInput.value));
+  palList.addEventListener('click', e => { if (e.target.closest('li')) { closePal(); showToast(); } });
+
+  /* duplicate marquee content for seamless loop */
+  const track = document.getElementById('marquee-track');
+  track.innerHTML += track.innerHTML;
+})();
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const scenes = [];
+
+function setup(canvas, fov = 50) {
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  const camera = new THREE.PerspectiveCamera(fov, 1, 0.1, 100);
+  const scene = new THREE.Scene();
+  return { renderer, camera, scene };
+}
+
+function fit({ renderer, camera }, canvas) {
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  if (canvas.width !== Math.floor(w * renderer.getPixelRatio()) || canvas.height !== Math.floor(h * renderer.getPixelRatio())) {
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+}
+
+let mouseX = 0, mouseY = 0;
+addEventListener('mousemove', e => {
+  mouseX = (e.clientX / innerWidth) * 2 - 1;
+  mouseY = (e.clientY / innerHeight) * 2 - 1;
+}, { passive: true });
+
+/* --- particle sphere --- */
+{
+  const canvas = document.getElementById('c-sphere');
+  const ctx = setup(canvas);
+  ctx.camera.position.z = 2.6;
+  const N = 1400, pos = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) {
+    const u = Math.random() * 2 - 1, t = Math.random() * Math.PI * 2;
+    const r = 1 + (Math.random() - 0.5) * 0.08, s = Math.sqrt(1 - u * u);
+    pos[i * 3] = r * s * Math.cos(t); pos[i * 3 + 1] = r * u; pos[i * 3 + 2] = r * s * Math.sin(t);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x86848d, size: 0.018, transparent: true, opacity: 0.85 }));
+  ctx.scene.add(pts);
+  scenes.push({ canvas, ctx, update(t) {
+    pts.rotation.y = t * 0.00012;
+    pts.rotation.x += ((mouseY * 0.25) - pts.rotation.x) * 0.04;
+    pts.rotation.z += ((mouseX * 0.1) - pts.rotation.z) * 0.04;
+  }});
+}
+
+/* --- wireframe icosahedron --- */
+{
+  const canvas = document.getElementById('c-ico');
+  const ctx = setup(canvas);
+  ctx.camera.position.z = 2.5;
+  const geo = new THREE.IcosahedronGeometry(1, 1);
+  const wire = new THREE.LineSegments(
+    new THREE.WireframeGeometry(geo),
+    new THREE.LineBasicMaterial({ color: 0xc9c8cc, transparent: true, opacity: 0.8 })
+  );
+  const verts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x7070ff, size: 0.04 }));
+  const group = new THREE.Group();
+  group.add(wire, verts);
+  ctx.scene.add(group);
+  scenes.push({ canvas, ctx, update(t) {
+    group.rotation.y = t * 0.00015;
+    group.rotation.x = Math.sin(t * 0.0001) * 0.3;
+  }});
+}
+
+/* --- dot field wave --- */
+{
+  const canvas = document.getElementById('c-wave');
+  const ctx = setup(canvas, 42);
+  ctx.camera.position.set(0, 1.6, 3.4);
+  ctx.camera.lookAt(0, 0, 0);
+  const COLS = 72, ROWS = 26, pos = new Float32Array(COLS * ROWS * 3);
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xb9b8bd, size: 0.028, transparent: true, opacity: 0.9 }));
+  ctx.scene.add(pts);
+  scenes.push({ canvas, ctx, update(t) {
+    let k = 0;
+    for (let i = 0; i < COLS; i++) for (let j = 0; j < ROWS; j++) {
+      const x = (i / (COLS - 1) - 0.5) * 7, z = (j / (ROWS - 1) - 0.5) * 3;
+      pos[k++] = x;
+      pos[k++] = Math.sin(x * 1.4 + t * 0.0011) * 0.14 + Math.cos(z * 2 + t * 0.0009) * 0.12;
+      pos[k++] = z;
+    }
+    geo.attributes.position.needsUpdate = true;
+  }});
+}
+
+/* visibility-aware render loop */
+const vis = new WeakMap();
+const vio = new IntersectionObserver(es => es.forEach(e => vis.set(e.target, e.isIntersecting)), { threshold: 0.05 });
+scenes.forEach(s => { vis.set(s.canvas, false); vio.observe(s.canvas); });
+
+if (RM) {
+  scenes.forEach(s => { fit(s.ctx, s.canvas); s.update(0); s.ctx.renderer.render(s.ctx.scene, s.ctx.camera); });
+} else {
+  (function frame(t) {
+    scenes.forEach(s => {
+      if (!vis.get(s.canvas)) return;
+      fit(s.ctx, s.canvas);
+      s.update(t);
+      s.ctx.renderer.render(s.ctx.scene, s.ctx.camera);
+    });
+    requestAnimationFrame(frame);
+  })(0);
+}
+</script>
+</body>
+</html>

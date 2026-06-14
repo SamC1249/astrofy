@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sam Chen — Hero Concepts 06–10 — Geometry &amp; Line</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --text:#282a30;
+    --text-2:#3c4149;
+    --text-3:#6f6e77;
+    --text-4:#86848d;
+    --accent:#7070ff;
+    --accent-tint:#f1f1ff;
+    --hairline:rgba(0,0,0,0.08);
+    --ease:cubic-bezier(0.25,0.46,0.45,0.94);
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    font-family:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+    font-optical-sizing:auto;
+    background:#fff;
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+  }
+  #snap{
+    height:100vh;
+    height:100dvh;
+    overflow-y:auto;
+    scroll-snap-type:y mandatory;
+    scroll-behavior:smooth;
+  }
+  @media (prefers-reduced-motion: reduce){
+    #snap{scroll-behavior:auto;}
+  }
+  section.hero{
+    position:relative;
+    height:100vh;
+    height:100dvh;
+    scroll-snap-align:start;
+    scroll-snap-stop:always;
+    overflow:hidden;
+    border-bottom:1px solid var(--hairline);
+  }
+  section.hero canvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
+  }
+
+  /* ---------- copy blocks ---------- */
+  .copy{
+    position:absolute;
+    z-index:2;
+    pointer-events:none;
+  }
+  .copy a{pointer-events:auto;}
+  .kicker{
+    font-family:var(--mono);
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.14em;
+    color:var(--accent);
+    margin-bottom:18px;
+  }
+  .kicker.gray{color:var(--text-4);}
+  h1.name{
+    font-size:clamp(48px,7vw,72px);
+    font-weight:590;
+    letter-spacing:-0.022em;
+    line-height:1.02;
+    color:var(--text);
+  }
+  .tagline{
+    margin-top:14px;
+    font-size:clamp(17px,1.6vw,21px);
+    font-weight:510;
+    letter-spacing:-0.012em;
+    color:var(--text-2);
+  }
+  .bio{
+    margin-top:10px;
+    font-size:15px;
+    font-weight:400;
+    line-height:1.55;
+    color:var(--text-3);
+    max-width:46ch;
+  }
+  .actions{
+    margin-top:28px;
+    display:flex;
+    gap:12px;
+  }
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:inherit;
+    font-size:14px;
+    font-weight:510;
+    letter-spacing:-0.01em;
+    text-decoration:none;
+    padding:10px 18px;
+    border-radius:8px;
+    transition:transform .18s var(--ease), box-shadow .18s var(--ease), background-color .18s var(--ease), border-color .18s var(--ease);
+    cursor:pointer;
+  }
+  .btn-primary{
+    background:var(--text);
+    color:#fff;
+    border:1px solid var(--text);
+    box-shadow:0 1px 2px rgba(0,0,0,0.09);
+  }
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.09);}
+  .btn-secondary{
+    background:rgba(255,255,255,0.7);
+    backdrop-filter:blur(6px);
+    color:var(--text-2);
+    border:1px solid var(--hairline);
+    box-shadow:0 1px 2px rgba(0,0,0,0.04);
+  }
+  .btn-secondary:hover{border-color:rgba(0,0,0,0.16);transform:translateY(-1px);}
+
+  /* placements */
+  .copy-center{
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+  }
+  .copy-center .bio{margin-left:auto;margin-right:auto;}
+  .copy-center .actions{justify-content:center;}
+  .copy-left{
+    left:clamp(24px,8vw,140px);
+    top:50%;
+    transform:translateY(-50%);
+    max-width:600px;
+  }
+  .copy-bottomleft{
+    left:clamp(24px,8vw,140px);
+    bottom:clamp(96px,16vh,180px);
+    max-width:600px;
+  }
+  .copy-split{
+    left:clamp(24px,7vw,120px);
+    top:50%;
+    transform:translateY(-50%);
+    max-width:560px;
+  }
+  /* halo behind centered text so it stays legible over geometry */
+  .halo{
+    position:absolute;
+    z-index:1;
+    left:50%;top:50%;
+    transform:translate(-50%,-50%);
+    width:min(80vw,900px);
+    height:min(70vh,560px);
+    background:radial-gradient(closest-side,rgba(255,255,255,0.92) 0%,rgba(255,255,255,0.55) 55%,rgba(255,255,255,0) 100%);
+    pointer-events:none;
+  }
+  .halo-left{
+    position:absolute;
+    z-index:1;
+    left:0;top:0;bottom:0;
+    width:min(62vw,760px);
+    background:linear-gradient(90deg,rgba(255,255,255,0.92) 0%,rgba(255,255,255,0.72) 55%,rgba(255,255,255,0) 100%);
+    pointer-events:none;
+  }
+
+  /* ---------- spec label ---------- */
+  .spec{
+    position:absolute;
+    z-index:3;
+    left:clamp(20px,3vw,40px);
+    bottom:24px;
+    font-family:var(--mono);
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--text-4);
+    pointer-events:none;
+  }
+  .spec b{color:var(--text-2);font-weight:600;}
+
+  /* scroll hint, first hero only */
+  .scroll-hint{
+    position:absolute;
+    z-index:3;
+    left:50%;
+    bottom:26px;
+    transform:translateX(-50%);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:var(--mono);
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.14em;
+    color:var(--text-4);
+    pointer-events:none;
+  }
+  .scroll-hint::after{
+    content:"";
+    width:1px;
+    height:28px;
+    background:linear-gradient(rgba(0,0,0,0.25),rgba(0,0,0,0));
+  }
+
+  /* ---------- dot nav ---------- */
+  #dotnav{
+    position:fixed;
+    z-index:10;
+    right:18px;
+    top:50%;
+    transform:translateY(-50%);
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  #dotnav button{
+    width:8px;height:8px;
+    border-radius:50%;
+    border:none;
+    padding:0;
+    background:rgba(0,0,0,0.16);
+    cursor:pointer;
+    transition:background-color .2s var(--ease), transform .2s var(--ease);
+  }
+  #dotnav button:hover{background:rgba(0,0,0,0.34);}
+  #dotnav button.active{
+    background:var(--accent);
+    transform:scale(1.35);
+  }
+
+  @media (max-width:720px){
+    .copy-left,.copy-split,.copy-bottomleft{left:24px;right:24px;}
+    .halo-left{width:100vw;}
+    .spec{font-size:10px;right:48px;}
+  }
+</style>
+</head>
+<body>
+
+<nav id="dotnav" aria-label="Hero concepts">
+  <button data-target="hero06" class="active" title="06 — Terrain flyover"></button>
+  <button data-target="hero07" title="07 — Neural graph"></button>
+  <button data-target="hero08" title="08 — Gyroscope rings"></button>
+  <button data-target="hero09" title="09 — Oscilloscope ribbons"></button>
+  <button data-target="hero10" title="10 — Exploded icosahedron"></button>
+</nav>
+
+<main id="snap">
+
+  <!-- 06 — WIREFRAME TERRAIN FLYOVER · centered copy -->
+  <section class="hero" id="hero06">
+    <canvas></canvas>
+    <div class="copy copy-center" style="padding-bottom:6vh;">
+      <div class="kicker gray">Cambridge, MA · 42.37° N</div>
+      <h1 class="name">Sam Chen</h1>
+      <p class="tagline">Researcher, Builder &amp; Founder</p>
+      <p class="bio">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="#">Get in touch</a>
+        <a class="btn btn-secondary" href="#">View work</a>
+      </div>
+    </div>
+    <div class="scroll-hint">Scroll</div>
+    <div class="spec"><b>HERO 06 / 20</b> — Terrain flyover — wireframe · infinite scroll · white fog</div>
+  </section>
+
+  <!-- 07 — NEURAL GRAPH · left copy, graph right -->
+  <section class="hero" id="hero07">
+    <canvas></canvas>
+    <div class="halo-left"></div>
+    <div class="copy copy-left">
+      <div class="kicker">Signal propagation · live</div>
+      <h1 class="name">Sam Chen</h1>
+      <p class="tagline">Researcher, Builder &amp; Founder</p>
+      <p class="bio">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="#">Get in touch</a>
+        <a class="btn btn-secondary" href="#">Read research</a>
+      </div>
+    </div>
+    <div class="spec"><b>HERO 07 / 20</b> — Neural graph — 80 nodes · k-NN edges · pulses #7070FF</div>
+  </section>
+
+  <!-- 08 — GYROSCOPE RINGS · copy centered over the assembly -->
+  <section class="hero" id="hero08">
+    <canvas></canvas>
+    <div class="halo"></div>
+    <div class="copy copy-center">
+      <h1 class="name">Sam Chen</h1>
+      <p class="tagline">Researcher, Builder &amp; Founder</p>
+      <p class="bio">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="#">Get in touch</a>
+        <a class="btn btn-secondary" href="#">View work</a>
+      </div>
+    </div>
+    <div class="spec"><b>HERO 08 / 20</b> — Gyroscope — 5 wireframe rings · independent axes · mouse tilt</div>
+  </section>
+
+  <!-- 09 — OSCILLOSCOPE RIBBONS · bottom-left copy -->
+  <section class="hero" id="hero09">
+    <canvas></canvas>
+    <div class="copy copy-bottomleft">
+      <div class="kicker gray">Ch 1–4 · amplitude ∝ cursor Y</div>
+      <h1 class="name">Sam Chen</h1>
+      <p class="tagline">Researcher, Builder &amp; Founder</p>
+      <p class="bio">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="#">Get in touch</a>
+        <a class="btn btn-secondary" href="#">Read writing</a>
+      </div>
+    </div>
+    <div class="spec"><b>HERO 09 / 20</b> — Oscilloscope — 4 ribbons · superimposed signals · amp ← mouse Y</div>
+  </section>
+
+  <!-- 10 — EXPLODED ICOSAHEDRON · split, copy left / object right -->
+  <section class="hero" id="hero10">
+    <canvas></canvas>
+    <div class="halo-left"></div>
+    <div class="copy copy-split">
+      <div class="kicker">Fig. 10 — exploded view</div>
+      <h1 class="name">Sam Chen</h1>
+      <p class="tagline">Researcher, Builder &amp; Founder</p>
+      <p class="bio">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="#">Get in touch</a>
+        <a class="btn btn-secondary" href="#">View work</a>
+      </div>
+    </div>
+    <div class="spec"><b>HERO 10 / 20</b> — Exploded icosahedron — 20 faces · breathes apart · assembles on approach</div>
+  </section>
+
+</main>
+
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const DPR = Math.min(window.devicePixelRatio || 1, 2);
+
+const WHITE  = 0xffffff;
+const INDIGO = 0x7070ff;
+
+const heroes = [];          // {section, render(t,dt), resize(), active}
+const heroBySection = new Map();
+
+/* ---------------------------------------------------------------- helpers */
+
+function createHero(id, build){
+  const section = document.getElementById(id);
+  const canvas  = section.querySelector('canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias:true });
+  renderer.setPixelRatio(DPR);
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(WHITE);
+
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 200);
+
+  const ctx = {
+    scene, camera, renderer, section,
+    w: 1, h: 1,
+    mouse: { x:0, y:0, tx:0, ty:0 }   // x right+, y down+ in [-1,1]
+  };
+
+  if (!REDUCED){
+    section.addEventListener('pointermove', (e)=>{
+      const r = section.getBoundingClientRect();
+      ctx.mouse.tx = ((e.clientX - r.left) / r.width)  * 2 - 1;
+      ctx.mouse.ty = ((e.clientY - r.top)  / r.height) * 2 - 1;
+    });
+    section.addEventListener('pointerleave', ()=>{ ctx.mouse.tx = 0; ctx.mouse.ty = 0; });
+  }
+
+  const api = build(ctx); // { update(t,dt), onResize?(w,h) }
+
+  const hero = {
+    section,
+    active: false,
+    render(t, dt){
+      const k = REDUCED ? 1 : Math.min(1, dt * 5);
+      ctx.mouse.x += (ctx.mouse.tx - ctx.mouse.x) * k;
+      ctx.mouse.y += (ctx.mouse.ty - ctx.mouse.y) * k;
+      api.update(t, dt);
+      renderer.render(scene, camera);
+    },
+    resize(){
+      const w = section.clientWidth, h = section.clientHeight;
+      if (!w || !h) return;
+      ctx.w = w; ctx.h = h;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      if (api.onResize) api.onResize(w, h);
+      if (REDUCED) hero.render(0, 0);
+    }
+  };
+
+  hero.resize();
+  heroes.push(hero);
+  heroBySection.set(section, hero);
+}
+
+/* =======================================================================
+   06 — WIREFRAME TERRAIN FLYOVER
+   ======================================================================= */
+createHero('hero06', (ctx)=>{
+  const { scene, camera } = ctx;
+  camera.fov = 55;
+  camera.position.set(0, 2.7, 8);
+  camera.updateProjectionMatrix();
+
+  const geo = new THREE.PlaneGeometry(72, 48, 150, 100);
+  geo.rotateX(-Math.PI / 2);
+
+  const uniforms = { uTime: { value: 0 } };
+
+  const mat = new THREE.ShaderMaterial({
+    uniforms,
+    wireframe: true,
+    vertexShader: /* glsl */`
+      uniform float uTime;
+      varying float vH;
+      varying float vDist;
+      float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
+      float noise(vec2 p){
+        vec2 i = floor(p), f = fract(p);
+        f = f * f * (3.0 - 2.0 * f);
+        return mix(
+          mix(hash(i),                hash(i + vec2(1.0, 0.0)), f.x),
+          mix(hash(i + vec2(0.0,1.0)),hash(i + vec2(1.0, 1.0)), f.x),
+          f.y);
+      }
+      float fbm(vec2 p){
+        float v = 0.0, a = 0.5;
+        for (int i = 0; i < 4; i++){
+          v += a * noise(p);
+          p = p * 2.03 + vec2(11.7, 9.2);
+          a *= 0.5;
+        }
+        return v;
+      }
+      void main(){
+        vec3 p = position;
+        vec2 q = vec2(p.x * 0.12, (p.z - uTime * 4.0) * 0.12);
+        float h = fbm(q);
+        // carve a valley along the flight path
+        float valley = 0.22 + smoothstep(1.5, 15.0, abs(p.x + sin(p.z * 0.05 + uTime * 0.25) * 2.0));
+        p.y = h * 4.4 * valley;
+        vH = p.y;
+        vec4 mv = modelViewMatrix * vec4(p, 1.0);
+        vDist = -mv.z;
+        gl_Position = projectionMatrix * mv;
+      }
+    `,
+    fragmentShader: /* glsl */`
+      precision highp float;
+      varying float vH;
+      varying float vDist;
+      void main(){
+        vec3 gray   = vec3(0.74);
+        vec3 indigo = vec3(0.439, 0.439, 1.0);
+        vec3 col = mix(gray, indigo, smoothstep(2.3, 3.5, vH));
+        float fog = smoothstep(9.0, 38.0, vDist);   // fade to white at the horizon
+        col = mix(col, vec3(1.0), fog);
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `
+  });
+
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.z = -16;
+  mesh.frustumCulled = false;
+  scene.add(mesh);
+
+  const look = new THREE.Vector3(0, 1.1, -26);
+
+  return {
+    update(t){
+      uniforms.uTime.value = t * 0.55;
+      camera.position.x = ctx.mouse.x * 1.1;
+      camera.position.y = 2.7 - ctx.mouse.y * 0.35;
+      camera.lookAt(look);
+    }
+  };
+});
+
+/* =======================================================================
+   07 — NEURAL GRAPH
+   ======================================================================= */
+createHero('hero07', (ctx)=>{
+  const { scene, camera } = ctx;
+  camera.fov = 42;
+  camera.position.set(0, 0, 7.4);
+  camera.updateProjectionMatrix();
+
+  const group = new THREE.Group();
+  scene.add(group);
+
+  // --- nodes: flattened ellipsoid cloud ---
+  const N = 80;
+  const pts = [];
+  const rand = (a,b)=> a + Math.random()*(b-a);
+  for (let i = 0; i < N; i++){
+    // gaussian-ish via averaging
+    const g = ()=> (Math.random()+Math.random()+Math.random())/1.5 - 1;
+    pts.push(new THREE.Vector3(g()*3.1, g()*2.0, g()*2.0));
+  }
+
+  const nodeGeo = new THREE.SphereGeometry(0.052, 10, 8);
+  const nodeMat = new THREE.MeshBasicMaterial({ color: 0x9a99a2 });
+  const nodes = new THREE.InstancedMesh(nodeGeo, nodeMat, N);
+  const dummy = new THREE.Object3D();
+  for (let i = 0; i < N; i++){
+    dummy.position.copy(pts[i]);
+    const s = rand(0.7, 1.5);
+    dummy.scale.setScalar(s);
+    dummy.updateMatrix();
+    nodes.setMatrixAt(i, dummy.matrix);
+  }
+  nodes.instanceMatrix.needsUpdate = true;
+  group.add(nodes);
+
+  // --- edges: 3 nearest neighbours, deduped ---
+  const edgeSet = new Set();
+  const adjacency = Array.from({length:N}, ()=>[]);
+  for (let i = 0; i < N; i++){
+    const ds = [];
+    for (let j = 0; j < N; j++){
+      if (i === j) continue;
+      ds.push([pts[i].distanceToSquared(pts[j]), j]);
+    }
+    ds.sort((a,b)=>a[0]-b[0]);
+    for (let k = 0; k < 3; k++){
+      const j = ds[k][1];
+      const key = i < j ? i + '-' + j : j + '-' + i;
+      if (!edgeSet.has(key)){
+        edgeSet.add(key);
+        adjacency[i].push(j);
+        adjacency[j].push(i);
+      }
+    }
+  }
+  const edges = [...edgeSet].map(k => k.split('-').map(Number));
+  const epos = new Float32Array(edges.length * 6);
+  edges.forEach(([a,b], i)=>{
+    epos.set([pts[a].x, pts[a].y, pts[a].z, pts[b].x, pts[b].y, pts[b].z], i*6);
+  });
+  const edgeGeo = new THREE.BufferGeometry();
+  edgeGeo.setAttribute('position', new THREE.BufferAttribute(epos, 3));
+  const edgeMat = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.12 });
+  group.add(new THREE.LineSegments(edgeGeo, edgeMat));
+
+  // --- pulses travelling along edges ---
+  const P = 12;
+  const pulseMesh = new THREE.InstancedMesh(
+    new THREE.SphereGeometry(0.075, 10, 8),
+    new THREE.MeshBasicMaterial({ color: INDIGO }),
+    P
+  );
+  group.add(pulseMesh);
+  const pulses = [];
+  for (let i = 0; i < P; i++){
+    const e = edges[(Math.random()*edges.length)|0];
+    pulses.push({ a: e[0], b: e[1], t: Math.random(), sp: rand(0.45, 1.1) });
+  }
+  const pv = new THREE.Vector3();
+
+  function placePulses(){
+    for (let i = 0; i < P; i++){
+      const p = pulses[i];
+      pv.lerpVectors(pts[p.a], pts[p.b], p.t);
+      dummy.position.copy(pv);
+      dummy.scale.setScalar(1);
+      dummy.updateMatrix();
+      pulseMesh.setMatrixAt(i, dummy.matrix);
+    }
+    pulseMesh.instanceMatrix.needsUpdate = true;
+  }
+  placePulses();
+
+  return {
+    onResize(w, h){
+      group.position.x = (w / h) > 1.05 ? 1.45 : 0; // sit right of the copy
+    },
+    update(t, dt){
+      for (const p of pulses){
+        p.t += p.sp * dt;
+        if (p.t >= 1){
+          const from = p.b;
+          const nbrs = adjacency[from];
+          let next = nbrs[(Math.random()*nbrs.length)|0];
+          if (next === undefined) next = p.a;
+          p.a = from; p.b = next; p.t = 0;
+          p.sp = rand(0.45, 1.1);
+        }
+      }
+      placePulses();
+      group.rotation.y = t * 0.06 + ctx.mouse.x * 0.28;
+      group.rotation.x = ctx.mouse.y * 0.16;
+    }
+  };
+});
+
+/* =======================================================================
+   08 — GYROSCOPE RINGS
+   ======================================================================= */
+createHero('hero08', (ctx)=>{
+  const { scene, camera } = ctx;
+  camera.fov = 40;
+  camera.position.set(0, 0, 6.6);
+  camera.updateProjectionMatrix();
+
+  const assembly = new THREE.Group();
+  scene.add(assembly);
+
+  const ringDefs = [
+    { r: 1.00, color: 0xc2c1c8, sx: 0.52, sy: 0.18 },
+    { r: 1.35, color: 0xaeadb5, sx: -0.31, sy: 0.42 },
+    { r: 1.70, color: INDIGO,   sx: 0.22, sy: -0.36 },
+    { r: 2.05, color: 0x9a99a2, sx: -0.16, sy: 0.27 },
+    { r: 2.40, color: 0xc2c1c8, sx: 0.11, sy: -0.20 }
+  ];
+
+  const pivots = [];
+  for (const d of ringDefs){
+    const geo = new THREE.TorusGeometry(d.r, 0.055, 4, 120);
+    const mat = new THREE.MeshBasicMaterial({ color: d.color, wireframe: true });
+    const ring = new THREE.Mesh(geo, mat);
+    const pivot = new THREE.Group();
+    pivot.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, 0);
+    pivot.add(ring);
+    assembly.add(pivot);
+    pivots.push({ pivot, ...d, ox: Math.random()*6, oy: Math.random()*6 });
+  }
+
+  // small wireframe core
+  const core = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(0.3, 0),
+    new THREE.MeshBasicMaterial({ color: 0x86848d, wireframe: true })
+  );
+  assembly.add(core);
+
+  return {
+    update(t){
+      for (const p of pivots){
+        p.pivot.rotation.x = p.ox + t * p.sx;
+        p.pivot.rotation.y = p.oy + t * p.sy;
+      }
+      core.rotation.y = t * 0.3;
+      core.rotation.x = t * 0.21;
+      assembly.rotation.y = ctx.mouse.x * 0.45;
+      assembly.rotation.x = ctx.mouse.y * 0.32;
+    }
+  };
+});
+
+/* =======================================================================
+   09 — OSCILLOSCOPE RIBBONS
+   ======================================================================= */
+createHero('hero09', (ctx)=>{
+  const { scene, camera } = ctx;
+  camera.fov = 45;
+  camera.position.set(0, 0, 6);
+  camera.updateProjectionMatrix();
+
+  const SEGS = 240;
+  const defs = [
+    { baseY: 1.45, color: 0xc2c1c8, f1: 0.85, f2: 2.10, a1: 0.55, a2: 0.16, s1: 0.9,  s2: 1.7, ph: 0.0, z: -0.4 },
+    { baseY: 0.85, color: INDIGO,   f1: 1.15, f2: 2.90, a1: 0.42, a2: 0.20, s1: 1.3,  s2: 2.2, ph: 2.1, z:  0.0 },
+    { baseY: 0.25, color: 0xaeadb5, f1: 0.65, f2: 1.75, a1: 0.60, a2: 0.14, s1: 0.7,  s2: 1.4, ph: 4.0, z: -0.2 },
+    { baseY: -0.40, color: 0x9a99a2, f1: 1.45, f2: 3.40, a1: 0.34, a2: 0.12, s1: 1.6, s2: 2.8, ph: 1.2, z: -0.6 }
+  ];
+
+  const ribbons = defs.map(d => {
+    const geo = new THREE.PlaneGeometry(30, 0.035, SEGS, 1);
+    const pos = geo.getAttribute('position');
+    const origY = new Float32Array(pos.count);
+    for (let i = 0; i < pos.count; i++) origY[i] = pos.getY(i);
+    const mat = new THREE.MeshBasicMaterial({ color: d.color });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.z = d.z;
+    mesh.frustumCulled = false;
+    scene.add(mesh);
+    return { ...d, pos, origY };
+  });
+
+  let amp = 0.75;
+
+  function deform(t){
+    for (const r of ribbons){
+      const { pos, origY } = r;
+      for (let i = 0; i < pos.count; i++){
+        const x = pos.getX(i);
+        const wave =
+          Math.sin(x * r.f1 + t * r.s1 + r.ph) * r.a1 +
+          Math.sin(x * r.f2 - t * r.s2 + r.ph * 0.5) * r.a2;
+        pos.setY(i, r.baseY + origY[i] + wave * amp);
+      }
+      pos.needsUpdate = true;
+    }
+  }
+  deform(0);
+
+  return {
+    update(t, dt){
+      // cursor up (mouse.y -> -1) raises amplitude, down calms it
+      const target = 0.75 - ctx.mouse.y * 0.5;
+      amp += (target - amp) * (REDUCED ? 1 : Math.min(1, dt * 4));
+      deform(t);
+    }
+  };
+});
+
+/* =======================================================================
+   10 — EXPLODED ICOSAHEDRON
+   ======================================================================= */
+createHero('hero10', (ctx)=>{
+  const { scene, camera } = ctx;
+  camera.fov = 42;
+  camera.position.set(0, 0, 6.6);
+  camera.updateProjectionMatrix();
+
+  const group = new THREE.Group();
+  scene.add(group);
+
+  let base = new THREE.IcosahedronGeometry(1.4, 0);
+  if (base.index) base = base.toNonIndexed();
+  const bp = base.getAttribute('position');
+  const lightDir = new THREE.Vector3(0.5, 0.8, 0.6).normalize();
+
+  const faces = [];
+  const va = new THREE.Vector3(), vb = new THREE.Vector3(), vc = new THREE.Vector3();
+  const ab = new THREE.Vector3(), ac = new THREE.Vector3();
+
+  const ACCENT_FACE = 7;
+
+  for (let f = 0; f < 20; f++){
+    va.fromBufferAttribute(bp, f*3);
+    vb.fromBufferAttribute(bp, f*3 + 1);
+    vc.fromBufferAttribute(bp, f*3 + 2);
+    const centroid = new THREE.Vector3().add(va).add(vb).add(vc).divideScalar(3);
+    const normal = ab.subVectors(vb, va).cross(ac.subVectors(vc, va)).clone().normalize();
+
+    const fgeo = new THREE.BufferGeometry();
+    fgeo.setAttribute('position', new THREE.Float32BufferAttribute([
+      va.x - centroid.x, va.y - centroid.y, va.z - centroid.z,
+      vb.x - centroid.x, vb.y - centroid.y, vb.z - centroid.z,
+      vc.x - centroid.x, vc.y - centroid.y, vc.z - centroid.z
+    ], 3));
+
+    const isAccent = f === ACCENT_FACE;
+    // flat shading baked into the face colour, near-white
+    const d = Math.max(0, normal.dot(lightDir));
+    const c = 0.90 + 0.08 * d;
+    const faceColor = isAccent
+      ? new THREE.Color(0xe6e6ff)
+      : new THREE.Color(c * 0.995, c * 0.995, c);
+
+    const mesh = new THREE.Mesh(fgeo, new THREE.MeshBasicMaterial({
+      color: faceColor,
+      polygonOffset: true,
+      polygonOffsetFactor: 1,
+      polygonOffsetUnits: 1
+    }));
+    const edge = new THREE.LineSegments(
+      new THREE.EdgesGeometry(fgeo),
+      new THREE.LineBasicMaterial({ color: isAccent ? INDIGO : 0x9a99a2 })
+    );
+    const pivot = new THREE.Group();
+    pivot.add(mesh, edge);
+    group.add(pivot);
+
+    faces.push({ pivot, centroid, normal, jitter: 0.85 + Math.random()*0.45 });
+  }
+
+  let explode = 0.4;
+  const proj = new THREE.Vector3();
+
+  function placeFaces(){
+    for (const fc of faces){
+      fc.pivot.position.copy(fc.centroid)
+        .addScaledVector(fc.normal, explode * fc.jitter);
+    }
+  }
+  placeFaces();
+
+  return {
+    onResize(w, h){
+      group.position.x = (w / h) > 1.05 ? 1.7 : 0;
+      group.position.y = (w / h) > 1.05 ? 0 : 0.9;
+    },
+    update(t, dt){
+      // breathing apart / together while idle
+      let target = 0.38 + 0.16 * Math.sin(t * 0.7);
+      // proximity of cursor to the object (in NDC) pulls it together
+      proj.copy(group.position).project(camera);
+      const dx = ctx.mouse.x - proj.x;
+      const dy = (-ctx.mouse.y) - proj.y;
+      const dist = Math.hypot(dx, dy);
+      const prox = 1 - Math.min(1, Math.max(0, (dist - 0.08) / 0.6));
+      target *= (1 - prox);
+      explode += (target - explode) * (REDUCED ? 1 : Math.min(1, dt * 3));
+      placeFaces();
+      group.rotation.y = t * 0.24;
+      group.rotation.x = 0.32 + Math.sin(t * 0.17) * 0.18;
+    }
+  };
+});
+
+/* ---------------------------------------------------------------- runtime */
+
+const snap = document.getElementById('snap');
+const dots = [...document.querySelectorAll('#dotnav button')];
+
+dots.forEach(btn => {
+  btn.addEventListener('click', ()=>{
+    document.getElementById(btn.dataset.target)
+      .scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth' });
+  });
+});
+
+const io = new IntersectionObserver((entries)=>{
+  for (const e of entries){
+    const hero = heroBySection.get(e.target);
+    if (!hero) continue;
+    hero.active = e.isIntersecting;                 // render only visible scenes
+    if (REDUCED && e.isIntersecting) hero.render(0, 0);
+    if (e.intersectionRatio >= 0.6){                // dot-nav state
+      const idx = heroes.indexOf(hero);
+      dots.forEach((d, i)=> d.classList.toggle('active', i === idx));
+    }
+  }
+}, { root: snap, threshold: [0.02, 0.6] });
+
+heroes.forEach(h => io.observe(h.section));
+
+window.addEventListener('resize', ()=> heroes.forEach(h => h.resize()));
+
+if (!REDUCED){
+  let last = performance.now();
+  const loop = (now)=>{
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    const t = now / 1000;
+    for (const h of heroes) if (h.active) h.render(t, dt);
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+} else {
+  heroes.forEach(h => h.render(0, 0));
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sam Chen — Hero Concepts 16–20 — ASCII &amp; Kinetic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;510;590;700&display=swap" rel="stylesheet">
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+</script>
+<style>
+  :root{
+    --bg:#fff;
+    --text:#282a30;
+    --text-2:#3c4149;
+    --text-3:#6f6e77;
+    --text-4:#86848d;
+    --accent:#7070ff;
+    --accent-tint:#f1f1ff;
+    --hairline:rgba(0,0,0,0.08);
+    --ease:cubic-bezier(0.25,0.46,0.45,0.94);
+    --mono:ui-monospace,"SF Mono",Menlo,Monaco,"Cascadia Mono",monospace;
+    --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    font-weight:400;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    overflow:hidden;
+  }
+  .snap{
+    height:100vh;
+    overflow-y:auto;
+    scroll-snap-type:y mandatory;
+    scroll-behavior:smooth;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .snap{scroll-behavior:auto;}
+  }
+  section.hero{
+    position:relative;
+    height:100vh;
+    scroll-snap-align:start;
+    scroll-snap-stop:always;
+    overflow:hidden;
+    background:var(--bg);
+  }
+  canvas.fx{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
+  }
+
+  /* ---------- hero text primitives ---------- */
+  .hname{
+    font-weight:590;
+    letter-spacing:-0.022em;
+    line-height:1.02;
+    color:var(--text);
+  }
+  .tagline{
+    font-weight:510;
+    letter-spacing:-0.01em;
+    color:var(--text-3);
+  }
+  .bio{
+    font-weight:400;
+    color:var(--text-2);
+    line-height:1.55;
+  }
+  .btnrow{display:flex;gap:12px;align-items:center;}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    height:40px;padding:0 20px;
+    border-radius:8px;
+    font-family:var(--sans);
+    font-size:14px;font-weight:510;letter-spacing:-0.01em;
+    text-decoration:none;cursor:pointer;
+    transition:transform .18s var(--ease), box-shadow .18s var(--ease), background-color .18s var(--ease), border-color .18s var(--ease);
+    user-select:none;
+  }
+  .btn-primary{
+    background:var(--text);color:#fff;border:1px solid var(--text);
+    box-shadow:0 1px 2px rgba(0,0,0,0.07);
+  }
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.09);}
+  .btn-secondary{
+    background:#fff;color:var(--text-2);border:1px solid var(--hairline);
+  }
+  .btn-secondary:hover{border-color:rgba(0,0,0,0.16);transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,0.05);}
+
+  /* ---------- spec label, bottom-left ---------- */
+  .spec{
+    position:absolute;left:28px;bottom:24px;z-index:30;
+    font-family:var(--mono);
+    font-size:10.5px;letter-spacing:0.06em;
+    color:var(--text-4);
+    text-transform:uppercase;
+    display:flex;align-items:center;gap:10px;
+    pointer-events:none;
+    white-space:nowrap;
+  }
+  .spec .tick{width:7px;height:7px;border:1px solid var(--accent);background:var(--accent-tint);}
+  .spec b{color:var(--text-2);font-weight:400;}
+
+  /* ---------- dot nav ---------- */
+  .dotnav{
+    position:fixed;right:22px;top:50%;transform:translateY(-50%);
+    z-index:90;display:flex;flex-direction:column;gap:14px;
+  }
+  .dotnav a{
+    width:7px;height:7px;border-radius:50%;
+    background:rgba(0,0,0,0.16);
+    transition:background-color .25s var(--ease), transform .25s var(--ease);
+    display:block;
+  }
+  .dotnav a:hover{background:var(--text-3);}
+  .dotnav a.on{background:var(--accent);transform:scale(1.45);}
+
+  /* ============ 16 · ASCII SCULPTURE ============ */
+  #h16 .copy{
+    position:absolute;z-index:10;
+    left:7vw;top:50%;transform:translateY(-50%);
+    max-width:520px;
+  }
+  #h16 .kicker{
+    font-family:var(--mono);font-size:11px;letter-spacing:0.14em;
+    color:var(--accent);text-transform:uppercase;margin-bottom:22px;
+    display:flex;align-items:center;gap:10px;
+  }
+  #h16 .kicker::before{content:"";width:22px;height:1px;background:var(--accent);}
+  #h16 .hname{font-size:clamp(56px,7.2vw,104px);margin-bottom:14px;}
+  #h16 .tagline{font-size:clamp(17px,1.5vw,21px);margin-bottom:14px;}
+  #h16 .bio{font-size:15px;max-width:380px;margin-bottom:30px;}
+  #h16 .scrim{
+    position:absolute;inset:0;z-index:5;pointer-events:none;
+    background:linear-gradient(90deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.78) 30%, rgba(255,255,255,0) 58%);
+  }
+
+  /* ============ 17 · ASCII FLOW FIELD ============ */
+  #h17 .copy{
+    position:absolute;z-index:10;
+    left:50%;top:50%;transform:translate(-50%,-50%);
+    text-align:center;
+    padding:52px 64px;
+  }
+  #h17 .copy::before{
+    content:"";position:absolute;inset:0;z-index:-1;border-radius:50%;
+    background:radial-gradient(ellipse at center, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.85) 55%, rgba(255,255,255,0) 75%);
+  }
+  #h17 .hname{font-size:clamp(54px,7vw,100px);margin-bottom:12px;}
+  #h17 .tagline{font-size:clamp(16px,1.4vw,20px);margin-bottom:12px;}
+  #h17 .bio{font-size:14.5px;margin-bottom:28px;}
+  #h17 .btnrow{justify-content:center;}
+
+  /* ============ 18 · ASCII PORTRAIT ============ */
+  #h18 .copy{
+    position:absolute;z-index:10;
+    left:0;right:0;bottom:13vh;
+    display:flex;flex-direction:column;align-items:center;text-align:center;gap:0;
+  }
+  #h18 .tagline{font-size:clamp(16px,1.4vw,20px);margin-bottom:10px;}
+  #h18 .bio{font-size:14.5px;margin-bottom:24px;}
+  #h18 .hint{
+    position:absolute;z-index:10;top:26px;left:0;right:0;text-align:center;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:0.12em;
+    color:var(--text-4);text-transform:uppercase;pointer-events:none;
+  }
+  #h18 .hint em{color:var(--accent);font-style:normal;}
+
+  /* ============ 19 · KINETIC TYPE WALL ============ */
+  #h19 .wall{
+    position:absolute;inset:0;z-index:1;
+    display:flex;flex-direction:column;justify-content:center;
+    gap:0.6vh;
+    overflow:hidden;
+    -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%);
+    mask-image:linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%);
+  }
+  #h19 .row{
+    white-space:nowrap;
+    font-size:clamp(58px,8.6vh,110px);
+    line-height:1.04;
+    letter-spacing:-0.022em;
+    will-change:transform;
+  }
+  #h19 .row .in{display:inline-block;will-change:transform;}
+  #h19 .row.solid{font-weight:590;color:var(--text);}
+  #h19 .row.ghost{
+    font-weight:200;color:transparent;
+    -webkit-text-stroke:1px rgba(40,42,48,0.34);
+  }
+  #h19 .row.indigo{
+    font-weight:200;color:transparent;
+    -webkit-text-stroke:1.2px var(--accent);
+  }
+  @keyframes h19L{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+  @keyframes h19R{from{transform:translateX(-50%);}to{transform:translateX(0);}}
+  #h19.live .row .in.dirL{animation:h19L var(--dur,60s) linear infinite;}
+  #h19.live .row .in.dirR{animation:h19R var(--dur,60s) linear infinite;}
+  #h19 .copy{
+    position:absolute;z-index:10;left:0;right:0;top:50%;transform:translateY(-50%);
+    display:flex;flex-direction:column;align-items:center;text-align:center;
+    pointer-events:none;
+  }
+  #h19 .card{
+    pointer-events:auto;
+    background:rgba(255,255,255,0.86);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border:1px solid var(--hairline);
+    border-radius:14px;
+    padding:34px 46px;
+    box-shadow:0 12px 40px rgba(0,0,0,0.07);
+    display:flex;flex-direction:column;align-items:center;
+  }
+  #h19 .tagline{font-size:clamp(16px,1.4vw,19px);margin-bottom:8px;}
+  #h19 .bio{font-size:14px;margin-bottom:22px;}
+
+  /* ============ 20 · TERMINAL BOOT ============ */
+  #h20{cursor:text;}
+  #h20 .frame{
+    position:absolute;inset:0;z-index:1;
+    display:flex;flex-direction:column;
+  }
+  #h20 .bar{
+    height:42px;flex:none;
+    display:flex;align-items:center;gap:8px;
+    padding:0 18px;
+    border-bottom:1px solid var(--hairline);
+    background:rgba(0,0,0,0.013);
+  }
+  #h20 .bar i{width:10px;height:10px;border-radius:50%;border:1px solid rgba(0,0,0,0.14);background:#fff;}
+  #h20 .bar i:first-child{background:var(--accent-tint);border-color:var(--accent);}
+  #h20 .bar .title{
+    margin-left:12px;
+    font-family:var(--mono);font-size:11px;letter-spacing:0.08em;
+    color:var(--text-4);
+  }
+  #h20 .term{
+    flex:1;
+    padding:5.5vh 8vw 0;
+    font-family:var(--mono);
+    font-size:clamp(12.5px,1.05vw,14.5px);
+    line-height:1.95;
+    color:var(--text-2);
+    overflow:hidden;
+  }
+  #h20 .ln{white-space:pre-wrap;min-height:1.95em;}
+  #h20 .ln .p{color:var(--text-4);}
+  #h20 .ln .ok{color:var(--accent);font-weight:700;}
+  #h20 .ln .dim{color:var(--text-4);}
+  #h20 .caret{
+    display:inline-block;width:0.62em;height:1.18em;
+    background:var(--accent);
+    vertical-align:-0.18em;
+    margin-left:1px;
+  }
+  #h20 .caret.blink{animation:h20blink 1s steps(1) infinite;}
+  @keyframes h20blink{0%,55%{opacity:1;}56%,100%{opacity:0;}}
+  #h20 .final{
+    position:absolute;z-index:10;left:8vw;bottom:14vh;
+    opacity:0;transform:translateY(14px);
+    transition:opacity .7s var(--ease), transform .7s var(--ease);
+    pointer-events:none;
+  }
+  #h20 .final.show{opacity:1;transform:none;pointer-events:auto;}
+  #h20 .final .hname{font-size:clamp(48px,6vw,88px);margin-bottom:10px;}
+  #h20 .final .tagline{font-size:clamp(16px,1.4vw,20px);margin-bottom:10px;}
+  #h20 .final .bio{font-size:14.5px;margin-bottom:26px;}
+  #h20 .skip{
+    position:absolute;z-index:10;top:58px;right:28px;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:0.1em;
+    color:var(--text-4);text-transform:uppercase;
+    pointer-events:none;
+    transition:opacity .4s var(--ease);
+  }
+  #h20 .skip.gone{opacity:0;}
+
+  @media (max-width:760px){
+    #h16 .copy{left:6vw;right:6vw;max-width:none;}
+    .dotnav{right:12px;}
+    #h19 .card{padding:26px 28px;}
+    #h20 .term{padding:4vh 6vw 0;}
+    #h20 .final{left:6vw;}
+  }
+</style>
+</head>
+<body>
+<nav class="dotnav" aria-label="Hero concepts">
+  <a href="#h16" data-dot="h16" title="ASCII Sculpture"></a>
+  <a href="#h17" data-dot="h17" title="ASCII Flow Field"></a>
+  <a href="#h18" data-dot="h18" title="ASCII Portrait"></a>
+  <a href="#h19" data-dot="h19" title="Kinetic Type Wall"></a>
+  <a href="#h20" data-dot="h20" title="Terminal Boot"></a>
+</nav>
+
+<div class="snap" id="snap">
+
+  <!-- ================= 16 · ASCII SCULPTURE ================= -->
+  <section class="hero" id="h16">
+    <canvas class="fx" id="c16"></canvas>
+    <div class="scrim"></div>
+    <div class="copy">
+      <div class="kicker">Interpretability &middot; RL &middot; Systems</div>
+      <h1 class="hname">Sam Chen</h1>
+      <p class="tagline">Researcher, Builder &amp; Founder</p>
+      <p class="bio">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+      <div class="btnrow">
+        <a class="btn btn-primary" href="#">View research</a>
+        <a class="btn btn-secondary" href="#">Get in touch</a>
+      </div>
+    </div>
+    <div class="spec"><span class="tick"></span>HERO 16 / 20 — <b>ASCII sculpture</b> — three.js &middot; torus knot &middot; luminance &rarr; " .:-=+*#%@"</div>
+  </section>
+
+  <!-- ================= 17 · ASCII FLOW FIELD ================= -->
+  <section class="hero" id="h17">
+    <canvas class="fx" id="c17"></canvas>
+    <div class="copy">
+      <h1 class="hname">Sam Chen</h1>
+      <p class="tagline">Researcher, Builder &amp; Founder</p>
+      <p class="bio">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+      <div class="btnrow">
+        <a class="btn btn-primary" href="#">View research</a>
+        <a class="btn btn-secondary" href="#">Get in touch</a>
+      </div>
+    </div>
+    <div class="spec"><span class="tick"></span>HERO 17 / 20 — <b>ASCII flow field</b> — 2D canvas &middot; value noise &middot; mouse ink " .&middot;:+*#"</div>
+  </section>
+
+  <!-- ================= 18 · ASCII PORTRAIT ================= -->
+  <section class="hero" id="h18">
+    <canvas class="fx" id="c18"></canvas>
+    <div class="hint">Move to resolve &middot; <em>click to scramble</em></div>
+    <div class="copy">
+      <p class="tagline">Researcher, Builder &amp; Founder</p>
+      <p class="bio">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+      <div class="btnrow">
+        <a class="btn btn-primary" href="#">View research</a>
+        <a class="btn btn-secondary" href="#">Get in touch</a>
+      </div>
+    </div>
+    <div class="spec"><span class="tick"></span>HERO 18 / 20 — <b>ASCII portrait reveal</b> — text-sampled grid &middot; flashlight resolve &middot; click scramble</div>
+  </section>
+
+  <!-- ================= 19 · KINETIC TYPE WALL ================= -->
+  <section class="hero" id="h19">
+    <div class="wall" id="wall19" aria-hidden="true"></div>
+    <div class="copy">
+      <div class="card">
+        <p class="tagline">Researcher, Builder &amp; Founder</p>
+        <p class="bio">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+        <div class="btnrow">
+          <a class="btn btn-primary" href="#">View research</a>
+          <a class="btn btn-secondary" href="#">Get in touch</a>
+        </div>
+      </div>
+    </div>
+    <div class="spec"><span class="tick"></span>HERO 19 / 20 — <b>Kinetic type wall</b> — Inter 590 / 200 outline &middot; counter-marquee &middot; mouse shear</div>
+  </section>
+
+  <!-- ================= 20 · TERMINAL BOOT ================= -->
+  <section class="hero" id="h20">
+    <div class="frame">
+      <div class="bar">
+        <i></i><i></i><i></i>
+        <span class="title">sam@harvard — zsh — interpretability stack</span>
+      </div>
+      <div class="term" id="term20"></div>
+    </div>
+    <div class="skip" id="skip20">click / any key to skip</div>
+    <div class="final" id="final20">
+      <h1 class="hname">Sam Chen</h1>
+      <p class="tagline">Researcher, Builder &amp; Founder</p>
+      <p class="bio">CS, Math &amp; Psychology at Harvard — interpretability and RL.</p>
+      <div class="btnrow">
+        <a class="btn btn-primary" href="#">View research</a>
+        <a class="btn btn-secondary" href="#">Get in touch</a>
+      </div>
+    </div>
+    <div class="spec"><span class="tick"></span>HERO 20 / 20 — <b>Terminal boot</b> — light terminal &middot; typed log &middot; [OK] tags &middot; skippable</div>
+  </section>
+
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+
+/* ============================================================
+   Shared runtime: reduced motion, DPR, visibility-gated loops
+   ============================================================ */
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const DPR = Math.min(devicePixelRatio || 1, 2);
+const snap = document.getElementById('snap');
+
+function sizeCanvas(canvas){
+  const r = canvas.parentElement.getBoundingClientRect();
+  canvas.width  = Math.max(1, Math.round(r.width  * DPR));
+  canvas.height = Math.max(1, Math.round(r.height * DPR));
+  return { w: r.width, h: r.height };
+}
+
+/* Each concept registers { el, start(), stop(), resize(), once() }.
+   once() = static render for reduced motion / first paint. */
+const concepts = new Map();
+
+const io = new IntersectionObserver((entries) => {
+  for (const e of entries){
+    const c = concepts.get(e.target.id);
+    if (!c) continue;
+    if (e.isIntersecting && e.intersectionRatio > 0.35){
+      if (RM) { c.once && c.once(); } else { c.start && c.start(); }
+    } else {
+      c.stop && c.stop();
+    }
+    // dot nav
+    if (e.isIntersecting && e.intersectionRatio > 0.55){
+      document.querySelectorAll('.dotnav a').forEach(a =>
+        a.classList.toggle('on', a.dataset.dot === e.target.id));
+    }
+  }
+}, { root: snap, threshold: [0, 0.36, 0.56] });
+
+let resizeT;
+addEventListener('resize', () => {
+  clearTimeout(resizeT);
+  resizeT = setTimeout(() => {
+    for (const c of concepts.values()) c.resize && c.resize();
+  }, 120);
+});
+
+/* tiny value-noise (hash-lerp), shared by 17 & 18 shimmer */
+function hash2(x, y){
+  const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453123;
+  return s - Math.floor(s);
+}
+function vnoise(x, y){
+  const xi = Math.floor(x), yi = Math.floor(y);
+  const xf = x - xi, yf = y - yi;
+  const u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+  const a = hash2(xi, yi), b = hash2(xi + 1, yi);
+  const c = hash2(xi, yi + 1), d = hash2(xi + 1, yi + 1);
+  return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+}
+/* ============================================================
+   16 · ASCII SCULPTURE — three.js torus knot -> luminance grid
+   ============================================================ */
+(() => {
+  const canvas = document.getElementById('c16');
+  const ctx = canvas.getContext('2d');
+  const RAMP = ' .:-=+*#%@';
+  const CELL = 11;                       // css px per character cell
+  let gw = 0, gh = 0, cssW = 0, cssH = 0;
+  let raf = 0, t0 = performance.now();
+
+  // -- offscreen three.js scene rendered at grid resolution --
+  const glCanvas = document.createElement('canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas: glCanvas, antialias: false, alpha: false });
+  renderer.setPixelRatio(1);
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x000000);
+  const cam = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+  cam.position.set(0, 0, 7.2);
+
+  const knot = new THREE.Mesh(
+    new THREE.TorusKnotGeometry(1.65, 0.52, 220, 36),
+    new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35, metalness: 0.1 })
+  );
+  scene.add(knot);
+  const key = new THREE.DirectionalLight(0xffffff, 2.6); key.position.set(2.5, 3, 4); scene.add(key);
+  const rim = new THREE.DirectionalLight(0xffffff, 1.1); rim.position.set(-3, -2, 2); scene.add(rim);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.18));
+
+  let rt = null, px = null;
+
+  function resize(){
+    const s = sizeCanvas(canvas);
+    cssW = s.w; cssH = s.h;
+    gw = Math.max(24, Math.floor(cssW / CELL));
+    gh = Math.max(18, Math.floor(cssH / (CELL * 1.25)));   // mono line-height ratio
+    if (rt) rt.dispose();
+    rt = new THREE.WebGLRenderTarget(gw, gh, {
+      minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthBuffer: true
+    });
+    px = new Uint8Array(gw * gh * 4);
+    renderer.setSize(gw, gh, false);
+    cam.aspect = cssW / cssH;
+    cam.updateProjectionMatrix();
+    drawFrame(performance.now());
+  }
+
+  function drawFrame(now){
+    const t = (now - t0) / 1000;
+    knot.rotation.x = t * 0.32;
+    knot.rotation.y = t * 0.45;
+    knot.position.x = 1.4;                                 // shifted right of copy
+    renderer.setRenderTarget(rt);
+    renderer.render(scene, cam);
+    renderer.readRenderTargetPixels(rt, 0, 0, gw, gh, px);
+    renderer.setRenderTarget(null);
+
+    const chW = cssW / gw, chH = cssH / gh;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.clearRect(0, 0, cssW, cssH);
+    ctx.font = `${Math.ceil(chH * 0.92)}px ui-monospace,"SF Mono",Menlo,monospace`;
+    ctx.textBaseline = 'top';
+
+    // batch by style: faint gray, mid gray, dark, indigo (brightest)
+    const buckets = [[], [], [], []];
+    for (let y = 0; y < gh; y++){
+      const ry = gh - 1 - y;                               // GL flip
+      for (let x = 0; x < gw; x++){
+        const i = (ry * gw + x) * 4;
+        const lum = (0.2126 * px[i] + 0.7152 * px[i+1] + 0.0722 * px[i+2]) / 255;
+        if (lum < 0.045) continue;
+        const ci = Math.min(RAMP.length - 1, Math.floor(lum * RAMP.length));
+        const ch = RAMP[ci];
+        if (ch === ' ') continue;
+        const b = lum > 0.82 ? 3 : lum > 0.55 ? 2 : lum > 0.28 ? 1 : 0;
+        buckets[b].push(ch, x * chW, y * chH);
+      }
+    }
+    const styles = ['rgba(40,42,48,0.30)', 'rgba(60,65,73,0.62)', '#282a30', '#7070ff'];
+    for (let b = 0; b < 4; b++){
+      const arr = buckets[b];
+      if (!arr.length) continue;
+      ctx.fillStyle = styles[b];
+      for (let k = 0; k < arr.length; k += 3) ctx.fillText(arr[k], arr[k+1], arr[k+2]);
+    }
+  }
+
+  function loop(now){ drawFrame(now); raf = requestAnimationFrame(loop); }
+
+  concepts.set('h16', {
+    start(){ if (!raf){ if (!rt) resize(); raf = requestAnimationFrame(loop); } },
+    stop(){ cancelAnimationFrame(raf); raf = 0; },
+    resize(){ if (rt) resize(); },
+    once(){ if (!rt) resize(); else drawFrame(performance.now()); }
+  });
+  resize();
+})();
+
+/* ============================================================
+   17 · ASCII FLOW FIELD — value noise glyph field + mouse ink
+   ============================================================ */
+(() => {
+  const canvas = document.getElementById('c17');
+  const section = document.getElementById('h17');
+  const ctx = canvas.getContext('2d');
+  const RAMP = ' .·:+*#';
+  const CELL = 13;
+  let gw = 0, gh = 0, cssW = 0, cssH = 0;
+  let ink = null;
+  let raf = 0, t0 = performance.now();
+  const mouse = { x: -1e4, y: -1e4, on: false };
+
+  section.addEventListener('pointermove', e => {
+    const r = section.getBoundingClientRect();
+    mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top; mouse.on = true;
+  });
+  section.addEventListener('pointerleave', () => { mouse.on = false; });
+
+  function resize(){
+    const s = sizeCanvas(canvas);
+    cssW = s.w; cssH = s.h;
+    gw = Math.max(20, Math.floor(cssW / CELL));
+    gh = Math.max(16, Math.floor(cssH / (CELL * 1.18)));
+    ink = new Float32Array(gw * gh);
+    drawFrame(performance.now());
+  }
+
+  function field(x, y, t){
+    // two octaves drifting in opposite directions -> organic smoke
+    const n1 = vnoise(x * 0.085 + t * 0.10, y * 0.085 - t * 0.055);
+    const n2 = vnoise(x * 0.021 - t * 0.045, y * 0.021 + t * 0.030);
+    return n1 * 0.55 + n2 * 0.75 - 0.18;
+  }
+
+  function drawFrame(now){
+    const t = (now - t0) / 1000;
+    const chW = cssW / gw, chH = cssH / gh;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.clearRect(0, 0, cssW, cssH);
+    ctx.font = `${Math.ceil(chH * 0.86)}px ui-monospace,"SF Mono",Menlo,monospace`;
+    ctx.textBaseline = 'top';
+    ctx.textAlign = 'center';
+
+    const mr = 130;                                        // ink brush radius (css px)
+    const buckets = [[], [], [], []];                      // faint, mid, dark-ink, indigo-ink
+    for (let y = 0; y < gh; y++){
+      const py = y * chH;
+      for (let x = 0; x < gw; x++){
+        const idx = y * gw + x;
+        // ink dynamics
+        if (!RM && mouse.on){
+          const dx = x * chW + chW / 2 - mouse.x, dy = py + chH / 2 - mouse.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < mr * mr){
+            const g = 1 - Math.sqrt(d2) / mr;
+            ink[idx] = Math.min(1, ink[idx] + g * g * 0.5);
+          }
+        }
+        const k = ink[idx];
+        if (k > 0.003) ink[idx] = k * 0.962; else ink[idx] = 0;
+
+        let v = field(x, y, t) + k * 0.85;
+        if (v <= 0.10) continue;
+        const ci = Math.max(1, Math.min(RAMP.length - 1, Math.floor(v * RAMP.length)));
+        const ch = RAMP[ci];
+        let b;
+        if (k > 0.45) b = 3;
+        else if (k > 0.12) b = 2;
+        else b = v > 0.62 ? 1 : 0;
+        buckets[b].push(ch, x * chW + chW / 2, py);
+      }
+    }
+    const styles = ['rgba(134,132,141,0.34)', 'rgba(111,110,119,0.62)', '#3c4149', '#7070ff'];
+    for (let b = 0; b < 4; b++){
+      const arr = buckets[b];
+      if (!arr.length) continue;
+      ctx.fillStyle = styles[b];
+      for (let i = 0; i < arr.length; i += 3) ctx.fillText(arr[i], arr[i+1], arr[i+2]);
+    }
+    ctx.textAlign = 'left';
+  }
+
+  function loop(now){ drawFrame(now); raf = requestAnimationFrame(loop); }
+
+  concepts.set('h17', {
+    start(){ if (!raf){ if (!ink) resize(); raf = requestAnimationFrame(loop); } },
+    stop(){ cancelAnimationFrame(raf); raf = 0; },
+    resize(){ if (ink) resize(); },
+    once(){ if (!ink) resize(); else drawFrame(performance.now()); }
+  });
+  resize();
+})();
+/* ============================================================
+   18 · ASCII PORTRAIT REVEAL — "SAM CHEN" sampled into a grid
+   ============================================================ */
+(() => {
+  const canvas = document.getElementById('c18');
+  const section = document.getElementById('h18');
+  const ctx = canvas.getContext('2d');
+  const RAMP = ' .·:-=+*#%@';
+  const CELL = 10;
+  let gw = 0, gh = 0, cssW = 0, cssH = 0;
+  let mask = null, scram = null;
+  let raf = 0, t0 = performance.now();
+  const mouse = { x: -1e4, y: -1e4 };
+
+  section.addEventListener('pointermove', e => {
+    const r = section.getBoundingClientRect();
+    mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
+  });
+  section.addEventListener('pointerleave', () => { mouse.x = -1e4; mouse.y = -1e4; });
+  section.addEventListener('click', e => {
+    if (RM || e.target.closest('.btn')) return;
+    // inject scramble energy, strongest near click
+    const r = section.getBoundingClientRect();
+    const cx = e.clientX - r.left, cy = e.clientY - r.top;
+    const chW = cssW / gw, chH = cssH / gh;
+    for (let y = 0; y < gh; y++) for (let x = 0; x < gw; x++){
+      const i = y * gw + x;
+      if (mask[i] <= 0.02) continue;
+      const dx = x * chW - cx, dy = y * chH - cy;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      scram[i] = Math.min(1.6, scram[i] + Math.max(0.55, 1.6 - d / 700));
+    }
+  });
+
+  function buildMask(){
+    // offscreen canvas: paint the name, sample alpha per cell
+    const off = document.createElement('canvas');
+    off.width = gw; off.height = gh;
+    const oc = off.getContext('2d', { willReadFrequently: true });
+    oc.clearRect(0, 0, gw, gh);
+    oc.fillStyle = '#000';
+    oc.textAlign = 'center';
+    oc.textBaseline = 'middle';
+    const cellAspect = (cssH / gh) / (cssW / gw);          // ~1.18 (cells are tall)
+    // fit "SAM CHEN" across ~92% of grid width; counter cell aspect via y-scale
+    let fs = gh;
+    oc.font = `700 ${fs}px "Inter",sans-serif`;
+    const target = gw * 0.92;
+    fs = Math.floor(fs * target / Math.max(1, oc.measureText('SAM CHEN').width));
+    oc.save();
+    oc.translate(gw / 2, gh * 0.40);
+    oc.scale(1, 1 / cellAspect);
+    oc.font = `700 ${fs}px "Inter",sans-serif`;
+    if (fs / cellAspect > gh * 0.72){                      // clamp height
+      const f2 = Math.floor(gh * 0.72 * cellAspect);
+      oc.font = `700 ${f2}px "Inter",sans-serif`;
+    }
+    oc.fillText('SAM CHEN', 0, 0);
+    oc.restore();
+    const d = oc.getImageData(0, 0, gw, gh).data;
+    mask = new Float32Array(gw * gh);
+    for (let i = 0; i < gw * gh; i++) mask[i] = d[i * 4 + 3] / 255;
+    scram = new Float32Array(gw * gh);
+  }
+
+  function resize(){
+    const s = sizeCanvas(canvas);
+    cssW = s.w; cssH = s.h;
+    gw = Math.max(40, Math.floor(cssW / CELL));
+    gh = Math.max(24, Math.floor(cssH / (CELL * 1.18)));
+    buildMask();
+    drawFrame(performance.now(), RM);
+  }
+
+  function drawFrame(now, settled){
+    const t = (now - t0) / 1000;
+    const chW = cssW / gw, chH = cssH / gh;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.clearRect(0, 0, cssW, cssH);
+    ctx.font = `${Math.ceil(chH * 0.94)}px ui-monospace,"SF Mono",Menlo,monospace`;
+    ctx.textBaseline = 'top';
+    ctx.textAlign = 'center';
+
+    const R = 170;                                          // flashlight radius
+    const buckets = [[], [], [], []];                       // faint, mid, crisp, indigo
+    for (let y = 0; y < gh; y++){
+      const py = y * chH;
+      for (let x = 0; x < gw; x++){
+        const i = y * gw + x;
+        const m = mask[i];
+        if (m < 0.04) continue;
+
+        // scramble decay
+        let sc = scram[i];
+        if (sc > 0.01) scram[i] = sc * 0.94; else { scram[i] = 0; sc = 0; }
+
+        // flashlight proximity 0..1
+        let prox = 0;
+        if (!settled){
+          const dx = x * chW + chW / 2 - mouse.x, dy = py + chH / 2 - mouse.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < R * R) prox = 1 - Math.sqrt(d2) / R;
+        } else prox = 1;                                    // reduced motion: fully resolved
+
+        // density value: faint shimmer far away, crisp near mouse
+        const shim = settled ? 0.5 : vnoise(x * 0.6 + t * 1.1, y * 0.6 - t * 0.8);
+        let v = m * (0.28 + 0.22 * shim) + prox * m * 0.85;
+        if (sc > 0.02){                                     // scrambled: random glyph churn
+          v = m * (0.3 + 0.7 * hash2(x + Math.floor(t * 24) * 7, y + Math.floor(t * 24) * 13));
+        }
+        v = Math.min(1, v);
+        const ci = Math.max(1, Math.min(RAMP.length - 1, Math.round(v * (RAMP.length - 1))));
+        const ch = RAMP[ci];
+        let b;
+        if (sc > 0.25) b = 3;
+        else if (prox > 0.55 && m > 0.5) b = (hash2(x * 3.7, y * 5.1) > 0.86) ? 3 : 2;
+        else if (prox > 0.18 || v > 0.62) b = 2;
+        else if (v > 0.34) b = 1;
+        else b = 0;
+        buckets[b].push(ch, x * chW + chW / 2, py);
+      }
+    }
+    const styles = ['rgba(134,132,141,0.30)', 'rgba(111,110,119,0.55)', '#282a30', '#7070ff'];
+    for (let b = 0; b < 4; b++){
+      const arr = buckets[b];
+      if (!arr.length) continue;
+      ctx.fillStyle = styles[b];
+      for (let k = 0; k < arr.length; k += 3) ctx.fillText(arr[k], arr[k+1], arr[k+2]);
+    }
+    ctx.textAlign = 'left';
+  }
+
+  function loop(now){ drawFrame(now, false); raf = requestAnimationFrame(loop); }
+
+  concepts.set('h18', {
+    start(){ if (!raf){ if (!mask) resize(); raf = requestAnimationFrame(loop); } },
+    stop(){ cancelAnimationFrame(raf); raf = 0; },
+    resize(){ if (mask) resize(); },
+    once(){ if (!mask) resize(); else drawFrame(performance.now(), true); }
+  });
+  // rebuild once Inter is actually loaded (mask uses Inter metrics)
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => resize());
+  resize();
+})();
+/* ============================================================
+   19 · KINETIC TYPE WALL — counter-marquee rows + mouse shear
+   ============================================================ */
+(() => {
+  const section = document.getElementById('h19');
+  const wall = document.getElementById('wall19');
+  const ROWS = 6;
+  const styles = ['solid', 'ghost', 'solid', 'indigo', 'ghost', 'solid'];
+  const durs   = [64, 46, 78, 52, 70, 58];
+  const rows = [];
+
+  for (let i = 0; i < ROWS; i++){
+    const row = document.createElement('div');
+    row.className = 'row ' + styles[i];
+    const inner = document.createElement('span');
+    inner.className = 'in ' + (i % 2 ? 'dirR' : 'dirL');
+    inner.style.setProperty('--dur', durs[i] + 's');
+    // duplicated content so a -50% translate loops seamlessly
+    const unit = 'Sam Chen · '.repeat(8);
+    inner.textContent = unit + unit;
+    row.appendChild(inner);
+    wall.appendChild(row);
+    rows.push(row);
+  }
+
+  let targetSkew = 0, curSkew = 0, raf = 0;
+  function onMove(e){
+    const r = section.getBoundingClientRect();
+    targetSkew = ((e.clientY - r.top) / r.height - 0.5) * -7;   // deg
+  }
+  function tick(){
+    curSkew += (targetSkew - curSkew) * 0.07;
+    for (let i = 0; i < ROWS; i++){
+      const f = (i - (ROWS - 1) / 2) / ((ROWS - 1) / 2);        // -1..1
+      rows[i].style.transform = `skewX(${(curSkew * (0.4 + 0.6 * Math.abs(f)) * Math.sign(f || 1)).toFixed(3)}deg)`;
+    }
+    raf = requestAnimationFrame(tick);
+  }
+
+  concepts.set('h19', {
+    start(){
+      section.classList.add('live');
+      if (!raf){ section.addEventListener('pointermove', onMove); raf = requestAnimationFrame(tick); }
+    },
+    stop(){
+      section.classList.remove('live');
+      section.removeEventListener('pointermove', onMove);
+      cancelAnimationFrame(raf); raf = 0;
+    },
+    resize(){},
+    once(){
+      // reduced motion: static offset rows for composition, no animation
+      rows.forEach((row, i) => { row.firstChild.style.transform = `translateX(${-6 - i * 5}%)`; });
+    }
+  });
+})();
+
+/* ============================================================
+   20 · TERMINAL BOOT — typed log, [OK] tags, skippable
+   ============================================================ */
+(() => {
+  const section = document.getElementById('h20');
+  const term = document.getElementById('term20');
+  const finalEl = document.getElementById('final20');
+  const skipEl = document.getElementById('skip20');
+
+  const OK  = '<span class="ok">[ OK ]</span>';
+  const LINES = [
+    { p: '$', t: ' boot --profile sam.chen', d: 400 },
+    { t: 'loading interpretability stack… ' + OK, d: 260 },
+    { t: 'mounting /research/rl-environments ' + OK, d: 200 },
+    { t: 'harvard.edu session established <span class="dim">· cs · math · psych</span> ' + OK, d: 240 },
+    { t: 'outreach_debate: <span class="dim">1800 members, worldwide</span> ' + OK, d: 240 },
+    { t: 'founder_mode: <span class="dim">enabled</span> ' + OK, d: 200 },
+    { t: 'attention heads aligned <span class="dim">(all of them, eventually)</span> ' + OK, d: 320 },
+    { p: '$', t: ' whoami', d: 420 },
+  ];
+
+  let started = false, done = false, timers = [], typing = false;
+
+  function caret(blink){ return `<span class="caret${blink ? ' blink' : ''}"></span>`; }
+
+  function lineHTML(ln, partialPlain, withCaret){
+    // type plain text progressively; swap to rich HTML when the line completes
+    const prefix = ln.p ? `<span class="p">${ln.p}</span>` : '';
+    if (partialPlain != null){
+      return prefix + escapeHTML(partialPlain) + (withCaret ? caret(false) : '');
+    }
+    return prefix + ln.t;
+  }
+  function escapeHTML(s){ return s.replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+  function plainOf(ln){
+    const tmp = document.createElement('div');
+    tmp.innerHTML = ln.t;
+    return tmp.textContent;
+  }
+
+  function clearTimers(){ timers.forEach(t => clearTimeout(t)); timers = []; }
+
+  function renderAll(instant){
+    term.innerHTML = LINES.map(ln => `<div class="ln">${lineHTML(ln)}</div>`).join('')
+      + `<div class="ln"><span class="p">&gt;</span> sam chen ${caret(true)}</div>`;
+    skipEl.classList.add('gone');
+    finalEl.classList.add('show');
+    done = true;
+  }
+
+  function run(){
+    if (started) return;
+    started = true;
+    term.innerHTML = '';
+    let li = 0;
+
+    function nextLine(){
+      if (done) return;
+      if (li >= LINES.length){
+        // final answer line, then reveal hero
+        const div = document.createElement('div');
+        div.className = 'ln';
+        term.appendChild(div);
+        typeText(div, '> sam chen', () => {
+          div.innerHTML = `<span class="p">&gt;</span> sam chen ${caret(true)}`;
+          skipEl.classList.add('gone');
+          timers.push(setTimeout(() => finalEl.classList.add('show'), 350));
+          done = true;
+        });
+        return;
+      }
+      const ln = LINES[li++];
+      const div = document.createElement('div');
+      div.className = 'ln';
+      term.appendChild(div);
+      const plain = (ln.p || '') + plainOf({ t: ln.t });
+      typeText(div, plain, () => {
+        div.innerHTML = lineHTML(ln);                       // settle into rich markup
+        timers.push(setTimeout(nextLine, ln.d));
+      });
+    }
+
+    function typeText(div, text, then){
+      let i = 0;
+      typing = true;
+      (function step(){
+        if (done) return;
+        i = Math.min(text.length, i + 1 + (Math.random() < 0.35 ? 1 : 0));
+        div.innerHTML = escapeHTML(text.slice(0, i)) + caret(false);
+        if (i < text.length) timers.push(setTimeout(step, 14 + Math.random() * 26));
+        else { typing = false; div.innerHTML = escapeHTML(text); then(); }
+      })();
+    }
+    nextLine();
+  }
+
+  function skip(){
+    if (done || !started) return;
+    clearTimers();
+    renderAll(true);
+  }
+  section.addEventListener('click', e => { if (!e.target.closest('.btn')) skip(); });
+  addEventListener('keydown', () => {
+    const r = section.getBoundingClientRect();
+    if (r.top > -innerHeight / 2 && r.top < innerHeight / 2) skip();
+  });
+
+  concepts.set('h20', {
+    start(){ run(); },
+    stop(){ /* keep state; boot only plays once */ },
+    resize(){},
+    once(){ if (!done){ started = true; renderAll(true); } }
+  });
+})();
+
+/* observe all sections */
+for (const id of ['h16', 'h17', 'h18', 'h19', 'h20']) io.observe(document.getElementById(id));
+
+/* reduced motion: paint every static state immediately */
+if (RM) for (const c of concepts.values()) c.once && c.once();
+
+</script>
+</body>
+</html>

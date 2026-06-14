@@ -1,0 +1,201 @@
+---
+const items = [
+  {
+    q: "What I'm reading",
+    a: "I enjoy reading about philosophy and psychology. Some works include Nietzsche's <em>Genealogy of Morality</em>, Seneca's Letters to Lucilius, and Gladwell's <em>Outliers</em>.",
+  },
+  {
+    q: "Problems I care about",
+    a: "I'm a strong believer in education and its power to transform lives. I think it is uniquely underindexed and will require intentionality to be effective in a post-AGI world.",
+  },
+  {
+    q: "What I'm listening to",
+    a: "Lo-fi with rain in the background, Adele, and Coldplay.",
+  },
+  {
+    q: "For fun",
+    a: "I'm always in the mood for spikeball. I enjoy basketball recreationally and love to meet new people.",
+  },
+];
+---
+
+<div class="lx-about">
+  <div class="lx-about-cap">
+    <span class="lx-about-title">about me</span>
+  </div>
+
+  <div class="lx-about-list">
+    {
+      items.map((item, i) => (
+        <div class="lx-about-item" data-open={i === 0 ? "" : undefined}>
+          <button class="lx-about-q" type="button" aria-expanded={i === 0 ? "true" : "false"}>
+            <span>{item.q}</span>
+          </button>
+          <div class="lx-about-panel">
+            <div class="lx-about-a" set:html={item.a} />
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .lx-about {
+    margin: 0;
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    background: var(--bg);
+    overflow: hidden;
+    box-shadow: var(--shadow-tiny);
+  }
+
+  /* ── caption ── */
+  .lx-about-cap {
+    padding: 11px 18px;
+    border-bottom: 1px solid var(--hairline-soft);
+    background: var(--surface);
+  }
+  .lx-about-title {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    text-transform: lowercase;
+    color: var(--text-4);
+  }
+
+  /* ── item: the whole horizontal unit (label + answer) ── */
+  .lx-about-item {
+    position: relative;
+    border-bottom: 1px solid var(--hairline-soft);
+  }
+  .lx-about-item:last-child {
+    border-bottom: none;
+  }
+
+  /* the rail spans the full item height — label AND answer — so the
+     entire row reads as one activated unit, no icon needed */
+  .lx-about-item::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.2s var(--ease);
+  }
+  .lx-about-item:hover::before {
+    opacity: 0.18;
+  }
+  .lx-about-item[data-open]::before {
+    opacity: 1;
+  }
+
+  /* ── trigger (no icon — hover + rail carry the affordance) ── */
+  .lx-about-q {
+    width: 100%;
+    display: block;
+    padding: 13px 18px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-3);
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .lx-about-q > span {
+    display: inline-block;
+    transition: transform 0.2s var(--ease), color 0.15s var(--ease);
+  }
+  .lx-about-item:hover .lx-about-q > span {
+    color: var(--text-1);
+    transform: translateX(3px);
+  }
+  .lx-about-item[data-open] .lx-about-q > span {
+    color: var(--text-1);
+    transform: translateX(3px);
+  }
+
+  /* ── answer: height reveals, peel unveils ── */
+  .lx-about-panel {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.3s var(--ease);
+  }
+  .lx-about-item[data-open] .lx-about-panel {
+    max-height: 140px;
+  }
+
+  .lx-about-a {
+    position: relative;
+    overflow: hidden;          /* clips the peeling sheet at the row edge */
+    padding: 1px 18px 15px;
+    font-size: 0.8125rem;
+    color: var(--text-3);
+    line-height: 1.6;
+  }
+  .lx-about-a :global(em) {
+    font-style: italic;
+    color: var(--text-2);
+  }
+
+  /*
+   * The peel: a full-bleed sheet the colour of the card sits over the
+   * answer. Closed it covers everything (translateX 0, no transition →
+   * snaps back instantly). Open it slides off to the LEFT, unveiling the
+   * answer right-to-left across the entire row. A soft leading shadow
+   * gives it the lift of a peeling sheet.
+   */
+  .lx-about-a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--bg);
+    transform: translateX(0);
+    box-shadow: -10px 0 14px -8px rgba(0, 0, 0, 0.12);
+    transition: none;
+  }
+  .lx-about-item[data-open] .lx-about-a::after {
+    transform: translateX(-101%);
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.06s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lx-about-q > span,
+    .lx-about-panel { transition: none; }
+    .lx-about-a::after { display: none; }
+  }
+</style>
+
+<script>
+  /*
+   * One delegated listener. Toggle behaviour: clicking a closed row opens
+   * it and closes the others; clicking the open row closes it, leaving the
+   * card fully collapsed. Guard flag survives Astro view-transition
+   * re-evaluation without stacking listeners.
+   */
+  if (!(document as any).__lxAbout) {
+    (document as any).__lxAbout = true;
+    document.addEventListener("click", (e) => {
+      const btn = (e.target as Element).closest(".lx-about-q");
+      if (!btn) return;
+      const item = btn.closest(".lx-about-item");
+      if (!item) return;
+      const wasOpen = item.hasAttribute("data-open");
+      const list = item.closest(".lx-about-list");
+      list?.querySelectorAll(".lx-about-item").forEach((r) => {
+        r.removeAttribute("data-open");
+        r.querySelector(".lx-about-q")?.setAttribute("aria-expanded", "false");
+      });
+      if (!wasOpen) {
+        item.setAttribute("data-open", "");
+        btn.setAttribute("aria-expanded", "true");
+      }
+    });
+  }
+</script>
