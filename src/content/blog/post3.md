@@ -7,7 +7,7 @@ tags: ["Thoughs"]
 
 ---
 
-A part of growing up is confronting the realities of the world. We are economically fucked as a generation. Social Security has solvency risks, the world is increasingly multipolar, and jobs are being erased by AI. We realized our parents are not the perfect humans we thought they were. Higher education is being attacked. The government is corrupt. We start senseless wars. No wonder so many people in their 20s have lost hope. 
+A part of being in your 20s is seeing the world for what it is. We are economically fucked as a generation. Social Security has solvency risks, the world is increasingly multipolar, and jobs are being erased by AI. We realized our parents are not the perfect humans we thought they were. Higher education is being attacked. The government is corrupt. We start senseless wars. No wonder so many people in their 20s have lost hope. 
 
 This year I turned 20 and it was a year where I saw the ugliness of the world. We witness the atrophy of our political systems, the death of Renee Nicole Good and Alex Pretti by ICE, the release of 3.5 million documents (out of 6 million) in the Epstein files, a war in Iran, the invasion of Venezuela, and far more. Meanwhile, this year -- far more than the previous 4 years -- has become dominated by new AI technologies. The job market, while making a slight bounce back, is in shambles and young people, people I know at Harvard, are struggling to find jobs. It's not good to be 20 years old right now. Maybe, if you were a little older, you could have joined OpenAI and Anthropic and made tens of millions when they IPOed but now it's a little too late. 
 
