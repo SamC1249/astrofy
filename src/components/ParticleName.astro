@@ -42,6 +42,39 @@
     let mx = -1e4, my = -1e4, mActive = false;
     let visible = false;
     let raf = 0;
+    // Whether the most recent sample() rasterized the real Switzer glyph
+    // (vs. a system fallback because the webfont hadn't loaded yet).
+    let sampledFont = false;
+
+    const FONT = "600 176px Switzer";
+    const fontAPI = (document as any).fonts;
+    // Reliable "is Switzer actually rendering?" probe via text metrics.
+    // document.fonts.check() can't be trusted here: it returns true *vacuously*
+    // when the (cross-origin, CDN-hosted) Switzer @font-face isn't registered
+    // yet — exactly the cold-load case that produced the fallback rasterization.
+    // Comparing the name's width in "Switzer, monospace" against "monospace"
+    // alone detects whether Switzer has genuinely replaced the fallback.
+    const probeCtx = document.createElement("canvas").getContext("2d")!;
+    function switzerActive(): boolean {
+      if (!probeCtx) return true;
+      probeCtx.font = "600 176px monospace";
+      const base = probeCtx.measureText("SAM CHEN").width;
+      probeCtx.font = "600 176px Switzer, monospace";
+      return Math.abs(probeCtx.measureText("SAM CHEN").width - base) > 0.5;
+    }
+    // Resolves true once Switzer is genuinely rendering, or false after maxMs.
+    function whenFontReady(maxMs: number): Promise<boolean> {
+      return new Promise((resolve) => {
+        const deadline = performance.now() + maxMs;
+        const tick = () => {
+          try { fontAPI?.load(FONT); } catch {}
+          if (switzerActive()) return resolve(true);
+          if (performance.now() >= deadline) return resolve(false);
+          setTimeout(tick, 100);
+        };
+        tick();
+      });
+    }
 
     function sample(preservePos = false) {
       const oldPos = preservePos ? pos : null;
@@ -64,6 +97,7 @@
       g.textBaseline = "middle";
       g.font = "600 176px Switzer, Inter, system-ui, sans-serif";
       g.fillText("SAM CHEN", ow / 2, oh / 2 + 8);
+      sampledFont = switzerActive();
       const data = g.getImageData(0, 0, ow, oh).data;
 
       let step = 3;
@@ -174,16 +208,22 @@
     }
 
     function start() {
-      const ready = (document as any).fonts?.load("600 176px Switzer") ?? Promise.resolve();
-      let fontReady = false;
-      ready.then(() => { fontReady = true; });
-      Promise.race([ready, new Promise((r) => setTimeout(r, 1500))]).then(() => {
+      // Give Switzer a brief window to arrive so the common (fast) path never
+      // shows the fallback rasterization at all. If it's slow, fall through and
+      // paint with the fallback so the scatter animation isn't blocked...
+      whenFontReady(600).then(() => {
         sample();
-        // If Switzer hadn't loaded in time, re-sample once it does so the glyph
-        // shape matches Vercel (and itself across reloads). Preserve positions
-        // to avoid a visible scatter-and-resettle.
-        if (!fontReady) {
-          ready.then(() => sample(true));
+        // ...then re-sample once Switzer genuinely loads so the glyph shape
+        // matches across cold loads and reloads. Preserve positions to avoid a
+        // visible scatter-and-resettle. Gated on the metrics probe (not
+        // fonts.load's resolution), which is the bug that left cold loads stuck.
+        if (!sampledFont) {
+          whenFontReady(9000).then((ok) => {
+            if (ok && !sampledFont) {
+              sample(reduced ? false : true);
+              if (reduced) draw();
+            }
+          });
         }
         if (reduced) {
           draw();
